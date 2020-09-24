@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>赠送礼物列表</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css" />
+
+    <style>
+        *{margin: 0;padding: 0}
+        html,body{background: #eee}
+
+       .swiper-container{margin-top: 150px;width: 100%}
+
+       .swiper-slide{height: 300px;
+            display: flex;
+            display: -webkit-flex;
+            display: -webkit-box;
+       }
+       .swiper-slide>div{
+           height: 150px;
+           width: 20%
+        }
+        .swiper-slide p{
+            text-align: center;
+            font-size: 14px;
+            }
+        /* .swiper-slide>div span{
+            margin: auto;
+            width:60px;
+            text-align: center;
+            font-size: 14px;
+            display: flex;
+            display: -webkit-flex;
+            display: -webkit-box;
+        } */
+       .swiper-slide div img{
+            width:50px; 
+            display: flex;
+            display: -webkit-flex;
+            display: -webkit-box;
+            margin: auto
+            }
+      
+       .swiper2{
+           background:red;
+           font-size: 200px
+           }
+       /* http://p77jrrkvj.bkt.clouddn.com/6.png */
+     </style>
+</head>
+
+<body>
+    <div class="swiper-container">
+
+        <div class="swiper-wrapper">
+            <div class="swiper-slide swiper1">
+                <div>
+                    <img src="http://p77jrrkvj.bkt.clouddn.com/6.png" alt="">
+                    <p>100聊币</p>
+                    <p>杜蕾斯</p>
+                </div>
+                <div>
+                    <img src="http://p77jrrkvj.bkt.clouddn.com/6.png" alt="">
+                    <p>100聊币</p>
+                    <p>杜蕾斯</p>
+                </div>
+                <div>
+                    <img src="http://p77jrrkvj.bkt.clouddn.com/6.png" alt="">
+                    <p>100聊币</p>
+                    <p>杜蕾斯</p>
+                </div>
+                <div>
+                    <img src="http://p77jrrkvj.bkt.clouddn.com/6.png" alt="">
+                    <p>100聊币</p>
+                    <p>杜蕾斯</p>
+                </div>
+                
+            </div>
+            <div class="swiper-slide swiper2">2</div>
+        </div>
+    </div>
+
+
+
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+
+<script>
+
+    var mySwiper = new Swiper('.swiper-container', {
+        autoplay: false,//可选选项，自动滑动
+        resistanceRatio: 0,
+    })
+
+</script>
+
+</html>

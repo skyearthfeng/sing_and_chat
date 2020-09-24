@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>礼物</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/lottery.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+		<div class="wrap flex-wrap flex-vertical">
+			<div class="bg" @click.stop="api.closeFrame()"></div>
+			<div class="lottery-wrap">
+				<div class="lottery-header">
+					<div :class="['menu-item', menuIndex == 0 ? 'active' : '']" @click="menuSelector(0)">中奖记录</div>
+					<div :class="['menu-item', menuIndex == 1 ? 'active' : '']" @click="menuSelector(1)">本期奖池</div>
+					<div :class="['menu-item', menuIndex == 2 ? 'active' : '']" @click="menuSelector(2)">玩法介绍</div>
+				</div>
+				<div class="lottery-content">
+					<div v-if="menuIndex == -1" class="treasure-box">
+						<div class="treasure-img">
+							<img src="../image/baoxiang_big.png" alt="">
+						</div>
+						<div class="option-wrap">
+							<div :class="['option-item', option == 1 ? 'active' : '']" @click="optionSelector(1)">
+								<img src="../image/sousuo_icon.png" alt="">
+								<span>开1次</span>
+							</div>
+							<div :class="['option-item', option == 10 ? 'active' : '']" @click="optionSelector(10)">
+								<img src="../image/sousuo_icon.png" alt="">
+								<span>开10次</span>
+							</div>
+							<div :class="['option-item', option == 100 ? 'active' : '']" @click="optionSelector(100)">
+								<img src="../image/sousuo_icon.png" alt="">
+								<span>开100次</span>
+							</div>
+						</div>
+						<div class="tips">20金币/次，连开几率更高</div>
+						<div class="btn-wrap">
+							<button type="button" @click="lotteryDraw">试试运气</button>
+						</div>
+					</div>
+					<div v-if="menuIndex == 0" class="record-wrap">
+						<div class="record-item" v-for="(item, index) in record_list" :key="item.id">
+							<img class="gift-icon" :src="item.gift_url" alt="">
+							<div class="name-wrap">
+								<span class="name">{{item.gift_name}}</span>
+								<span class="nums">x{{item.nums}}</span>
+							</div>
+							<div class="time">{{item.create_time}}</div>
+						</div>
+					</div>
+					<div v-if="menuIndex == 1" class="pool-wrap">
+						<div class="pool-item" v-for="(item, index) in pool_list" :key="item.id">
+							<img class="gift-icon" :src="item.gift_url" alt="">
+							<div class="name">礼物：{{item.name}}</div>
+							<div class="value">
+								<img src="../image/jinbi_icon.png" alt="">
+								<span>{{item.gold}}</span>
+							</div>
+						</div>
+					</div>
+					<div v-if="menuIndex == 2" class="intro-wrap">
+						<div class="intro-option">1、每次开宝箱消耗20聊币，且必定可获得一个奖品。</div>
+						<div class="intro-option">2、获得的奖品可在相应页面查看。</div>
+						<div class="intro-option">3、开宝箱获得的礼物可以送给你的好友。 </div>
+						<div class="intro-option">4、本活动最终解释权归唱聊所有。 </div>
+					</div>
+				</div>
+				<div class="lottery-footer">
+					<div class="left">
+						<div class="gold-wrap">
+							<img src="../image/jinbi_icon.png" alt="">
+							<span>{{gold}}</span>
+						</div>
+						<div class="recharge-wrap" @click="openRecharge">
+							<span>充值</span>
+							<img src="../image/arrow_icon.png" alt="">
+						</div>
+					</div>
+					<div class="right">
+						<div class="menu-lottery" @click="menuSelector(-1)">试试手气</div>
+					</div>
+				</div>
+			</div>
+			<div v-if="isLottery" class="gift-box" @click="closeLotteryBox">
+				<div class="gift-wrap">
+					<div class="gift-header"></div>
+					<div class="gift-content">
+						<div class="title">恭喜你获得</div>
+						<div class="gift-list">
+							<div class="gift-item" v-for="(item, index) in lottery_list" :key="item.id">
+								<div class="gift-icon">
+									<img :src="item.gift.file" alt="">
+								</div>
+								<div class="gift-name">{{item.name}}x{{item.count}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    let app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+				gold: '0',
+				option: 1,
+				userInfo: {},
+				isLottery: false,
+				menuIndex: -1,
+				lottery_list: [],
+				record_list: [],
+				pool_list: [],
+            },
+            created() {},
+            mounted() {
+				var _this = this
+				_this.getUserIndex();
+            },
+            methods: {
+                // 获取账户信息
+                getUserIndex: function () {
+                    var _this = this;
+                    api.ajax({
+                        url: baseUrl + 'user/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == 200) {
+							_this.userInfo = ret.data.info;
+							_this.gold = ret.data.info.gold
+                        }
+                    })
+				},
+				// 抽奖
+				lotteryDraw: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+                    api.ajax({
+                        url: lotteryUrl + 'get_lottery',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+								uid: parseInt($api.getStorage('uid')),
+								times: _this.option
+                            },
+                        }
+                    }, function (ret, err) {
+						api.hideProgress();
+                        if (ret.code == 200) {
+							_this.lottery_list = ret.data;
+							_this.isLottery = true;
+							_this.getUserIndex();
+                        } else {
+							api.toast({
+								msg: ret.msg
+							})
+						}
+                    })
+				},
+				
+				closeLotteryBox: function () {
+					this.isLottery = false;
+				},
+
+                optionSelector: function (option) {
+                    this.option = option
+				},
+				
+                menuSelector: function (index) {
+					var _this = this;
+					_this.menuIndex = index
+					if (index == 0) {
+						// 中奖记录
+						api.showProgress({
+							title: '',
+							text: ''
+						});
+						api.ajax({
+							url: lotteryUrl + 'member_jackpot',
+							method: 'get',
+							headers: {
+								token: $api.getStorage('deviceToken')
+							},
+							data: {
+								values: {
+									uid: parseInt($api.getStorage('uid')),
+								},
+							}
+						}, function (ret, err) {
+							api.hideProgress();
+							if (ret.code == 200) {
+								_this.record_list = ret.data;
+							} else {
+								api.toast({
+									msg: ret.msg
+								});
+							}
+						})
+					}
+					if (index == 1) {
+						// 奖池列表
+						api.showProgress({
+							title: '',
+							text: ''
+						});
+						api.ajax({
+							url: lotteryUrl + 'jackpot_index',
+							method: 'get',
+							headers: {
+								token: $api.getStorage('deviceToken')
+							},
+							data: {
+								values: {},
+							}
+						}, function (ret, err) {
+							api.hideProgress();
+							if (ret.code == 200) {
+								_this.pool_list = ret.data;
+							} else {
+								api.toast({
+									msg: ret.msg,
+									duration: 2000,
+									location: 'bottom'
+								});
+							}
+						})
+					}
+                },
+
+                openRecharge: function () {
+                    api.openWin({
+                        name: 'recharge',
+                        url: 'recharge.html',
+                        slidBackEnabled: false
+                    })
+				},
+				
+			},
+			filters: {
+				// getGiftUrl: function (value) {
+				// 	return qiniuImageUrl + value
+				// }
+			}
+        })
+    }
+</script>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>创建聊天室</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/create_room.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="wrap flex-wrap flex-vertical">
+            <header id="header" class=" border-bottom">
+                <div class="header-wrap">
+                    <div @click="goback" class="header-left">
+                        <i class="iconfont icon-pre"></i>
+                    </div>
+                    <h1 class="header-title">创建</h1>
+                </div>
+            </header>
+            <div class="room_content">
+                <p class="room_content_title">给你的聊天室起个特殊的名字吧~</p>
+                <div class="romm_content_name">
+                    <input type="text" placeholder="请输入房间名" maxlength="10" autofocus="true" v-model="roomName">
+                    <span class="name_number">{{roomName.length}}/10</span>
+                </div>
+                <p class="room_content_title">请选择聊天室类型</p>
+                <span class="room_content_laber ">
+                    √ 相亲交友
+                </span>
+            </div>
+            <footer>
+                <button>
+                    创建聊天室
+                </button>
+            </footer>
+        </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        // if (api.systemType == 'android') {
+        //   api.setScreenSecure({
+        //     secure: true
+        //   });
+        // }
+        $api.fixStatusBar($api.dom('#header'));
+        app = new Vue({
+            el: '#app',
+            data: {
+                roomName:'',
+            },
+            created: function () {
+
+            },
+            mounted: function () { },
+            methods: {
+                goback() {
+                    api.closeWin();
+                },
+            },
+
+        })
+    }
+</script>

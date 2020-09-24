@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>动态详情</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dynamic.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="wrap flex-wrap flex-vertical">
+			<header id="header" class=" border-bottom">
+				<div class="header-wrap">
+					<div class="header-left" onclick="api.closeWin()">
+						<i class="iconfont icon-pre"></i>
+					</div>
+					<div class="header-title">动态详情</div>
+				</div>
+			</header>
+			<div class="flex-con" style="overflow-y: auto;">
+				<div class="dynamic-list">
+					<div class="dynamic-item">
+						<div class="user-wrap" @click="openUserHome(infolist.member_id)">
+							<div class="user-avatar">
+								<img :src="infolist.member.avatar" alt="">
+							</div>
+							<div class="user-info">
+								<div class="name-wrap">
+									<div class="name">
+										<p>{{infolist.member.name}}</p>
+										<span v-if="infolist.member.sex == 1" class="age1">
+											<i :class="['icon-sex' + infolist.member.sex, 'iconfont']"></i>{{infolist.member.age}}</span>
+										<span v-if="infolist.member.sex == 2" class="age2">
+											<i :class="['icon-sex' + infolist.member.sex, 'iconfont']"></i>{{infolist.member.age}}</span>
+									</div>
+								</div>
+								<div class="occupation">{{infolist.city}}</div>
+							</div>
+							<div class="time">{{infolist.created_at | timeFormat}}</div>
+						</div>
+						<div class="dynamic-con">
+							<p>{{infolist.description}}</p>
+							<div class="imgBox" v-if="infolist.files.length != 0">
+								<div class="img1" v-if="infolist.files.length == 1">
+									<div v-if="item1.type == 1" class="imgSize" v-for="(item1,index1) in infolist.files" :key="item1.id" @click="openVedio(item1.filename)">
+										<img :src="item1.filename+'?vframe/jpg/offset/1/w/300/h/300'" alt="">
+										<div class="play-icon">
+											<i class="iconfont icon-bofang"></i>
+										</div>
+									</div>
+									<div v-if="item1.type == 0" class="imgSize" v-for="(item1,index1) in infolist.files" :key="item1.id" @click="getPhotoBrowser(index1,item1)">
+										<img :src="item1.filename+'?imageView2/1/w/300/h/300'" alt="">
+									</div>
+								</div>
+								<div class="img2" v-if="infolist.files.length > 1">
+									<div class="imgSize" v-for="(item1,index1) in infolist.files" :key="item1.id" @click="getPhotoBrowser(index1,item1)">
+										<img :src="item1.filename+'?imageView2/1/w/300/h/300'" alt="">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="pinglunnum">
+					共有{{infolist.comment_size}}条评论
+				</div>
+				<div id="pl" v-if="comentList.length != 0">
+					<div class="pingluns" v-for="(item,index) in comentList" :key="item.id">
+						<div class="left">
+							<div @click="openDetail(item.member_id)" class="hezi" v-if="item.member != ''">
+								<img :src="item.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="right">
+							<div class="name">
+								<span v-if="item.member != ''" class="yonghu">{{item.member.name}}</span>
+								<p>{{item.description}}</p>
+							</div>
+							<div class="dianping">
+								{{item.created_at | timeFormat}}
+							</div>
+						</div>
+					</div>
+					<p v-else>暂无评论</p>
+				</div>
+			</div>
+			<!-- <div class="pinglun_ipt">
+				<input v-model="pinglun" type="text" placeholder="请输入评论">
+				<span class="right" @click="sendBtn">发送</span>
+			</div> -->
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+	// 	if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'dark'
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				activeIndex: 1,
+				infolist: {
+					id: null,
+					member_id: "",
+					description: "",
+					video: "",
+					images: "",
+					view_size: null,
+					like_size: "",
+					share_size: "",
+					comment_size: "",
+					city: "",
+					created_at: "",
+					updated_at: "",
+					is_like: 1,
+					member: {
+						member_id: "",
+						avatar: "",
+						name: "",
+						city: "",
+						sex: "",
+						age: ""
+					},
+					files: []
+				},
+				comentList: [],
+				pinglun: ''
+			},
+			created: function () {
+
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getDynamicDetail();
+			},
+			methods: {
+				goback: function () {
+					api.closeWin();
+					_this.isback = false;
+
+				},
+				getDynamicDetail: function () {
+					var _this = this;
+					api.ajax({
+						url: baseUrl + 'dynamic/detail',
+						method: 'get',
+						headers: {
+							token: $api.getStorage('deviceToken')
+						},
+						data: {
+							values: {
+								uid: $api.getStorage('uid'),
+								id: api.pageParam.id
+							}
+						}
+					}, function (ret, err) {
+						if (ret.status == 200) {
+							_this.infolist = ret.data.info;
+							_this.comentList = ret.data.list;
+						}
+					})
+				},
+				sendBtn: function () {
+					var _this = this;
+					if (this.pinglun == '') {
+						api.toast({
+							msg: '请输入评论内容',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					api.ajax({
+						url: baseUrl + 'dynamic/comment',
+						method: 'post',
+						headers: {
+							token: $api.getStorage('deviceToken')
+						},
+						data: {
+							values: {
+								uid: $api.getStorage('uid'),
+								id: api.pageParam.id,
+								desc: _this.pinglun
+							}
+						}
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.message[0],
+						});
+						if (ret.status == 200) {
+							_this.pinglun = '';
+							_this.getDynamicDetail();
+							api.sendEvent({
+								name: 'getDynamicList',
+							});
+						}
+					})
+				},
+				openDetail: function (id) {
+					var _this = this;
+					// alert(id)
+					// alert(_this.infolist.member_id)
+					// alert($api.getStorage('uid'))
+					if (_this.infolist.member_id == $api.getStorage('uid')) {
+						api.openWin({
+							name: 'user_home',
+							url: 'user_home.html',
+							slidBackEnabled: false,
+							pageParam: {
+								member_id: id
+							}
+						});
+					}
+				},
+				openUserHome: function (id) {
+
+					api.openWin({
+						name: 'user_home',
+						url: 'user_home.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+				getPhotoBrowser: function (index, item) {
+					var _this = this;
+					_this.isback = true;
+					var phoneImg = [];
+					for (var i = 0; i < _this.infolist.files.length; i++) {
+						phoneImg.push(_this.infolist.files[i].filename);
+					}
+					var photoBrowser = api.require('photoBrowser');
+					photoBrowser.open({
+						images: phoneImg,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000',
+						activeIndex: index,
+						zoomEnabled: false
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.eventType == 'click') {
+								photoBrowser.close();
+							}
+						}
+					});
+				},
+				openVedio: function (file) {
+					api.openWin({
+						name: 'video_detail_dynamic',
+						url: 'video_detail_dynamic.html',
+						slidBackEnabled: false,
+						pageParam: {
+							file: file
+						}
+					});
+				}
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>

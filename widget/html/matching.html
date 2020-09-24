@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的关注</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/matching.css" />
+</head>
+
+<body>
+  <div id="app" >
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class=" border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">匹配问答</div>
+        </div>
+      </header>
+      <div class="matching-nav">
+        <div class="item">
+            <i class="iconfont icon-appreciate"></i>
+            <p>兴趣爱好</p>
+        </div>
+        <div class="item">
+            <i class="iconfont icon-appreciate"></i>
+            <p>个性特征</p>
+        </div>
+        <div class="item">
+            <i class="iconfont icon-appreciate"></i>
+            <p>生活习惯</p>
+        </div>
+        <div class="item">
+            <i class="iconfont icon-appreciate"></i>
+            <p>恋爱情感</p>
+        </div>
+        <div class="item">
+            <i class="iconfont icon-appreciate"></i>
+            <p>价值观</p>
+        </div>
+      </div>
+      <div class="matchin-content ">
+         <p class="title">你的作息时间很规律么？</p>
+         <div class="option border">
+            <div >
+                1
+            </div>
+            <span>
+                早睡早起
+            </span>
+         </div>
+         <div class="option border">
+            <div>
+                2
+            </div>
+            <span>
+                早睡早起
+            </span>
+        </div>
+        <div class="option border">
+            <div>
+                3
+            </div>
+            <span>
+                早睡早起
+            </span>
+        </div>
+      </div>
+      <div class="matching-bottom">
+        <div class="replace border">换一题</div>
+        <div class="submit border">
+            提交答案
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        empty: false,
+        follow: true,
+        list: [],
+      },
+      created: function () {
+        var _this=this;
+        api.setRefreshHeaderInfo({
+          bgColor: '#ccc',
+          textColor: '#fff',
+          textDown: '下拉刷新...',
+          textUp: '松开刷新...'
+        }, function (ret, err) {
+          setTimeout(function () {
+            _this.showBankList();
+          }, 1000);
+        });
+
+      },
+      mounted: function () {
+        this.showBankList();
+      },
+      methods: {
+        openDetail: function (id) {
+          api.openWin({
+            name: 'user_home',
+            url: 'user_home.html',
+            slidBackEnabled: false,
+            pageParam: {
+              member_id: id
+            }
+          });
+        },
+        showBankList: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'user/fans',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            api.refreshHeaderLoadDone()
+            if (ret.status == '200') {
+              //alert('1');
+              if (ret.data == '') {
+                __this.empty = true;
+                __this.follow = false;
+              } else {
+                __this.empty = false;
+                __this.follow = true;
+                //alert(1);
+                __this.list = [];
+                for (var i = 0; i < ret.data.length; i++) {
+                  __this.list.push({
+                    id: i + 1,
+                    member_id: ret.data[i].member_id,
+                    name: ret.data[i].name,
+                    avatar: ret.data[i].avatar,
+                    city: ret.data[i].city,
+                    sex: ret.data[i].sex,
+                    age: ret.data[i].age
+                  })
+                }
+              }
+
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

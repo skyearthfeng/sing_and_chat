@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>评分</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/score.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="score-wrap">
+        <h1>给我评分哟<i @click="closeFrame" class="iconfont icon-close"></i></h1>
+        <div class="score-con">
+          <div class="user-info">
+            <div class="avatar">
+              <img :src="avatar" alt="">
+            </div>
+            <div class="text">
+              <div class="name">{{name}}
+                <span :class="['sex', 'sex' + sex]">
+                  <i :class="['iconfont', 'icon-sex' + sex]"></i>{{age}}
+                </span>
+              </div>
+              <div class="signature">{{signature}}</div>
+            </div>
+          </div>
+          <div class="score">
+            <div class="score-select">
+              <i :class="['iconfont', 'icon-xingxing', score >= 1 ? 'active' : '']" @click="selectScore(1)"></i>
+              <i :class="['iconfont', 'icon-xingxing', score >= 2 ? 'active' : '']" @click="selectScore(2)"></i>
+              <i :class="['iconfont', 'icon-xingxing', score >= 3 ? 'active' : '']" @click="selectScore(3)"></i>
+              <i :class="['iconfont', 'icon-xingxing', score >= 4 ? 'active' : '']" @click="selectScore(4)"></i>
+              <i :class="['iconfont', 'icon-xingxing', score >= 5 ? 'active' : '']" @click="selectScore(5)"></i>
+            </div>
+            <div class="score-text">{{scoreText}}</div>
+          </div>
+        </div>
+        <div class="score-btn">
+          <button @click="submit" type="button">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        id: '',
+        name: '',
+        avatar: '',
+        sex: '',
+        age: '',
+        signature: '',
+        score: 0,
+        scoreText: '请选择评价星级~',
+        scoreTextList: ['', '非常不满意', '不满意，比较差', '一般，还需改善', '比较满意，仍可改善', '非常满意，无可挑剔'],
+      },
+      created: function () {
+        var _this = this;
+        _this.id = api.pageParam.id;
+        _this.name = api.pageParam.name;
+        _this.avatar = api.pageParam.avatar;
+        _this.sex = api.pageParam.sex;
+        _this.age = api.pageParam.age;
+        _this.signature = api.pageParam.signature;
+      },
+      mounted: function () { },
+      methods: {
+        closeFrame: function () {
+          api.sendEvent({
+            name: 'closeWin'
+          })
+          api.closeFrame({
+            name: 'score_frame'
+          });
+        },
+
+        selectScore: function (score) {
+          var _this = this;
+          _this.score = score;
+          _this.scoreText = _this.scoreTextList[score];
+        },
+
+        submit: function () {
+          var _this = this;
+          if (_this.score == 0) {
+            api.toast({
+              msg: '请选择评分~',
+            });
+            return false;
+          }
+          api.ajax({
+            url: baseUrl + 'user/evaluate',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                to_uid: _this.id,
+                grade: _this.score,
+                description: _this.scoreText
+              },
+            }
+          }, function (ret, err) {
+            api.toast({
+              msg: ret.message[0]
+            });
+            if (ret.status == 200) {
+              api.sendEvent({
+                name: 'closeWin'
+              })
+              api.closeFrame({
+                name: 'score_frame'
+              });
+            }
+          })
+        }
+      }
+    })
+  }
+</script>

@@ -1,0 +1,48 @@
+// out: ../css/index.css
+@import 'common';
+.status-bar {
+  width: 100%;
+  background-color: transparent;
+}
+.wrap {
+  background: url(../image/start_bg.png) no-repeat;
+  background-size: cover;
+  .main {
+    width: 100%;
+    height: auto;
+  }
+  .flex-con {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .logo-wrap{
+    margin-bottom: 200px;
+    text-align: center;
+    img{
+      width: 100px;
+      border-radius: 20px;
+    }
+    .appName{
+      color: #fff;
+      font-size: 16px;
+    }
+  }
+  .login-wrap{
+    justify-content: space-around;
+    padding: 0 20px;
+    .icon{
+      width: 40px;
+      height: 40px;
+      &.icon-weixin1 {
+        background-position: -80px 0;
+      }
+      &.icon-qq {
+        background-position: -120px 0;
+      }
+      &.icon-phone {
+        background-position: -160px 0;
+      }
+    }
+  }
+}

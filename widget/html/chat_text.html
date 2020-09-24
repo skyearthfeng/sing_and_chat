@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>人气榜</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/ranking.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../css/chat.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="swiper-container" id="page">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide slidepage">
+                    <div class="swiper-container scroll">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide slidescroll">
+                                    <!-- <ul class="chat_list">
+                                            <li class="chat_items "
+                                                v-for='item in roomData' :key='item.roomid'>
+                                                <div class="chat_items_img">
+                                                    <img :src="item.logo" alt="">
+                                                    <span class="img_label">{{item.catename}}</span>
+                                                    <div class="chat_items_img_num">
+                                                        <img src="../image/chat.png" alt="">
+                                                        <span>{{item.nums}}人</span>
+                                                    </div>
+                                                </div>
+                                                <div class="chat_items_info">
+                                                    <h4>{{item.name}}</h4>
+                                                    <p>{{item.creater}}</p>
+                                                </div>
+                                            </li>
+                                            <li class="chat_items "
+                                            v-for='item in roomData' :key='item.roomid'>
+                                            <div class="chat_items_img">
+                                                <img :src="item.logo" alt="">
+                                                <span class="img_label">{{item.catename}}</span>
+                                                <div class="chat_items_img_num">
+                                                    <img src="../image/chat.png" alt="">
+                                                    <span>{{item.nums}}人</span>
+                                                </div>
+                                            </div>
+                                            <div class="chat_items_info">
+                                                <h4>{{item.name}}</h4>
+                                                <p>{{item.creater}}</p>
+                                            </div>
+                                        </li>
+                                        <li class="chat_items "
+                                        v-for='item in roomData' :key='item.roomid'>
+                                        <div class="chat_items_img">
+                                            <img :src="item.logo" alt="">
+                                            <span class="img_label">{{item.catename}}</span>
+                                            <div class="chat_items_img_num">
+                                                <img src="../image/chat.png" alt="">
+                                                <span>{{item.nums}}人</span>
+                                            </div>
+                                        </div>
+                                        <div class="chat_items_info">
+                                            <h4>{{item.name}}</h4>
+                                            <p>{{item.creater}}</p>
+                                        </div>
+                                    </li>
+                                        </ul> -->
+                                        <ul>
+                                                <li v-for="(item,i) in 200">
+                                                    <span class="index">
+                                                        {{i+1}}
+                                                    </span>
+                                                    <div class="content">
+                                                        <img src="../image/cert_1.png" alt="">
+                                                        <div>
+                                                            <p>云朵2</p>
+                                                            <p class="status">ID： 3279231</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="gift">
+                                                        支持TA
+                                                    </div>
+                                                </li>
+                                            </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide slidepage">
+                    <div class="swiper-container scroll">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide slidescroll">
+                                <ul>
+                                    <li v-for="(item,i) in 200">
+                                        <span class="index">
+                                            {{i+1}}
+                                        </span>
+                                        <div class="content">
+                                            <img src="../image/cert_1.png" alt="">
+                                            <div>
+                                                <p>云朵2</p>
+                                                <p class="status">ID： 3279231</p>
+                                            </div>
+                                        </div>
+                                        <div class="gift">
+                                            支持TA
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    var app, mySwiper;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                rankingIndex: 0,
+                rankingList: [],
+                roomData:[]
+            },
+            created() {},
+            mounted() {
+                this.getRoom()
+                mySwiper = new Swiper('#page', {
+                    autoHeight: true,
+                    setWrapperSize: true,
+                    // allowSlidePrev: false,
+                    // allowSlideNext: false,
+                    on: {
+                        touchStart: function (event) {
+                            // $event.setFrameGroupAttr('ranking','',false)
+                            // if(this.activeIndex==0){
+
+                            // }else{
+                            //     $event.setFrameGroupAttr('ranking','',true)
+                            // }
+                        },
+                        // slideNextTransitionStart: function(){
+                        //     alert(12)
+                        //     if(this.activeIndex==0){
+                        //         $event.setFrameGroupAttr('ranking','',false)
+                        //     }else{
+                        //         $event.setFrameGroupAttr('ranking','',true)
+                        //     }
+                        //     alert(this.activeIndex)
+                        // },
+                        // slidePrevTransitionStart: function(){
+                        //     if(this.activeIndex==0){
+                        //         $event.setFrameGroupAttr('ranking','',true)
+                        //     }else{
+                        //         $event.setFrameGroupAttr('ranking','',false)
+                        //     }
+                        // },
+                    }
+                })
+                var mySwiper1 = new Swiper('.scroll', {
+                    direction: 'vertical',
+                    freeMode: true,
+                    slidesPerView: 'auto',
+                })
+                this.getChartsIndex('day')
+                
+            },
+            methods: {
+                getRoom() {
+                    api.showProgress()
+                    let _this = this
+                    axios1('dlchat/api_room/retrieve', 'post', {
+                            token: $api.getStorage('deviceToken'),
+                            user_id: $api.getStorage('uid')
+                        },
+                        (res, err) => {
+                            if (res.code == 1) {
+                                _this.roomData = res.data;
+                                console.log(JSON.stringify(res.data))
+                            } else {
+                                // api.toast({
+                                //     msg: ret.msg
+                                // })
+                            }
+                            api.hideProgress()
+                            mySwiper1.update()
+                        }
+                    )
+                },
+                getChartsIndex: function (date) {
+                    var _this = this;
+                    api.showProgress({})
+                    api.ajax({
+                        url: baseUrl + 'charts/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                type: 'm',
+                                date: date,
+                                uid: $api.getStorage('uid')
+                            },
+                        }
+                    }, function (ret, err) {
+                        console.log(JSON.stringify(ret.data))
+                        if (ret.status == 200) {
+                            _this.rankingList = ret.data
+                        }
+                        api.hideProgress();
+                    })
+                },
+
+                selectRanking(i) {
+                    this.rankingIndex = i
+                    if (i == 0) {
+                        this.rankingList = []
+                        this.getChartsIndex('day')
+                    } else {
+                        this.rankingList = []
+                        this.getChartsIndex('week')
+                    }
+                }
+            },
+        })
+    }
+</script>

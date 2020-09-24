@@ -1,0 +1,466 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>编辑聊天室资料</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/edit1.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="wrap flex-wrap flex-vertical">
+            <header id="header" class=" border-bottom">
+                <div class="header-wrap">
+                    <div @click="goback" class="header-left">
+                        <i class="iconfont icon-pre"></i>
+                    </div>
+                    <h1 class="header-title">创建聊天室</h1>
+                </div>
+            </header>
+            <div class="flex-con">
+                <div class="edit-info">
+                    <div class="input-wrap border-bottom" @click="showActionSheet(5)">
+                        <div class="label avatar">房间封面</div>
+                        <img :src="avatar" alt="">
+                    </div>
+                    <div class="input-wrap border-bottom">
+                        <div class="label">房间名称</div>
+                        <input v-model="form.name" type="text" placeholder="请填写房间名称">
+                    </div>
+                    <div class="input-wrap border-bottom" @click='typeShow=true'>
+                        <div class="label">房间类型</div>
+                        <input v-model="roomType" type="text" placeholder="请选择房间类型" disabled>
+                    </div>
+                    <div class="input-wrap border-bottom" @click='passwordShow=true'>
+                        <div class="label">房间加密</div>
+                        <input v-model="form.type==1?'加密':'不加密'" type="text" disabled>
+                    </div>
+                    <div class="input-wrap border-bottom" v-if="form.type==1">
+                        <div class="label">房间密码</div>
+                        <input v-model="form.key" type="text" placeholder="请填写房间密码">
+                    </div>
+                    <div class="textarea-wrap border-bottom">
+                        <div class="label">房间公告</div>
+                        <textarea v-model="form.signature" placeholder="请填写房间公告"></textarea>
+                    </div>
+                    <div class="textarea-wrap border-bottom">
+                        <div class="label">房间聊天框公告</div>
+                        <textarea v-model="form.shortnotice" placeholder="请填写房间短公告"></textarea>
+                    </div>
+                </div>
+                <div class="btn-wrap">
+                    <button @click="edtiorSubmit" type="button" :class="[isDisabled ?'btn-active':'btn']">提交</button>
+                </div>
+                <div v-if="FNImageClipShow" class="FNImageClip-control">
+                    <span @click="FNImageClip_cancel">取消</span>
+                    <span @click="FNImageClip_enter">确定</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat_type" v-show='typeShow'>
+            <div class="type_bg"></div>
+            <ul>
+                <li v-for='item,index in chatType' class="border-bottom" @click='clickType(item.name,item.id)'>
+                    {{item.name}}
+                </li>
+                <li class="border-bottom type_close" @click='typeShow=false'>取消</li>
+            </ul>
+        </div>
+        <div class="chat_type" v-show='passwordShow'>
+            <div class="type_bg" @click="passwordShow=false"></div>
+            <ul>
+                <li class="border-bottom" @click="form.type=1">
+                    加密
+                </li>
+                <li class="border-bottom" @click="form.type=0">
+                    不加密
+                </li>
+                <li class="border-bottom type_close" @click='passwordShow=false'>取消</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app, FNImageClip;
+    apiready = function () {
+        // if (api.systemType == 'android') {
+        //   api.setScreenSecure({
+        //     secure: true
+        //   });
+        // }
+        $api.fixStatusBar($api.dom('#header'));
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+        FNImageClip = api.require('FNImageClip');
+        app = new Vue({
+            el: '#app',
+            data: {
+                form: {
+                    token: $api.getStorage('deviceToken'),
+                    user_id: $api.getStorage('uid'),
+                    name: '',
+                    notice: '',
+                    shortnotice: '',
+                    logo: '',
+                    room_cate_id: '',
+                    bgpic: '',
+                    shortnotice: '',
+                    type: 0,
+                    key: undefined,
+                },
+                typeShow: false,
+                passwordShow: false,
+                roomType: undefined,
+                chatType: [{
+                    name: '交友',
+                    id: 2,
+                }, {
+                    name: '点歌',
+                    id: 4,
+                }, {
+                    name: '情感',
+                    id: 7,
+                }, {
+                    name: '陪练',
+                    id: 9,
+                }, {
+                    name: '电台',
+                    id: 8,
+                }, ],
+                avatar: '../image/camera.png',
+                imgList: ['../image/img1.jpg', '../image/img_edit_add.png', '../image/img_edit_add.png',
+                    '../image/img_edit_add.png', '../image/img_edit_add.png'
+                ],
+                qiniuToken: '',
+                FNImageClipShow: false,
+                imgIndex: -1,
+                isDisabled: true,
+            },
+            created: function () {
+                // this.getPageParam();
+                this.getQiniuToken();
+                this.getChatType()
+            },
+            mounted: function () {},
+            methods: {
+                clickType(item, id) {
+                    this.roomType = item;
+                    this.form.room_cate_id = id;
+                    this.typeShow = false;
+                },
+                watchModel: function () {
+                    if (this.form.name == '' || this.form.occupation == '' || this.form.signature ==
+                        '') {
+                        this.isDisabled = true;
+                    } else {
+                        this.isDisabled = false;
+                    }
+                },
+                getChatType() {
+                    var _this = this
+                    var data = {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid')
+                    }
+                    axios1('dlchat/api_room/catelist', 'post', data, function (res, err) {
+                        if (res.code == 1) {
+                            _this.chatType = res.data
+                        }
+                    })
+                },
+                // 获取页面传值
+                // getPageParam: function () {
+                //     this.avatar = api.pageParam.avatar;
+                //     this.form.name = api.pageParam.name;
+                //     this.form.signature = api.pageParam.signature;
+                //     this.form.occupation = api.pageParam.occupation;
+                //     this.form.files0 = api.pageParam.background[0]
+                //     // for (var i = 0; i < api.pageParam.background.length; i++) {
+                //     //   if (api.pageParam.background[i] != '') {
+                //     //     this.imgList[i] = api.pageParam.background[i];
+                //     //     this.form['files' + i] = api.pageParam.background[i];
+                //     //   }
+                //     // }
+                // },
+                // 获取七牛token
+                getQiniuToken: function () {
+                    var _this = this
+                    axios('get_token', 'post', $api.getStorage('deviceToken'), {
+                        member_id: $api.getStorage('uid')
+                    }, function (res, err) {
+                        if (res.code == 200) {
+                            _this.qiniuToken = res.data;
+                        } else {
+                            api.toast({
+                                msg: '网络错误，请稍后再试'
+                            })
+                        }
+                    })
+                    // api.ajax({
+                    //     url: baseUrl + 'qiniu/token',
+                    //     method: 'get',
+                    //     headers: {
+                    //         token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //         values: {
+                    //             uid: $api.getStorage('uid')
+                    //         }
+                    //     }
+                    // }, function (ret, err) {
+                    //     if (ret.status == 200) {
+                    //         _this.qiniuToken = ret.data[0];
+                    //     }else{
+                    //     }
+                    // })
+                },
+
+                showActionSheet: function () {
+                    var _this = this;
+                    api.actionSheet({
+                        title: '',
+                        cancelTitle: '取消',
+                        destructiveTitle: '',
+                        buttons: ['拍照', '相册']
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (ret.buttonIndex == 1) {
+                                _this.getImageFile('camera');
+                            }
+                            if (ret.buttonIndex == 2) {
+                                _this.getImageFile('library');
+                            }
+                        }
+                    });
+                },
+
+                getImageFile: function (type) {
+                    var _this = this;
+                    api.getPicture({
+                        sourceType: type,
+                        encodingType: 'png',
+                        mediaValue: 'pic',
+                        destinationType: 'url',
+                        allowEdit: false,
+                        saveToPhotoAlbum: false
+                    }, function (ret, err) {
+                        if (ret) {
+                            FNImageClip.open({
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: api.winWidth,
+                                    h: api.winHeight - 50
+                                },
+                                srcPath: ret.data,
+                                style: {
+                                    mask: 'rgba(0,0,0,0.5)',
+                                    clip: {
+                                        w: api.winWidth - 2,
+                                        h: api.winWidth - 2,
+                                        x: 1,
+                                        y: (api.winHeight - api.winWidth - 50) / 2,
+                                        borderColor: '#0f0',
+                                        borderWidth: 1,
+                                        appearance: 'rectangle'
+                                    }
+                                },
+                                mode: 'image',
+                                fixedOn: api.frameName
+                            }, function (ret, err) {
+                                if (ret.status) {
+                                    _this.FNImageClipShow = true;
+                                }
+                            });
+                        }
+                    });
+                },
+
+                FNImageClip_cancel: function () {
+                    this.FNImageClipShow = false;
+                    FNImageClip.close();
+                },
+
+                FNImageClip_enter: function () {
+                    var _this = this;
+                    api.showProgress()
+                    FNImageClip.save({
+                        destPath: 'fs://imageClip/liaola_' + (+new Date()) + '.png',
+                        copyToAlbum: false,
+                        quality: 1
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (ret.destPath == undefined) {
+                                api.hideProgress();
+                                api.toast({
+                                    msg: '图片保存失败'
+                                })
+                                this.FNImageClipShow = false;
+                                FNImageClip.close();
+                            } else {
+                                _this.uploadImg(ret.destPath)
+                            }
+                        } else {
+                            api.hideProgress();
+                            api.toast({
+                                msg: '图片保存失败'
+                            })
+                            this.FNImageClipShow = false;
+                            FNImageClip.close();
+                        }
+                    });
+                },
+
+                // 上传图片
+                uploadImg: function (fileUrl) {
+                    var _this = this;
+                    api.ajax({
+                        url: qiniuBaseUrl,
+                        method: 'post',
+                        data: {
+                            values: {
+                                token: this.qiniuToken
+                            },
+                            files: {
+                                file: fileUrl
+                            }
+                        }
+                    }, function (ret, err) {
+                        console.log(JSON.stringify(ret))
+                        console.log(JSON.stringify(err))
+                        api.hideProgress()
+                        if (ret) {
+                            _this.FNImageClipShow = false;
+                            FNImageClip.close();
+                            _this.form.logo = ret.key;
+                            _this.avatar = qiniuImageUrl + ret.key;
+                        }
+                        if (err) {
+                            api.toast({
+                                msg: '网络错误，请稍后再试'
+                            });
+                        }
+                    });
+                },
+
+                edtiorSubmit: function () {
+                    var _this = this;
+                    if (_this.form.name == '') {
+                        api.toast({
+                            msg: '请填写房间名称'
+                        });
+                        return false;
+                    };
+                    if (_this.roomType == '') {
+                        api.toast({
+                            msg: '请选择类型'
+                        });
+                        return false;
+                    };
+                    if (_this.form.logo == '') {
+                        api.toast({
+                            msg: '请选择封面'
+                        });
+                        return false;
+                    }
+                    if (_this.form.type == 1 & _this.form.key == '') {
+                        api.toast({
+                            msg: '请填写房间密码'
+                        })
+                        return false
+                    }
+                    axios1('dlchat/api_room/create', 'post', _this.form, function (res, err) {
+                        console.log(JSON.stringify(res))
+                        console.log(JSON.stringify(err))
+                        if (res.code == 1) {
+                            api.toast({
+                                msg: '创建成功',
+                            })
+                            api.sendEvent({
+                                name: 'refreshChat',
+                            })
+                            setTimeout(function () {
+                                api.sendEvent({
+                                    name: 'searchChat',
+                                    extra: {
+                                        roomid: res.data.data.roomid,
+                                        userID: res.data.data.userID,
+                                        type: res.data.data.type
+                                    }
+                                })
+                            }, 200)
+                            api.closeWin()
+                        } else {
+                            api.toast({
+                                msg: res.msg
+                            })
+                        }
+                    })
+                    // api.ajax({
+                    //     url: baseUrl + 'user/store',
+                    //     method: 'post',
+                    //     headers: {
+                    //         token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //         values: _this.form
+                    //     }
+                    // }, function (ret, err) {
+                    //     if (ret.status == 200) {
+                    //         api.toast({
+                    //             msg: '提交成功',
+                    //             duration: 2000,
+                    //             location: 'bottom'
+                    //         });
+                    //         api.sendEvent({
+                    //             name: 'refreshMy',
+                    //         });
+                    //         setTimeout(
+                    //             function () {
+                    //                 api.closeWin();
+                    //             }, 2000)
+
+                    //     } else if (ret.status == 400) {
+                    //         api.toast({
+                    //             msg: ret.message[0],
+                    //             duration: 2000,
+                    //             location: 'bottom'
+                    //         });
+
+                    //     }
+                    // })
+                },
+
+                // 后退
+                goback: function () {
+                    api.closeWin();
+                },
+            },
+            watch: {
+                "form.name": function () {
+
+                    this.watchModel()
+                },
+                "form.occupation": function () {
+
+                    this.watchModel()
+                },
+                "form.signature": function () {
+
+                    this.watchModel()
+                }
+            }
+        })
+    }
+</script>

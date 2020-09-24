@@ -1,0 +1,1106 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>个人主页</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/user_home.css" />
+</head>
+<style>
+  /* .userCenter-title{margin-top: 34px;background: #fff;}
+  .userMsg-info{background: #fff;color: #333} */
+</style>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="userCenter flex-con">
+        <div v-if="a!=b" class="userCenter-bottom">
+          <div @click="openIM" class="userCenter-blf">
+            <img class="blf-img" src='../image/message_fill_light.png'>
+            <div class="blf-text">私信</div>
+          </div>
+          <!-- <div class="userCenter-blf" @click="openGiftFrame">
+            <img class="blf-img" src='../image/gift_icon.png'>
+            <div class="blf-text">送礼</div>
+          </div> -->
+          <div class="userCenter-blf" @click="call">
+            <!-- <div class="iconf-wrap">
+                <i class="blf-img iconfont icon-shipin1"></i>
+            </div> -->
+            <!-- <div class="blf-text">视频</div> -->
+          </div>
+          <!-- <div class="userCenter-blf" @click='openAbout'>
+              <img class="brt-img" src='../image/play_around.png'>
+              <div class="blf-text">视频</div>
+          </div> -->
+          <!-- <div class="userCenter-brt" @click='openAbout(userList.info.member_id)'>
+            <div class="brtBox">
+              <img class="brt-img" src='../image/play_around.png'>
+              <div class="brt-text">下单约TA</div>
+            </div>
+          </div> -->
+        </div>
+        <div class="userCenter-close-icon" tapmode @click="goback">
+          <div class="userCenter-close">
+            <i class="iconfont icon-pre"></i>
+          </div>
+        </div>
+        <!-- <div class="complain" tapmode @click="showActionSheet">
+         ...
+        </div> -->
+        <!--轮播图 -->
+        <!-- <div id="userImg" class="userMsgImg">
+
+        </div> -->
+        <div class="userCenter-title border-bottom">
+          <img @click='closeGiftBox' id="userImg" class="userMsgImg"
+            :src="userList.info.bg[0]+'?imageView2/1/w/500/format/jpg/interlace/1/q/60'" />
+          <div class="userMsg-info">
+            <h4 class="info-title">{{userList.info.name}}(ID{{userList.info.pretty_no}})</h4>
+            <div class="info-loves">{{userList.info.follows.length}}粉丝</div>
+            <div class="info-status" @click="addGuanzhu();">
+              <i :class="['icon-guanzhu' + userList.is_follow, 'iconfont']"></i>{{userList.is_follow | getFollow}}
+            </div>
+          </div>
+        </div>
+        <div class="userMsg-pay">
+
+          <!-- <div class="item border-bottom">
+            <div class="title">聊天价格：</div>
+            <div class="value">{{userList.info.price}}聊币/分</div>
+          </div> -->
+          <!-- <div class="item border-bottom">
+            <div class="title">接通率：</div>
+            <div class="value">{{userList.info.connect}}%</div>
+          </div> -->
+          <!-- <div class="item border-bottom">
+            <div class="title">好评率：</div>
+            <div class="value">{{userList.info.grade}}%</div>
+          </div> -->
+          <div v-if='ad_file== " "' class="item border-bottom" @click='openAd'>
+            <img :src="ad_file" alt="">
+            <img src="../image/ad.png" alt="" class="icon-ad">
+          </div>
+        </div>
+        <div class="room" v-if="userList.info.room!=null" @click="openChat(userList.info.room.roomid,userList.info.room.type)">
+          <div class="img-wrap">
+            <img :src="userList.info.room.logo" alt="">
+          </div>
+          <div class="title">
+            {{userList.info.room.name}}
+          </div>
+          <div class="">
+            进入聊天室
+            <i class="iconfont icon-next"></i>
+          </div>
+        </div>
+        <div class="userCenter-main">
+          <div class="navbar">
+            <p :class="['title', navbarIndex == 0 ? 'navbarSelected' : '']" @click="navbarSelected(0)">资料</p>
+            <p :class="['title', navbarIndex == 1 ? 'navbarSelected' : '']" @click="navbarSelected(1)">图片</p>
+            <p :class="['title', navbarIndex == 2 ? 'navbarSelected' : '']" @click="navbarSelected(2)">视频</p>
+            <p :class="['title', navbarIndex == 3 ? 'navbarSelected' : '']" @click="navbarSelected(3)">技能</p>
+          </div>
+          <div class="tab__panel">
+            <div :class="['tab__content', navbarIndex == 0 ? 'tabSelected' : '']">
+              <div class="flex-item msgList border-bottom">
+                <div class="msgList-left">个性签名</div>
+                <div class="msgList-right">{{userList.info.signature}}</div>
+              </div>
+              <div class="flex-item msgList border-bottom">
+                <div class="msgList-left">身高</div>
+                <div class="msgList-right">{{userList.info.height}}</div>
+              </div>
+              <div class="flex-item msgList border-bottom">
+                <div class="msgList-left">体重</div>
+                <div class="msgList-right">{{userList.info.weight}}</div>
+              </div>
+              <div class="flex-item msgList border-bottom">
+                <div class="msgList-left">星座</div>
+                <div class="msgList-right">{{constellationText}}</div>
+              </div>
+              <div class="flex-item msgList border-bottom">
+                <div class="msgList-left">城市</div>
+                <div class="msgList-right">{{userList.info.city}}</div>
+              </div>
+              <!-- <div v-if="userList.info.certification == '1'" class="flex-item contact border-bottom">
+                <div class="msgList-left">联系方式</div>
+                <div class="msgList-right">
+                  <div v-if="isPhone == 1" class="contact-phone contact-item">
+                    <span>
+                      <i class="iconfont icon-shouji"></i>手机号码</span>
+                    <p>{{userList.info.tel}}</p>
+                  </div>
+                  <div v-if="userList.info.tel!=null&&isPhone == 0" class="contact-item2">
+                    <p class="contact-item-btn" @click="buyInformation('phone')">查看手机</p>
+                  </div>
+                  <div v-if="isWechatID == 1" class="contact-phone contact-item">
+                    <span>
+                      <i class="iconfont icon-weixin"></i>微信号码</span>
+                    <p>{{userList.info.wechatID}}</p>
+                  </div>
+                  <div v-if="userList.info.wechatID!=null&&isWechatID == 0" class="contact-item2">
+                    <p class="contact-item-btn" @click="buyInformation('wx')">查看微信</p>
+                  </div>
+                </div>
+              </div> -->
+              <div class="flex-item">
+                <div class="gift-title">收到的礼物</div>
+                <div class="gift">
+                  <div v-for="(item, i) in userList.info.gifts" :key="item.id" class="gift-item">
+                    <img :src="!!item.gift ? item.gift.file : ''" alt="">
+                    <p>{{!!item.gift ? item.gift.name : ''}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div :class="['tab__content', navbarIndex == 1 ? 'tabSelected' : '']">
+              <div class="homeList flex-con">
+                <div v-for="(item, i) in userList.info.albums" :key="item.id" @click="getPhotoBrowser(item, i)"
+                  class="homeList-item">
+                  <img :class="[item.status == 1 && myinfo.level == 0 ? 'img-blur' : '']"
+                    :src="item.file  + '?imageView2/1/w/300/h/300'" alt="">
+                  <div v-if="item.status == 1 && myinfo.level == 0" class="private-wrap">
+                    <i class="iconfont icon-status1"></i>
+                  </div>
+                  <div class="item-user">
+                    <div class="userMsg">
+                      <h4>{{item.description}}</h4>
+                    </div>
+                    <span>
+                      <i class="iconfont icon-xin"></i>{{item.like_size}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div :class="['tab__content', navbarIndex == 2 ? 'tabSelected' : '']">
+              <div class="homeList flex-con">
+                <div @click="openVideoDetail(i)" v-for="(item, i) in userList.info.videos" :key="item.id"
+                  class="homeList-item">
+                  <img :class="[item.status == 1 && myinfo.level == 0 ? 'img-blur' : '']" :src="item.photo" alt=""
+                    v-if='item.photo!=null'>
+                  <img :class="[item.status == 1 && myinfo.level == 0 ? 'img-blur' : '']"
+                    :src="item.file +'?vframe/jpg/offset/2'" alt="" v-else>
+                  <div v-if="item.status == 1 && myinfo.level == 0" class="private-wrap">
+                    <i class="iconfont icon-status1"></i>
+                  </div>
+                  <div class="item-user">
+                    <div class="userMsg">
+                      <h4>{{item.description}}</h4>
+                    </div>
+                    <span>
+                      <i class="iconfont icon-xin"></i>{{item.like_size}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="skill-wrap" v-if="navbarIndex==3">
+              <div class="skill-item-wrap" v-for="item in my_skills" @click="openSkill(item)">
+                <div class="skill-item " >
+                    <div class="img-wrap">
+                      <img :src="item.picture">
+                    </div>
+                    <div class="skill-bottom">
+                      <div class="bottom-name">
+                          <div class="name">{{item.yy.title}}</div>
+                          <div class="price">{{item.price}}/一局</div>
+                      </div>
+                      <div class="bottom-pay">下单</div>
+                    </div>
+                </div>
+              </div>
+          </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox;
+  apiready = function () {
+    UIScrollPicture = api.require('UIScrollPicture');
+    dialogBox = api.require('dialogBox');
+    var IMG = $api.byId("userImg")
+    $api.css(IMG, "height:" + api.winWidth + "px");
+    app = new Vue({
+      el: '#app',
+      data: {
+        constellationList: ['未知', '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座', '魔蝎座', '水瓶座',
+          '双鱼座'
+        ],
+        constellationText: '',
+        navbarIndex: 0,
+        isPhone: 0,
+        isWechatID: 0,
+        isGiftIndex: 0,
+        actImgFile: '',
+        actIndex: 0,
+        giftId: '',
+        giftType: '',
+        giftName: '',
+        giftFile: '',
+        giftGold: '',
+        videoStatus: 0,
+        giftList: [],
+        myinfo: {
+          gold: '',
+          level: '',
+        },
+        userList: {
+          is_follow: 0,
+          info: {
+            member_id: '',
+            background: [],
+            name: '',
+            level: '',
+            price: '',
+            gold: '',
+            signature: '',
+            height: '',
+            weight: '',
+            city: '',
+            certification: '',
+            constellation: '0',
+            connect: '',
+            grade: '',
+            albums: [],
+            follows: [],
+            videos: [],
+            gifts: [],
+
+          }
+        },
+        a: '',
+        b: '',
+        ad_link: '',
+        ad_file: '',
+        buy: true,
+        wx_price: '',
+        phone_price: '',
+        my_skills: [{ //认证技能列表
+          picture: '../image/videoBg.png'
+        }]
+      },
+      created() {
+        var _this = this;
+        api.showProgress({
+          title: '',
+          text: ''
+        });
+        // 打开返回的frame
+        // api.openFrame({
+        //   name: 'back_frame',
+        //   url: 'back_frame.html',
+        //   bounces: false,
+        //   rect: {
+        //     x: 0,
+        //     y: 0,
+        //     w: api.winWidth,
+        //     h: 80
+        //   }
+        // });
+        // 打开我的关注等frame
+        api.addEventListener({
+          name: 'keyback'
+        }, function (ret, err) {
+          _this.goback();
+        });
+        api.addEventListener({
+          name: 'refreshUserHome'
+        }, function (ret, err) {
+          _this.showUserList();
+        });
+        api.addEventListener({
+          name: 'giveGift_showVipDialog'
+        }, function (ret, err) {
+          api.closeFrame({
+            name: 'gift_box'
+          });
+          _this.showVipDialog('开通VIP即可赠送礼物');
+        });
+        api.addEventListener({
+          name: 'giveGift_showRechargeDialog'
+        }, function (ret, err) {
+          api.closeFrame({
+            name: 'gift_box'
+          });
+          _this.showRechargeDialog('您的余额不足，无法赠送礼物');
+        });
+      },
+      mounted: function () {
+        var _this = this;
+        // this.ad();
+        // this.navbarIndex=api.pageParam.navbarIndex == undefined?0:api.pageParam.navbarIndex 
+        _this.showUserList();
+        window.addEventListener('scroll', this.handleScroll);
+        var currentX = 0;
+        var moveX = 0;
+        var endX = 0;
+        addEventListener("touchstart", function (event) {
+          currentX = event.changedTouches[0].screenX;
+        });
+        addEventListener("touchmove", function (event) {
+          moveX = event.changedTouches[0].screenX;
+        });
+        addEventListener("touchend", function (event) {
+          endX = event.changedTouches[0].screenX;
+          if (endX - currentX > 100) {
+            _this.goback();
+          }
+        });
+        // setTimeout(()=>{
+        //   this.navbarIndex=api.pageParam.navbarIndex == undefined?0:api.pageParam.navbarIndex 
+        // },500)
+      },
+      methods: {
+        // 头部上划隐藏
+        // handleScroll() {
+        //   const top = document.body.scrollTop
+        //   if (top > 200) {
+        //     api.closeFrame({
+        //       name: 'back_frame'
+        //     });
+        //   } else {
+        //     api.openFrame({
+        //       name: 'back_frame',
+        //       url: 'back_frame.html',
+        //       bounces: false,
+        //       rect: {
+        //         x: 0,
+        //         y: 0,
+        //         w: api.winWidth,
+        //         h: 80
+        //       }
+        //     });
+        //   }
+        // },
+
+        openSkill(item) {
+          let _this = this
+          api.openWin({
+            name: 'play_around',
+            url: 'play_around.html',
+            pageParam: {
+              item: item,
+              to_id: this.userList.info.member_id
+            }
+          })
+          // api.openTabLayout({
+          //   name: 'user_home_skill',
+          //   url: 'user_home_skill.html',
+          //   title: '技能列表',
+          //   hideNavigationBar: false,
+          //   navigationBar: {
+          //     background: '#fff',
+          //     color: '#333',
+          //     leftButtons: [{
+          //       iconPath: 'widget://image/back.png'
+          //     }]
+          //   },
+          //   pageParam:{
+          //     id:$api.getStorage('uid')
+          //   }
+          // });
+        },
+
+        closeGiftBox() {
+          api.closeFrame({
+            name: 'gift_box'
+          });
+        },
+
+        openAd() {
+          api.openWin({
+            name: 'openAd',
+            url: this.ad_link,
+          });
+        },
+
+        ad() {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'ad/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: 'user_deta'
+              },
+            }
+          }, function (ret, err) {
+            // console.log(JSON.stringify(ret.data[0].ad_link))
+            _this.ad_link = ret.data[0].ad_link;
+            _this.ad_file = ret.data[0].ad_file;
+
+          })
+        },
+        goback: function () {
+          api.sendEvent({
+            name: 'videoPlay',
+          });
+          api.sendEvent({
+            name: 'refreshHome'
+          });
+          api.closeWin();
+        },
+        navbarSelected: function (index) {
+          this.navbarIndex = index;
+          if (index == 3) {
+            let data = {
+              member_id: $api.getStorage('uid'),
+              id: api.pageParam.member_id
+            }
+            axios('my_skills', 'get', $api.getStorage('deviceToken'), data,
+              (res, err) => {
+                if (res.code == 200) {
+                  this.my_skills = res.data
+                  console.log(JSON.stringify(this.my_skill))
+                }
+              })
+          }
+        },
+        showUserList: function () {
+          // alert($api.getStorage('uid'))
+          // alert(api.pageParam.member_id)
+          var _this = this;
+          _this.a = $api.getStorage('uid')
+          _this.b = api.pageParam.member_id
+          console.log(JSON.stringify( $api.getStorage('deviceToken')))
+          axios('my_index', 'get', $api.getStorage('deviceToken'), {
+            member_id: $api.getStorage('uid'),
+            id: api.pageParam.member_id
+          }, function (ret, err) {
+            console.log(JSON.stringify(ret))
+            console.log(JSON.stringify(err))
+            if (ret.code == 200) {
+              // console.log(JSON.stringify(ret))
+              _this.userList = ret.data;
+              _this.myinfo = ret.info;
+              _this.phone_price = ret.data.info.phone_price;
+              _this.wx_price = ret.data.info.wx_price;
+              _this.constellationText = _this.constellationList[_this.userList.info.constellation];
+              _this.isPhone = ret.data.isphone;
+              _this.isWechatID = ret.data.iswechat;
+              // _this.initBanner()
+            }
+            api.hideProgress()
+            // console.log(JSON.stringify(ret))
+          })
+          // return
+          // api.ajax({
+          //   url: baseUrl + 'home/detail',
+          //   method: 'get',
+          //   headers: {
+          //     token: $api.getStorage('deviceToken')
+          //   },
+          //   data: {
+          //     values: {
+          //       uid: $api.getStorage('uid'),
+          //       id: api.pageParam.member_id
+          //     },
+          //   }
+          // }, function (ret, err) {
+          //   if (ret.status == 200) {
+          //     console.log(JSON.stringify(ret))
+          //     _this.userList = ret.data;
+          //     _this.myinfo = ret.info;
+          //     _this.phone_price = ret.data.info.phone_price;
+          //     _this.wx_price = ret.data.info.wx_price;
+          //     _this.constellationText = _this.constellationList[_this.userList.info.constellation];
+          //     _this.isPhone = ret.data.isphone;
+          //     _this.isWechatID = ret.data.iswechat;
+          //     // _this.initBanner()
+          //   }
+          //   api.hideProgress();
+          // })
+        },
+        addGuanzhu: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'user/follow',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                to_uid: _this.userList.info.member_id
+              },
+            }
+          }, function (ret, err) {
+            _this.showUserList();
+          })
+        },
+
+        openGiftFrame: function () {
+          var _this = this;
+          api.openFrame({
+            name: 'gift_box',
+            url: 'gift_box.html',
+            rect: {
+              x: 0,
+              y: 150,
+              w: api.winWidth,
+              h: 440,
+              marginBottom: 0,
+            },
+            pageParam: {
+              to_uid: _this.userList.info.member_id,
+              to_uname: _this.userList.info.name,
+              to_uavatar: _this.userList.info.avatar,
+            }
+          });
+        },
+
+        openAbout(id) {
+          api.openTabLayout({
+            name: 'user_home_skill',
+            url: 'user_home_skill.html',
+            title: 'TA的技能',
+            hideNavigationBar: false,
+            navigationBar: {
+              background: '#fff',
+              color: '#333',
+              leftButtons: [{
+                iconPath: 'widget://image/back.png'
+              }]
+            },
+            pageParam: {
+              id: id
+            }
+          });
+          // api.openWin({
+          //     name: 'play_around',
+          //     url: 'play_around.html',
+          //     pageParam: {
+          //         to_uid: this.userList.info.member_id,
+          //         to_uname: this.userList.info.name,
+          //         to_avatar: this.userList.info.avatar,
+          //         to_price: this.userList.info.price
+          //     }
+          // })
+        },
+
+        buyInformation: function (type) {
+          var _this = this;
+          var price = 0;
+          if (type == 'wx') {
+            price = _this.wx_price
+          } else if (type == 'phone') {
+            price = _this.phone_price
+          }
+          dialogBox.alert({
+            texts: {
+              title: '解锁价格',
+              content: price + '聊币',
+              leftBtnTitle: '取消',
+              rightBtnTitle: '确认'
+            },
+            styles: {
+              bg: '#fff',
+              w: 300,
+              corner: 2,
+              title: {
+                marginT: 20,
+                icon: 'widget://res/gou.png',
+                iconSize: 40,
+                titleSize: 14,
+                titleColor: '#000'
+              },
+              content: {
+                color: '#000',
+                size: 14
+              },
+              left: {
+                marginB: 7,
+                marginL: 20,
+                w: 130,
+                h: 35,
+                corner: 2,
+                bg: '#000',
+                color: '#fff',
+                size: 12
+              },
+              right: {
+                marginB: 7,
+                marginL: 10,
+                w: 130,
+                h: 35,
+                corner: 2,
+                bg: '#000',
+                color: '#fff',
+                size: 12
+              }
+            },
+            tapClose: true
+          }, function (ret) {
+            if (ret.eventType == 'left') {
+              var dialogBox = api.require('dialogBox');
+              dialogBox.close({
+                dialogName: 'alert'
+              });
+            }
+            if (ret.eventType == 'right') {
+
+              if (_this.buy) {
+                _this.buy = false;
+                api.ajax({
+                  url: baseUrl + 'home/buy',
+                  method: 'post',
+                  headers: {
+                    token: $api.getStorage('deviceToken')
+                  },
+                  data: {
+                    values: {
+                      uid: $api.getStorage('uid'),
+                      to_uid: _this.userList.info.member_id,
+                      type: type
+                    },
+                  }
+                }, function (ret, err) {
+                  if (ret.status == '400') {
+                    api.toast({
+                      msg: ret.message[0],
+                      duration: 2000,
+                      location: 'bottom'
+                    });
+                    _this.buy = true;
+                  }
+                  if (type == 'wx') {
+                    if (ret.status == '200') {
+                      api.toast({
+                        msg: '微信号码解锁成功',
+                        duration: 2000,
+                        location: 'bottom'
+                      });
+                      _this.isWechatID = 1;
+                      $api.setStorage('uisWechatID', _this.isWechatID);
+                    } else if (ret.status == '401') {
+                      _this.showRechargeDialog('您的余额不足，无法解锁微信号码');
+                    } else {
+                      _this.isWechatID = 0;
+                    }
+                    _this.buy = true;
+                  }
+                  if (type == 'phone') {
+                    if (ret.status == '200') {
+                      api.toast({
+                        msg: '手机号码解锁成功',
+                        duration: 2000,
+                        location: 'bottom'
+                      });
+                      _this.isPhone = 1;
+                      $api.setStorage('uisPhone', _this.isPhone);
+                    } else if (ret.status == '401') {
+                      _this.showRechargeDialog('您的余额不足，无法解锁手机号码');
+                    } else {
+                      _this.isPhone = 0;
+                    }
+                    _this.buy = true;
+                  }
+                  var dialogBox = api.require('dialogBox');
+                  dialogBox.close({
+                    dialogName: 'alert'
+                  });
+                })
+              }
+            }
+          });
+
+        },
+
+        getPhotoBrowser: function (item, index) {
+          var _this = this;
+          var activeIndex = index;
+          _this.actImgFile = item.file;
+          _this.videoStatus = item.status;
+          if (_this.videoStatus == 1 && _this.userList.info.level == 0) {
+            _this.showVipDialog('开通VIP即可查看私密图片');
+            return false;
+          }
+          var phoneImg = [];
+          for (var i = 0; i < _this.userList.info.albums.length; i++) {
+            if (_this.userList.info.albums[i].status == 0) {
+              phoneImg.push(_this.userList.info.albums[i].file);
+            } else {
+              if (activeIndex > i) {
+                activeIndex -= 1;
+              }
+            }
+          }
+          var photoBrowser = api.require('photoBrowser');
+          photoBrowser.open({
+            images: phoneImg,
+            placeholderImg: 'widget://image/image_pre.png',
+            bgColor: '#000',
+            activeIndex: activeIndex
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.eventType == 'click') {
+                photoBrowser.close();
+              }
+            }
+          });
+        },
+
+        showVipDialog: function (title) {
+          dialogBox.raffle({
+            texts: {
+              mainText: title,
+              subText: '',
+              leftTitle: '开通会员'
+            },
+            styles: {
+              bg: '#272320',
+              w: 300,
+              corner: 2,
+              icon: {
+                marginT: 20,
+                w: 40,
+                h: 40,
+                corner: 20,
+                iconPath: 'widget://image/icon_big_vip.png'
+              },
+              main: {
+                marginT: 10,
+                color: '#fff',
+                size: 14,
+              },
+              sub: {
+                marginT: 10
+              },
+              left: {
+                w: 300,
+                h: 50,
+                marginL: 0,
+                marginB: 0,
+                corner: 2,
+                bg: '#000',
+                color: '#fff',
+                size: 16
+              }
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret.eventType == 'left') {
+              api.openWin({
+                name: 'vip',
+                url: 'vip.html',
+                slidBackEnabled: false
+              });
+              dialogBox.close({
+                dialogName: 'raffle'
+              });
+            }
+          });
+        },
+
+        showRechargeDialog: function (title) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: title,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+
+        openVideoDetail: function (index) {
+          var _this = this;
+          // _this.videoStatus = item.status;
+          // if (_this.videoStatus == 1 && _this.userList.info.level == 0) {
+          //   _this.showVipDialog('开通VIP即可查看私密视频');
+          //   return false;
+          // }
+          api.openWin({
+            name: 'video_detail',
+            url: 'video_detail.html',
+            slidBackEnabled: false,
+            pageParam: {
+              videoList: _this.userList.info.videos,
+              index: index
+            }
+          });
+        },
+
+        openRecharge: function () {
+          api.openWin({
+            name: 'recharge',
+            url: 'recharge.html',
+            slidBackEnabled: false
+          });
+        },
+
+        // 打开im页面
+        openIM: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: $api.getStorage('uid'),
+            fromName: $api.getStorage('uname'),
+            fromAvatar: $api.getStorage('uavatar'),
+            toId: _this.userList.info.member_id,
+            toName: _this.userList.info.name,
+            toAvatar: _this.userList.info.avatar,
+          }
+          api.openWin({
+            name: 'im',
+            url: 'im.html',
+            pageParam: tempExtra
+          });
+        },
+
+        openChat(roomid, type) {
+          setTimeout(function () {
+            api.sendEvent({
+              name: 'searchChat',
+              extra: {
+                roomid: roomid,
+                type: type
+              }
+            })
+            api.closeWin({
+              name:'user_home'
+          })
+          }, 300)
+          api.closeWin({
+              name:'video_iso'
+          })
+          api.closeWin({
+              name:'video_detail'
+          })
+
+        },
+
+        // 视频通话
+        call: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: $api.getStorage('uid'),
+            fromName: $api.getStorage('uname'),
+            fromAvatar: $api.getStorage('uavatar'),
+            toId: _this.userList.info.member_id,
+            toName: _this.userList.info.name,
+            toAvatar: _this.userList.info.avatar,
+          };
+          // 发起视频
+          api.ajax({
+            url: baseUrl + 'message/videoCall',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                from_uid: $api.getStorage('uid'),
+                to_uid: _this.userList.info.member_id,
+                type: '0',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              api.openWin({
+                name: 'call1',
+                url: 'call1.html',
+                slidBackEnabled: false,
+                pageParam: {
+                  extra: tempExtra,
+                  type: 'videoCall',
+                  time: ret.data.time,
+                }
+              });
+            } else if (ret.status == 401) {
+              _this.showRechargeDialog(ret.message[0]);
+            } else {
+              api.toast({
+                msg: ret.message[0]
+              })
+            }
+          })
+        },
+        // 投诉，建议，分享
+        // showActionSheet: function (index) {
+        //   var _this = this;
+        //   _this.imgIndex = index;
+        //   api.actionSheet({
+        //     title: '',
+        //     cancelTitle: '取消',
+        //     destructiveTitle: '',
+        //     buttons: ['投诉', '建议']
+        //   }, function(ret, err) {
+        //     if (ret) {
+        //       if (ret.buttonIndex == 1) {
+        //         // alert("投诉")
+        //         // alert($api.getStorage('uid'))
+        //         var tempExtra = {
+        //           fromId: $api.getStorage('uid'),
+        //           fromName: $api.getStorage('uname'),
+        //           fromAvatar: $api.getStorage('uavatar'),
+        //           toId: 2,
+        //           toName:"官方客服" ,
+        //           toAvatar:'../image/message.png',
+        //         }
+        //           api.openWin({
+        //                 name: 'im',
+        //                 url: 'im.html',
+        //                 pageParam: tempExtra
+        //               });
+        //               }
+        //       if (ret.buttonIndex == 2) {
+        //         // alert("建议")
+        //         var tempExtra = {
+        //           fromId: $api.getStorage('uid'),
+        //           fromName: $api.getStorage('uname'),
+        //           fromAvatar: $api.getStorage('uavatar'),
+        //           toId: 2,
+        //           toName:"官方客服" ,
+        //           toAvatar:'../image/message.png',
+        //         }
+        //           api.openWin({
+        //                 name: 'im',
+        //                 url: 'im.html',
+        //                 pageParam: tempExtra
+        //               });
+        //       }
+        //     }
+        //   });
+        // },
+        // 主播照片轮播图
+        // initBanner: function () {
+        //   var _this = this;
+        //   if (_this.userList.info.background.length > 0) {
+        //     var banner_offset = $api.offset($api.byId('userImg'));
+        //     UIScrollPicture.open({
+        //       rect: {
+        //         x: banner_offset.l,
+        //         y: banner_offset.t,
+        //         w: banner_offset.w,
+        //         h: banner_offset.h
+        //       },
+        //       data: {
+        //         paths: _this.userList.info.bg
+        //       },
+        //       styles: {
+        //         indicator: {
+        //           dot: {
+        //             w: 3,
+        //             h: 3,
+        //             r: 2,
+        //             margin: 2
+        //           },
+        //           align: 'center',
+        //           color: '#FFFFFF',
+        //           activeColor: '#DA70D6'
+        //         },
+        //       },
+        //       placeholderImg: 'widget:../image/photo.png',
+        //       contentMode: 'scaleToFill',
+        //       interval: 3,
+        //       fixedOn: api.frameName,
+        //       loop: true,
+        //       fixed: false
+        //     }, function (ret, err) {
+
+        //     });
+        //   } else {
+        //     $api.css($api.byId('userImg'), 'height: 0px;');
+        //   }
+        // },
+
+      },
+      filters: {
+        getFollow: function (value) {
+          if (value == 0) {
+            return '关注';
+          }
+          if (value == 1) {
+            return '已关注';
+          }
+        }
+      }
+    })
+  }
+</script>

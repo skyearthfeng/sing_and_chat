@@ -1,0 +1,399 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>登录</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/login.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="../css/index.css" /> -->
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">登录</div>
+        </div>
+      </header>
+      <div id="main" class="flex-con">
+        <div class="form-wrap">
+          <div class="form-item flex-wrap">
+            <i class="iconfont icon-shouji"></i>
+            <input v-model="mobile" class="flex-con" type="tel" placeholder="请输入手机号码">
+          </div>
+          <div class="form-item flex-wrap">
+            <i class="iconfont icon-mima"></i>
+            <input v-model="password" class="flex-con" type="password" placeholder="请输入密码">
+          </div>
+          <div class="btn-wrap">
+            <button @click="login" id="submit-btn" type="button" :disabled="isDisabled"
+              :class="[isDisabled ?'btn-active':'btn']">立即登录</button>
+          </div>
+        </div>
+        <div class="forget-wrap flex-wrap">
+          <a @click="goRegister" class="register-link" href="javascript:;">还没有账号？立即注册</a>
+          <a @click="goforget" class="forget-pwd" href="javascript:;">忘记密码?</a>
+        </div>
+        <div class="loging-menu" @click="openWeixin()">
+          <img src="../image/wechat.png" alt="">
+        </div>
+        <div class="agreement-wrap">
+          <a href="javascript:;">《用户协议》</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        mobile: '',
+        password: '',
+        isDisabled: true,
+      },
+      created: function () {
+        if (!!$api.getStorage('uid')) {
+          api.openWin({
+            name: 'main',
+            url: 'main.html',
+            slidBackEnabled: false
+          })
+        }
+      },
+      mounted: function () {
+        this.regDevice()
+        this.public()
+        this.androidFinishApp()
+      },
+      methods: {
+
+        				// 设备注册
+				regDevice: function () {
+					api.ajax({
+						url: baseUrl + 'device/add',
+						method: 'post',
+						data: {
+							values: {
+								model: api.deviceModel,
+								device_code: api.deviceId,
+								pixelRatio: '2',
+								windowWidth: api.screenWidth,
+								windowHeight: api.screenHeight,
+								language: api.systemType,
+								appVersion: api.appVersion,
+								version: api.version,
+								channel: $api.getStorage('channel'),
+								tuid: $api.getStorage('tuid'),
+							},
+						}
+					}, function (ret, err) {
+						if (ret && ret.status == 200) {
+							$api.setStorage('deviceToken', ret.data.token);
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试'
+							});
+						}
+					});
+				},
+
+				// 应用公共设置
+				public: function () {
+					api.ajax({
+						url: baseUrl + 'device/index',
+						method: 'get',
+						data: {}
+					}, function (ret, err) {
+						if (ret.status == 200) {
+							$api.setStorage('videos', ret.data.videos);
+							$api.setStorage('pay', ret.data.pay);
+						}
+					});
+        },
+        
+        watchModel: function () {
+          if (this.mobile == '' || this.password == '') {
+            this.isDisabled = true;
+          } else {
+            this.isDisabled = false;
+          }
+        },
+        // 后退
+        goback: function () {
+          api.closeWin();
+        },
+
+        goRegister: function () {
+          api.openWin({
+            name: 'register',
+            url: 'register.html',
+            slidBackEnabled: false
+          });
+        },
+
+        goforget: function () {
+          api.openWin({
+            name: 'forget',
+            url: 'forget.html',
+            slidBackEnabled: false
+          });
+        },
+
+        androidFinishApp: function () {
+					var _this = this;
+					api.addEventListener({
+						name: 'keyback'
+					}, function (ret, err) {
+						if (_this.curHomeBackTriggerTimes === _this.maxHomeBackTriggerTimes) {
+							api.closeWidget({
+								id: api.appId,
+								silent: true
+							});
+						} else {
+							api.toast({
+								msg: api.appName + '：再按一次退出应用'
+							})
+						}
+						_this.curHomeBackTriggerTimes++;
+						setTimeout(function () {
+							_this.curHomeBackTriggerTimes--;
+						}, 2000);
+					});
+				},
+
+        openWeixin() {
+          if ($api.getStorage('deviceToken' == undefined)) {
+            this.regDevice();
+          }
+          var wx = api.require('wx');
+          api.showProgress({
+            animationType: '',
+            title: '',
+            text: '加载中...'
+          });
+          wx.auth(function (ret, err) {
+            if (ret.status) {
+              wx.getToken({
+                code: ret.code
+              }, function (ret2, err2) {
+                if (ret2.status) {
+                  wx.getUserInfo({
+                    accessToken: ret2.accessToken,
+                    openId: ret2.openId
+                  }, function (ret3, err3) {
+                    console.log(JSON.stringify(ret3))
+                    if (ret3.status) {
+                      api.hideProgress()
+                      var city;
+                      if (ret3.province == '') {
+                        city = !!ret3.city ? ret3.city : '';
+                      } else {
+                        city = ret3.province + (!!ret3.city ? ('-' + ret3.city) : '');
+                      }
+                      api.ajax({
+                        url: baseUrl + 'oauth/wechat',
+                        method: 'post',
+                        headers: {
+                          token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                          values: {
+                            openid: ret3.openid,
+                            name: ret3.nickname,
+                            sex: ret3.sex,
+                            city: city,
+                            headimgurl: ret3.headimgurl,
+                            channel: $api.getStorage('channel'),
+                            tuid: $api.getStorage('tuid'),
+                          },
+                        }
+                      }, function (ret4, err) {
+                        console.log(JSON.stringify(ret4))
+                        console.log(JSON.stringify(err))
+                        api.hideProgress()
+                        api.toast({
+                          msg: ret4.message[0]
+                        });
+                        if (ret4.status == 200) {
+                          var token = JSON.parse(ret4.data.token).code == 200 ? JSON.parse(ret4
+                            .data.token).token : '';
+                          console.log(ret4.data.id)
+                          $api.setStorage('uid', ret4.data.id);
+                          $api.setStorage('uname', ret4.data.name);
+                          $api.setStorage('uavatar', ret4.data.avatar);
+                          $api.setStorage('token', token);
+                          var tel = ret4.data.email
+                          if (tel.length == 11) {
+                            $api.setStorage('umobile', ret4.data.email);
+                            api.openWin({
+                              name: 'main',
+                              url: 'main.html',
+                            });
+                          } else {
+                            api.openWin({
+                              name: 'main',
+                              url: 'main.html',
+                            });
+                            // api.openWin({
+                            // 	name: 'weixin_phone',
+                            // 	url: 'html/weixin_phone.html',
+                            // 	slidBackEnabled: false,
+                            // 	pageParam: {
+                            // 		show: false,
+                            // 	}
+                            // });
+                          }
+
+                        }
+                      })
+                    } else {
+                      console.log(JSON.stringify(err3))
+                    }
+                  })
+                }
+                if (err2) {
+                  console.log(JSON.stringify(err2))
+                }
+              })
+            }
+            if (err) {
+              console.log(JSON.stringify(err))
+              api.hideProgress()
+              switch (err.code) {
+                case -1:
+                  api.toast({
+                    msg: '网络错误，请稍后再试'
+                  });
+                  break;
+                case 0:
+                  api.toast({
+                    msg: '微信已授权'
+                  });
+                  break;
+                case 1:
+                  api.toast({
+                    msg: '您已取消授权'
+                  });
+                  break;
+                case 2:
+                  api.toast({
+                    msg: '您已拒绝授权'
+                  });
+                  break;
+                case 3:
+                  api.toast({
+                    msg: '当前设备未安装微信客户端'
+                  });
+                  break;
+                default:
+                  break;
+              }
+            }
+          });
+        },
+
+        login: function () {
+          var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+          if (!regex.test(this.mobile)) {
+            api.toast({
+              msg: '请输入正确的手机号码',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          if (this.password == '') {
+            api.toast({
+              msg: '密码不能为空',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          api.ajax({
+            url: baseUrl + 'oauth/login',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                mobile: this.mobile,
+                password: this.password,
+              },
+            }
+          }, function (ret, err) {
+            if (ret) {
+              api.toast({
+                msg: ret.message[0]
+              });
+              if (ret.status == '200') {
+                var token = JSON.parse(ret.data.token).code == 200 ? JSON.parse(ret.data.token).token : '';
+                console.log(ret.data.id)
+                $api.setStorage('uid', ret.data.id);
+                $api.setStorage('uname', ret.data.name);
+                $api.setStorage('uavatar', ret.data.avatar);
+                $api.setStorage('umobile', ret.data.email);
+                $api.setStorage('token', token);
+                // alert($api.getStorage('umobile'))
+                // alert($api.getStorage('uid'))
+                // 我的状态 1.空闲 2.忙碌 3.勿扰
+                $api.setStorage('myStatus', 1);
+                api.openWin({
+                  name: 'main',
+                  url: 'main.html',
+                  slidBackEnabled: false,
+                  reload: true
+                });
+              }
+            } else {
+              api.toast({
+                msg: ret.message[0]
+              });
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        }
+      },
+      watch: {
+        "mobile": function () {
+          this.watchModel()
+        },
+        "password": function () {
+          this.watchModel()
+        },
+
+      }
+    })
+  }
+</script>

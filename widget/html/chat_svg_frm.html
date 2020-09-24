@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>特效</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../css/video.css" /> -->
+</head>
+<style>
+    html,body,#app{
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0,.2)
+    }
+    #demoCanvas {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+    <div id="app" @click="api.closeFrame()">
+        <div id="demoCanvas" ></div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svgaplayerweb@2.0.7/build/svga.min.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                url:api.pageParam.url
+            },
+            created() {},
+            mounted() {
+                var _this=this
+                // setTimeout(function(){
+                //     api.closeFrame()
+                // }, 2000)
+                var player = new SVGA.Player('#demoCanvas')
+                var parser = new SVGA.Parser('#demoCanvas') // 如果你需要支持 IE6+，那么必须把同样的选择器传给 Parser。
+                parser.load(_this.url, function (videoItem) {
+                    player.loops = 1
+                    player.setVideoItem(videoItem)
+                    player.startAnimation()
+                    player.onFinished(function() { // 播放结束回调
+                        api.closeFrame({
+                            name: 'chat_svg_frm'
+                        })
+                })
+                })
+
+
+            },
+            methods: {
+                
+            },
+        })
+    }
+</script>

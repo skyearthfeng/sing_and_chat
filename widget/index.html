@@ -1,0 +1,467 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+		content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>聊啦</title>
+	<link rel="stylesheet" type="text/css" href="./css/api.css" />
+	<link rel="stylesheet" type="text/css" href="./css/index.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="wrap flex-wrap flex-vertical">
+			<div class="flex-con">
+				<div class="main">
+					<div class="logo-wrap">
+						<img src="image/logo.png" alt="">
+						<div class="appName">{{appName}}</div>
+					</div>
+					<div class="login-wrap flex-wrap">
+						<a onclick="openWeixin()" class="login-btn login-weixin" href="javascript:;">
+							<i class="icon icon-weixin1"></i>
+						</a>
+						<!-- <a onclick="openQQ()" class="login-btn login-qq" href="javascript:;">
+							<i class="icon icon-qq"></i>
+						</a> -->
+						<a onclick="openLogin()" class="login-btn login-phone" href="javascript:;">
+							<i class="icon icon-phone"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript" src="script/vue.js"></script>
+<script type="text/javascript" src="script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		// 设置禁止截屏
+		if (api.systemType == 'android') {
+			api.setScreenSecure({
+				secure: false
+			});
+		}
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				appName: api.appName,
+				curHomeBackTriggerTimes: 1,
+				maxHomeBackTriggerTimes: 2,
+			},
+			created: function () {
+				var _this = this;
+				if (!!$api.getStorage('uid')) {
+					api.openWin({
+						name: 'main',
+						url: 'html/main.html',
+						slidBackEnabled: false
+					});
+				} else {
+					_this.checkUpdate();
+				}
+				_this.public();
+				$api.setStorage('channel', '0');
+				$api.setStorage('tuid', '0');
+				// var shareinstall = api.require('shareinstall')
+				// shareinstall.getInstall({}, function (ret, err) {
+				// 	if (ret && ret.channel) {
+				// 		$api.setStorage('channel', ret.channel);
+				// 	}
+				// 	if (ret && ret.tuid) {
+				// 		$api.setStorage('tuid', ret.tuid);
+				// 	}
+				// })
+			},
+			mounted: function () {
+				this.regDevice();
+				this.androidFinishApp();
+			},
+			methods: {
+				// 检查app版本更新
+				checkUpdate: function () {
+					var mam = api.require('mam');
+					mam.checkUpdate(function (ret, err) {
+						if (ret) {
+							var result = ret.result;
+							if (result.update) {
+								var str = '新版本号:' + result.version + ';\n更新内容:\n' + result.updateTip + ';\n发布时间:' + result.time;
+								if (result.closed) {
+									api.alert({
+										title: '有新版本更新',
+										msg: str,
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											if (api.systemType == "android") {
+												api.download({
+													url: result.source,
+													report: true
+												}, function (ret, err) {
+													if (ret && 0 == ret.state) {
+														api.showProgress({
+															title: ret.percent + "%",
+															text: ''
+														});
+													}
+													if (ret && 1 == ret.state) { /* 下载完成 */
+														api.hideProgress();
+														api.installApp({
+															appUri: ret.savePath
+														});
+													}
+												});
+											}
+											if (api.systemType == "ios") {
+												api.installApp({
+													appUri: result.source
+												});
+											}
+										}
+									});
+								} else {
+									api.confirm({
+										title: '有新版本推送，是否下载安装',
+										msg: str,
+										buttons: ['确定', '下次再说']
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											if (api.systemType == "android") {
+												api.download({
+													url: result.source,
+													report: true
+												}, function (ret, err) {
+													if (ret && 0 == ret.state) {
+														api.showProgress({
+															title: ret.percent + "%",
+															text: ''
+														});
+													}
+													if (ret && 1 == ret.state) { /* 下载完成 */
+														api.hideProgress();
+														api.installApp({
+															appUri: ret.savePath
+														});
+													}
+												});
+											}
+											if (api.systemType == "ios") {
+												api.installApp({
+													appUri: result.source
+												});
+											}
+										}
+									});
+								}
+							} else {
+								if (result.closed) {
+									// 无更新，强制关闭
+									api.alert({
+										title: '无新的版本',
+										msg: '应用已强制关闭',
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											api.closeWidget({
+												id: api.appId,
+												silent: true
+											});
+										}
+									});
+								}
+							}
+						}
+					});
+				},
+
+				// 点击返回两次退出应用
+				androidFinishApp: function () {
+					var _this = this;
+					api.addEventListener({
+						name: 'keyback'
+					}, function (ret, err) {
+						if (_this.curHomeBackTriggerTimes === _this.maxHomeBackTriggerTimes) {
+							api.closeWidget({
+								id: api.appId,
+								silent: true
+							});
+						} else {
+							api.toast({
+								msg: api.appName + '：再按一次退出应用'
+							})
+						}
+						_this.curHomeBackTriggerTimes++;
+						setTimeout(function () {
+							_this.curHomeBackTriggerTimes--;
+						}, 2000);
+					});
+				},
+
+				// 设备注册
+				regDevice: function () {
+					api.ajax({
+						url: baseUrl + 'device/add',
+						method: 'post',
+						data: {
+							values: {
+								model: api.deviceModel,
+								device_code: api.deviceId,
+								pixelRatio: '2',
+								windowWidth: api.screenWidth,
+								windowHeight: api.screenHeight,
+								language: api.systemType,
+								appVersion: api.appVersion,
+								version: api.version,
+								channel: $api.getStorage('channel'),
+								tuid: $api.getStorage('tuid'),
+							},
+						}
+					}, function (ret, err) {
+						if (ret && ret.status == 200) {
+							$api.setStorage('deviceToken', ret.data.token);
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试'
+							});
+						}
+					});
+				},
+
+				// 应用公共设置
+				public: function () {
+					api.ajax({
+						url: baseUrl + 'device/index',
+						method: 'get',
+						data: {}
+					}, function (ret, err) {
+						if (ret.status == 200) {
+							$api.setStorage('videos', ret.data.videos);
+							$api.setStorage('pay', ret.data.pay);
+						}
+					});
+				}
+
+			},
+		})
+	}
+	// 微信登录
+	function openWeixin() {
+		if ($api.getStorage('deviceToken' == undefined)) {
+			this.regDevice();
+		}
+		var wx = api.require('wx');
+		api.showProgress({
+			animationType: '',
+			title: '',
+			text: '加载中...'
+		});
+		wx.auth(function (ret, err) {
+			if (ret.status) {
+				wx.getToken({
+					code: ret.code
+				}, function (ret2, err2) {
+					if (ret2.status) {
+						wx.getUserInfo({
+							accessToken: ret2.accessToken,
+							openId: ret2.openId
+						}, function (ret3, err3) {
+							console.log(JSON.stringify(ret3))
+							if (ret3.status) {
+								api.hideProgress()
+								var city;
+								if (ret3.province == '') {
+									city = !!ret3.city ? ret3.city : '';
+								} else {
+									city = ret3.province + (!!ret3.city ? ('-' + ret3.city) : '');
+								}
+								api.ajax({
+									url: baseUrl + 'oauth/wechat',
+									method: 'post',
+									headers: {
+										token: $api.getStorage('deviceToken')
+									},
+									data: {
+										values: {
+											openid: ret3.openid,
+											name: ret3.nickname,
+											sex: ret3.sex,
+											city: city,
+											headimgurl: ret3.headimgurl,
+											channel: $api.getStorage('channel'),
+											tuid: $api.getStorage('tuid'),
+										},
+									}
+								}, function (ret4, err) {
+									console.log(JSON.stringify(ret4))
+									console.log(JSON.stringify(err))
+									api.hideProgress()
+									api.toast({
+										msg: ret4.message[0]
+									});
+									if (ret4.status == 200) {
+										var token = JSON.parse(ret4.data.token).code == 200 ? JSON.parse(ret4.data.token).token : '';
+										console.log(ret4.data.id)
+										$api.setStorage('uid', ret4.data.id);
+										$api.setStorage('uname', ret4.data.name);
+										$api.setStorage('uavatar', ret4.data.avatar);
+										$api.setStorage('token', token);
+										var tel = ret4.data.email
+										if (tel.length == 11) {
+											$api.setStorage('umobile', ret4.data.email);
+											api.openWin({
+												name: 'main',
+												url: 'html/main.html',
+											});
+										} else {
+											api.openWin({
+												name: 'main',
+												url: 'html/main.html',
+											});
+											// api.openWin({
+											// 	name: 'weixin_phone',
+											// 	url: 'html/weixin_phone.html',
+											// 	slidBackEnabled: false,
+											// 	pageParam: {
+											// 		show: false,
+											// 	}
+											// });
+										}
+
+									}
+								})
+							}else{
+								console.log(JSON.stringify(err3))
+							}
+						})
+					}if(err2){
+						console.log(JSON.stringify(err2))
+					}
+				})
+			}
+			if (err) {
+				console.log(JSON.stringify(err))
+				api.hideProgress()
+				switch (err.code) {
+					case -1:
+						api.toast({
+							msg: '网络错误，请稍后再试'
+						});
+						break;
+					case 0:
+						api.toast({
+							msg: '微信已授权'
+						});
+						break;
+					case 1:
+						api.toast({
+							msg: '您已取消授权'
+						});
+						break;
+					case 2:
+						api.toast({
+							msg: '您已拒绝授权'
+						});
+						break;
+					case 3:
+						api.toast({
+							msg: '当前设备未安装微信客户端'
+						});
+						break;
+					default:
+						break;
+				}
+			}
+		});
+	}
+
+	// QQ登录
+	// function openQQ() {
+	// 	var qq = api.require('QQPlus');
+	// 	api.showProgress({
+	// 		animationType: '',
+	// 		title: '',
+	// 		text: '加载中...'
+	// 	});
+	// 	qq.login(function (ret, err) {
+	// 		if (ret.status) {
+	// 			qq.getUserInfo(function (ret2, err2) {
+	// 				if (ret2.status) {
+	// 					var info = JSON.parse(ret2.info);
+	// 					var city;
+	// 					if (info.province == '') {
+	// 						city = !!info.city ? info.city : '';
+	// 					} else {
+	// 						city = info.province + (!!info.city ? ('-' + info.city) : '');
+	// 					}
+	// 					api.ajax({
+	// 						url: baseUrl + 'oauth/qq',
+	// 						method: 'post',
+	// 						headers: {
+	// 							token: $api.getStorage('deviceToken')
+	// 						},
+	// 						data: {
+	// 							values: {
+	// 								openid: ret.openId,
+	// 								name: info.nickname,
+	// 								sex: info.gender == '男' ? 1 : 2,
+	// 								city: city,
+	// 								headimgurl: info.figureurl_qq_2,
+	// 								channel: $api.getStorage('channel'),
+	// 								tuid: $api.getStorage('tuid'),
+	// 							},
+	// 						}
+	// 					}, function (ret3, err) {
+	// 						if (ret3.status == 200) {
+	// 							api.hideProgress();
+	// 							api.toast({
+	// 								msg: ret3.message[0]
+	// 							});
+	// 							var token = JSON.parse(ret3.data.token).code == 200 ? JSON.parse(ret3.data.token).token : '';
+	// 							$api.setStorage('uid', ret3.data.id);
+	// 							$api.setStorage('uname', ret3.data.name);
+	// 							$api.setStorage('uavatar', ret3.data.avatar);
+	// 							$api.setStorage('token', token);
+	// 							api.openWin({
+	// 								name: 'main',
+	// 								url: 'html/main.html',
+	// 								slidBackEnabled: false
+	// 							});
+	// 						}
+	// 					})
+	// 				}
+	// 				if (ret2) {
+	// 					api.hideProgress();
+	// 					api.toast({
+	// 						msg: ret2.msg
+	// 					});
+	// 				}
+	// 			});
+	// 		}
+	// 		if (err) {
+	// 			api.hideProgress();
+	// 			api.toast({
+	// 				msg: err.msg
+	// 			});
+	// 		}
+	// 	});
+	// }
+
+	// 手机号登录
+	function openLogin() {
+		api.openWin({
+			name: 'login',
+			url: 'html/login.html',
+			slidBackEnabled: false
+		});
+	}
+</script>

@@ -1,0 +1,645 @@
+@import 'http://at.alicdn.com/t/font_578379_k03tx603kw.css';
+@import 'http://at.alicdn.com/t/font_1007068_wnx9go79ctl.css';
+@import 'http://at.alicdn.com/t/font_1063748_ancee4whmgs.css';
+html,
+body {
+  font-size: 14px;
+  height: 100%;
+}
+#app,
+.wrap,
+.main {
+  height: 100%;
+  background-color: #fff;
+}
+.flex-wrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  background-color: #fff;
+}
+.flex-wrap.flex-vertical {
+  -webkit-box-orient: vertical;
+  -webkit-flex-flow: column;
+  flex-flow: column;
+}
+.flex-wrap .flex-con {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+}
+.main {
+  width: 100%;
+  height: 100%;
+}
+.icon {
+  display: inline-block;
+  background: url(../image/icons.png) no-repeat;
+  background-size: 400px 400px;
+}
+.status-bar {
+  width: 100%;
+  background: transparent;
+}
+#header {
+  height: 40px;
+  line-height: 40px;
+  background-color: #fff;
+}
+#header .header-home {
+  display: flex;
+}
+#header .header-home .search-wrap {
+  width: 40px;
+  line-height: 40px;
+  text-align: center;
+  margin-right: 20px;
+}
+#header .header-home .search-wrap .iconfont {
+  font-size: 20px;
+  color: #000;
+}
+#header .header-home .nav {
+  width: 100%;
+  text-align: center;
+  display: flex;
+}
+#header .header-home .nav a {
+  flex: 1;
+  padding: 0 5px;
+  line-height: 38px;
+  color: #000;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#header .header-home .nav a.active {
+  border-bottom: 2px solid #000;
+  color: #e12e85;
+}
+#header .header-home .search-home {
+  width: 100%;
+  height: 30px;
+  display: flex;
+}
+#header .header-home .search-home i {
+  font-size: 20px;
+  line-height: 30px;
+  margin-right: 20px;
+  padding-left: 10px;
+  color: #999;
+}
+#header .header-home .search-home div {
+  flex: 1;
+  height: 100%;
+  line-height: 30px;
+  color: #999;
+}
+#header .header-message {
+  width: 100%;
+  display: flex;
+  text-align: center;
+}
+#header .header-message .header-title {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: #000;
+}
+#header .header-message .header-title .header-right {
+  float: right;
+  margin-right: 10px;
+  font-size: 14px;
+}
+#header .header-message .header-title .header-left {
+  float: left;
+  margin-left: 10px;
+  font-size: 14px;
+}
+#header .header-wrap {
+  position: relative;
+}
+#header .header-wrap .header-biaoji {
+  position: absolute;
+  float: right;
+  top: 0;
+  right: 0;
+  color: #fff;
+  display: inline-block;
+}
+#header .header-wrap .header-left,
+#header .header-wrap .header-right {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+}
+#header .header-wrap .header-left .iconfont,
+#header .header-wrap .header-right .iconfont {
+  font-size: 20px;
+  color: #000;
+}
+#header .header-wrap .header-right {
+  left: auto;
+  right: 0;
+}
+#header .header-wrap .header-title {
+  text-align: center;
+  font-size: 16px;
+  color: #000;
+}
+.adMain {
+  width: 100%;
+  height: 95%;
+  position: relative;
+}
+.adMain span {
+  width: 30px ;
+  height: 30px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+.adMain a {
+  width: 100%;
+  height: 100%;
+}
+.adMain a img {
+  width: 100%;
+  height: 100%;
+}
+#footer {
+  border-top: 1px solid #efefef;
+  background-color: #fff;
+  height: 50px;
+  line-height: 50px;
+  padding-top: 5px;
+}
+#footer ul li {
+  padding: 5px 0;
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  min-width: 20%;
+  position: relative;
+}
+#footer ul li .messageBadge {
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background: #f00;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+#footer ul li i.icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  margin: 0 auto;
+  line-height: 50px;
+}
+#footer ul li.active {
+  color: #e12e85;
+}
+#footer ul li.active .icon-tab0 {
+  background-position: 0 0;
+}
+#footer ul li.active .icon-tab1 {
+  background-position: 0 -40px;
+}
+#footer ul li.active .icon-tab2 {
+  background-position: 0 -80px;
+}
+#footer ul li.active .icon-tab3 {
+  background-position: 0 -120px;
+}
+#footer ul li.active .icon-tab4 {
+  background-position: 0 -160px;
+}
+#footer ul li .icon-tab0 {
+  background-position: -40px 0;
+}
+#footer ul li .icon-tab1 {
+  background-position: -40px -40px;
+}
+#footer ul li .icon-tab2 {
+  background-position: -40px -80px;
+}
+#footer ul li .icon-tab3 {
+  background-position: -40px -120px;
+}
+#footer ul li .icon-tab4 {
+  background-position: -40px -160px;
+}
+#footer ul li .title {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+input,
+button {
+  appearance: none;
+  outline: medium;
+}
+.empty-img {
+  width: 150px;
+  margin: 80px auto 10px;
+  display: block;
+}
+.empty-text {
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+}
+.see_detail {
+  width: 22px;
+  height: 22px;
+  margin-right: 15px;
+  margin-top: 8px;
+}
+.header-video {
+  display: flex;
+}
+.header-video .nav .nav-left {
+  float: right;
+}
+.header-video .nav .nav-right {
+  float: left;
+  color: #fff;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  width: 100%;
+  display: block;
+}
+h4 {
+  font-size: 14px;
+}
+.banner-wrap {
+  width: 100%;
+  height: 100px;
+}
+.imgLinkBox {
+  padding: 2px 0;
+  display: -webkit-box;
+  display: -moz-box;
+}
+.imgLinkBox .imgLink {
+  padding: 2px;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+}
+.imgLinkBox .imgLink img {
+  border-radius: 6px;
+}
+.matchBox {
+  height: 70px;
+  display: -webkit-box;
+  display: -moz-box;
+  margin: 0 2px;
+  padding: 10px 5px;
+  color: #fff;
+  background: -webkit-linear-gradient(left, #e865c7, #cc94f8);
+  background: -o-linear-gradient(right, #e865c7, #cc94f8);
+  background: -moz-linear-gradient(right, #e865c7, #cc94f8);
+  background: linear-gradient(to right, #e865c7, #cc94f8);
+}
+.matchBox .match-l {
+  width: 50px;
+  height: 50px;
+}
+.matchBox .mt {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+}
+.matchBox .match-c {
+  padding-left: 4px;
+  font-size: 14px;
+  padding-top: 5px;
+}
+.matchBox .match-c .match-info > div {
+  display: inline-block;
+  margin-bottom: 3px;
+}
+.matchBox .match-c .match-info > div:nth-child(2) {
+  font-size: 11px;
+  margin-left: 10px;
+}
+.matchBox .match-r {
+  width: 120px;
+  height: 50px;
+  position: relative;
+}
+.matchBox .match-r .matchImg {
+  position: absolute;
+  left: 10px;
+  top: 0;
+}
+.matchBox .match-r .matchImg:nth-child(2) {
+  left: 50px;
+}
+.matchBox .match-r .matchImg > img {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+.matchBox .match-r .match-icon {
+  position: absolute;
+  height: 40px;
+  line-height: 40px;
+  right: 0;
+  top: 5px;
+}
+.homeList {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: row;
+  /*justify-content: space-between;
+  flex-wrap: wrap;*/
+  /*margin-top: 2px;*/
+  width: 97%;
+}
+.homeList .homeList-item {
+  width: 100%;
+  /*height: 180px;*/
+  margin: 10px;
+  position: relative;
+  color: #333;
+  background-color: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.homeList .homeList-item p {
+  width: 140px;
+  font-size: 12px;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.homeList .homeList-item .adImg {
+  width: 20px;
+  height: 15px;
+  position: absolute;
+  top: -5px;
+  right: 0;
+}
+.homeList .homeList-item .homeList-status {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 50px;
+  height: 24px;
+  background: #9e9993;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 20px;
+  text-align: center;
+  line-height: 24px;
+  padding-left: 8px;
+}
+.homeList .homeList-item .homeList-status .status1 {
+  position: absolute;
+  left: 7px;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #03fc03;
+}
+.homeList .homeList-item .homeList-status .status2 {
+  position: absolute;
+  left: 7px;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #03fc03;
+}
+.homeList .homeList-item .homeList-status .status4 {
+  position: absolute;
+  left: 7px;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: red;
+}
+.homeList .homeList-item .item-user {
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  position: absolute;
+  left: 0;
+  padding: 0 6px;
+  bottom: 6px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+}
+.homeList .homeList-item .item-user .userMsg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  float: left;
+}
+.homeList .homeList-item .item-user .userMsg div {
+  padding-left: 6px;
+  font-size: 12px;
+  width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.homeList .homeList-item .item-user .userMsg img {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+}
+.homeList .homeList-item .item-user .userMsg h4 {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  padding-left: 6px;
+}
+.homeList .homeList-item .item-user span {
+  height: 30px;
+  float: right;
+  font-size: 12px;
+  position: relative;
+}
+.homeList .homeList-item .item-user span i {
+  margin-right: 4px;
+  position: absolute;
+  left: -20px;
+  top: 0;
+  height: 30px;
+}
+.videoChat-main {
+  flex: 1;
+  color: #fff;
+  padding: 10px 5px;
+  background: -webkit-linear-gradient(top, #292929, #8a8a8a);
+  background: -o-linear-gradient(bottom, #292929, #8a8a8a);
+  background: -moz-linear-gradient(bottom, #292929, #8a8a8a);
+  background: linear-gradient(to bottom, #292929, #8a8a8a);
+}
+.videoChat-main .myPage-header {
+  width: 100%;
+  height: 60px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  padding: 0 5px;
+}
+.videoChat-main .myPage-header .MyUserImg {
+  width: 60px;
+  height: 60px;
+}
+.videoChat-main .myPage-header .MyUserImg img {
+  border-radius: 50%;
+}
+.videoChat-main .myPage-header .MyUserTxt {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  padding-left: 6px;
+  padding-top: 10px;
+}
+.videoChat-main .myPage-header .MyUserTxt p {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.videoChat-main .videoChat-line {
+  margin-left: 71px;
+  width: 80px;
+}
+.videoChat-main .video-con {
+  margin-top: 10px;
+  height: 200px;
+}
+.videoChat-main .videoList {
+  display: flex;
+  height: 200px;
+}
+.videoChat-main .videoList .video {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ca98fc;
+}
+.videoChat-main .videoList .video + .video {
+  margin-left: 5px;
+}
+.videoChat-main .laber-con {
+  margin-top: 10px;
+}
+.videoChat-main .laber-con span {
+  font-size: 12px;
+  padding: 3px 10px;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  margin: 4px;
+}
+.videoChat-main .laber-con span.laberSelected {
+  color: #ef5561;
+  border: 1px solid #ef5561;
+}
+.form-wrap {
+  padding: 20px;
+}
+.form-wrap .form-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+.form-wrap .form-item .iconfont {
+  line-height: 40px;
+  color: #555;
+}
+.form-wrap .form-item input {
+  height: 40px;
+  line-height: 40px;
+  border-radius: 3px;
+  text-indent: 10px;
+  font-size: 12px;
+}
+.form-wrap .btn-wrap button {
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  background-color: #fff;
+  color: #fff;
+  border-radius: 5px;
+}
+.forget-wrap {
+  padding: 0 20px;
+  justify-content: space-between;
+}
+.forget-wrap a {
+  color: #fff;
+}
+.agreement-wrap {
+  position: absolute;
+  left: 0;
+  bottom: 30px;
+  width: 100%;
+  text-align: center;
+}
+.agreement-wrap a {
+  color: #fff;
+}
+.sayHello {
+  position: fixed;
+  right: 0;
+  top: 85%;
+}
+.sayHello img {
+  width: 100px;
+  height: 35px;
+}
+.home-title {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  background-color: #fff;
+}
+.home-title > div {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+.home-title > div > img {
+  width: 100%;
+  border-radius: 50%;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+.home-title > div > div {
+  font-size: 11px;
+  width: 100%;
+  text-align: center;
+}
+.homeRinght,
+.homeLeft {
+  float: right;
+  width: 100%;
+  padding-right: 10px;
+  background-color: #f1f1f1;
+}
+.homeRinght .homeList-item > img,
+.homeLeft .homeList-item > img {
+  width: 100%;
+  min-height: 100px;
+  max-height: 300px;
+  object-fit: cover;
+  height: 100%;
+}

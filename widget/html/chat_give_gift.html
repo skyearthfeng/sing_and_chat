@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>赠送礼物悬浮</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_gift.css" />
+</head>
+<style>
+    html,body,#app{
+        background-color: rgba(0, 0, 0, 0)
+    }
+</style>
+<body>
+    <div id="app" v-cloak>
+        <div class="give-gift-frm">
+            <div class="name-wrap">
+                <p class="name">{{giftInfo.uname}}</p>
+                <p>送 {{giftInfo.toname}}</p>
+            </div>
+            <div class="give-gift-wrap">
+                <img :src="giftInfo.imgUrl" alt="">
+                x
+                <span>{{giftInfo.nums}}</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                giftInfo:api.pageParam
+            },
+            created() {},
+            mounted() {
+                setTimeout(function() {
+                    api.closeFrame()
+                },2000)
+            },
+            methods: {
+                
+            },
+        })
+    }
+</script>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>房间人数</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/nearby.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class=" border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <h1 class="header-title">在线人数</h1>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div v-if='peropleList.length>0' class="list-wrap" v-for='item in peropleList'>
+          <div class="list-item" @click.stop='embraceMic(item.member_id)'>
+            <div class="avatar">
+              <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+              <div class="name">{{item.name}}
+                <!-- <span>取消管理员</span> -->
+                <!-- <span class="age1"> -->
+                <!-- <i class="icon-sex1 iconfont"></i>12</span> -->
+              </div>
+            </div>
+            <span class="manage" v-if="   item.ismanager!=1 & creater && item.member_id!=uid"
+              @click.stop="setManage('add',item.member_id)">设为管理员</span>
+            <span class="close-manage" v-if="item.ismanager==1 & creater && item.member_id!=uid"
+              @click.stop="setManage('del',item.member_id)">取消管理员</span>
+            <i class="iconfont icon-next"></i>
+          </div>
+        </div>
+        <div v-else class="empty-wrap">
+          <img class="empty-img" src="../image/empty.png">
+          <div class="empty-text">😔暂无用户</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong;
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'))
+    app = new Vue({
+      el: '#app',
+      data: {
+        creater: api.pageParam.creater,
+        peropleList: [],
+        roomid: 0,
+        mic: 0,
+        uid:$api.getStorage('uid')
+      },
+      created() {
+        var _this = this
+      },
+      mounted() {
+        this.roomid = api.pageParam.roomid1
+        this.mic = api.pageParam.mic
+        this.perpleList()
+      },
+      methods: {
+        goback() {
+          api.closeWin()
+        },
+        perpleList() {
+          var _this = this
+          var data = {
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: _this.roomid
+          }
+          console.log(JSON.stringify({
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: _this.roomid
+          }))
+          axios1('dlchat/api_chat/userlist', 'post', data,
+            function (res, err) {
+              console.log(JSON.stringify(res))
+              if (res.code == 1) {
+                _this.peropleList = res.data
+              } else {
+                api.toast({
+                  msg: res.msg
+                })
+              }
+            }
+          )
+        },
+
+        //抱人上麦
+        embraceMic(id) {
+          var _this = this
+          rong = api.require('rongCloud2')
+          if (this.mic != -1) {
+            let data = {
+              token: $api.getStorage('deviceToken'),
+              buser_id: $api.getStorage('uid'),
+              roomid: this.roomid,
+              mic: this.mic,
+              user_id: id
+            }
+            axios1('dlchat/api_chat/micon', 'post', data,
+              (res, err) => {
+                if (res.code == 1) {
+                  api.toast({
+                    msg: '抱人成功'
+                  })
+                  rong.sendCommandMessage({
+                    conversationType: 'CHATROOM',
+                    targetId: _this.roomid,
+                    name: 'embrace',
+                    data: id
+                  }, function (ret, err) {})
+                } else {
+                  api.toast({
+                    msg: res.msg
+                  })
+                }
+                setTimeout(function () {
+                  api.closeWin()
+                }, 1000)
+
+              }
+            )
+          } else {
+            api.openWin({
+              name: 'user_home',
+              url: 'user_home.html',
+              bgColor: '#fff',
+              pageParam: {
+                member_id: id
+              },
+            })
+          }
+        },
+
+        //设置管理员
+        setManage(url, id) {
+          var _this = this
+          var base = 'dlchat/admin/' + url
+          console.log(JSON.stringify({
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: _this.roomid,
+            set_adminid: id,
+          }))
+          var data = {
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: _this.roomid,
+            adminid: id,
+          }
+          axios1(base, 'post', data, function (res) {
+            console.log(JSON.stringify(res))
+            if (res.code == 200) {
+              var ismanager = url == 'add' ? 1 : 0
+              rong = api.require('rongCloud2');
+              rong.sendCommandMessage({
+                conversationType: 'CHATROOM',
+                targetId: _this.roomid,
+                name: 'manage',
+                data: {
+                  id: id,
+                  ismanage: ismanager
+                }
+              }, function (ret, err) {})
+            }
+            api.closeWin()
+          })
+        }
+      },
+    })
+  }
+</script>

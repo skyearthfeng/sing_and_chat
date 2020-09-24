@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>历史记录</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/history.css" />
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的访客</div>
+        </div>
+      </header>
+      <div class="flex-con"></div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+
+    app = new Vue({
+      el: '#app',
+      data: {},
+      created: function () {
+        var _this = this;
+
+        api.openFrame({
+          name: 'history_frame',
+          url: 'history_frame.html',
+          bounces: true,
+          rect: {
+            x: 0,
+            y: $api.dom('#header').offsetHeight,
+            w: api.winWidth,
+            h: $api.dom('.flex-con').offsetHeight
+          }
+        });
+      },
+      mounted: function () {},
+      methods: {},
+
+    })
+  }
+</script>

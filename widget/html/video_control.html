@@ -1,0 +1,591 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>短视频</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak  style="background:rgba(0, 0, 0, 0)">
+    <div class="control-wrap" style="background:rgba(0, 0, 0, 0)">
+      <div @click="togglePlayStatus" @dblclick="dbl" class="playing">
+        <i v-if="player_pause" class="iconfont icon-bofang"></i>
+      </div>
+      <div @click="goback" class="goback">
+        <i class="iconfont icon-pre"></i>
+      </div>
+      <div class="userInfo">
+        <div class="name">@{{name}}</div>
+        <div class="description">{{description}}</div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item avatar-wrap">
+          <img :src="avatar" alt="" @click='openUser'>
+          <i @click="follow" v-if="is_follow == 0" class="iconfont icon-font-add"></i>
+          <i @click="follow" v-else class="iconfont icon-right-2"></i>
+        </div>
+        <div @click="like" class="menu-item like-wrap">
+          <i :class="['iconfont', 'icon-xin', is_like == 1 ? 'active' : '']"></i>
+          <div class="text">{{like_size}}</div>
+        </div>
+        <div class="menu-item read-wrap">
+          <i class="iconfont icon-yanjing"></i>
+          <div class="text">{{view_size}}</div>
+        </div>
+        <div class="menu-item share-wrap" @click='openActionMenu'>
+          <i class="iconfont icon-fenxiang"></i>
+          <div class="text">{{share_size}}</div>
+        </div>
+        <div class="menu-item video-wrap" @click="call">
+          <i class="iconfont icon-shipin1"></i>
+          <span>与ta视频</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox,wx, qq;
+  apiready = function () {
+    dialogBox = api.require('dialogBox');
+    wx = api.require('wx');
+    qq = api.require('QQPlus');
+    app = new Vue({
+      el: '#app',
+      data: {
+        video_id: '',
+        id: '',
+        name: '',
+        description: '',
+        avatar: '',
+        like_size: '',
+        view_size: '',
+        share_size: '',
+        is_follow: 0,
+        is_like: 0,
+        player_pause: false,
+        dblclick: true,
+        shareTitle: '',
+        shareContent: '',
+        shareUrl: '',
+        shareImage: '',
+        shareImageQQ: '',
+      },
+      created: function () {
+        this.planShare();
+        this.getPageParam();
+      },
+      mounted: function () {
+        // this.initVideoPlayer();
+      },
+      methods: {
+        planShare: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'share/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: 'spread'
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              __this.shareTitle = ret.data.title;
+              __this.shareContent = ret.data.content;
+              __this.shareUrl = ret.data.url + '?channel=' + $api.getStorage('channel') + '&tuid=' + $api.getStorage('uid');
+              __this.shareImage = ret.data.image;
+              __this.shareImageQQ = ret.data.image;
+            }
+          })
+        },
+        //分享
+        openActionMenu: function () {
+          var __this = this;
+          // var dialogBox = api.require('dialogBox');
+          dialogBox.actionMenu({
+            rect: {
+              h: 100
+            },
+            items: [{
+                text: '微信好友',
+                icon: 'widget://image/circular-WeChat.png'
+              },
+              {
+                text: '微信朋友圈',
+                icon: 'widget://image/circle-friend.png'
+              },
+              {
+                text: 'QQ空间',
+                icon: 'widget://image/circular-qq_space.png'
+              },
+              {
+                text: 'QQ好友',
+                icon: 'widget://image/circular-QQ.png'
+              }
+            ],
+            styles: {
+              bg: '#FFF',
+              column: 4,
+              itemText: {
+                color: '#000',
+                size: 14,
+                marginT: 5
+              },
+              itemIcon: {
+                size: 50
+              }
+            },
+            tapClose: true
+          }, function (ret) {
+            if (ret.index == 0) {
+              wx.shareWebpage({
+                // apiKey: wx_apiKey,
+                scene: 'session',
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                thumb: __this.shareImage,
+                contentUrl: __this.shareUrl
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  __this.togglePlayStatus();
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 1) {
+              wx.shareWebpage({
+                // apiKey: wx_apiKey,
+                scene: 'timeline',
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                thumb: __this.shareImage,
+                contentUrl: __this.shareUrl
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  __this.togglePlayStatus()
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 2) {
+              qq.shareNews({
+                type: 'QZone',
+                url: __this.shareUrl,
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                imgUrl: __this.shareImageQQ
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  __this.togglePlayStatus()
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 3) {
+              qq.shareNews({
+                type: 'QFriend',
+                url: __this.shareUrl,
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                imgUrl: __this.shareImageQQ
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  __this.togglePlayStatus()
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+          });
+        },
+        openUser: function () {
+          api.openWin({
+            name: 'user_home',
+            url: 'user_home.html',
+            slidBackEnabled: false,
+            pageParam: {
+              member_id: this.id
+            }
+          });
+          api.sendEvent({
+            name: 'videoPause',
+          });
+        },
+        dbl: function () {
+          var _this = this;
+          this.like();
+          _this.dblclick = false;
+          setTimeout(function () {
+            _this.dblclick = true;
+          }, 500)
+        },
+        goback: function () {
+          api.closeWin();
+        },
+        getDialogBoxRecharge: function (txt) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: txt,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+        getPageParam: function () {
+          this.video_id = api.pageParam.info.id;
+          this.id = api.pageParam.info.member.member_id;
+          this.name = api.pageParam.info.member.name;
+          this.avatar = api.pageParam.info.member.avatar;
+          this.like_size = api.pageParam.info.like_size;
+          this.view_size = api.pageParam.info.view_size;
+          this.share_size = api.pageParam.info.share_size;
+          this.description = api.pageParam.info.description;
+          this.is_like=api.pageParam.is_like;
+        },
+
+        togglePlayStatus: function () {
+          var _this = this;
+          setTimeout(function () {
+            if (_this.dblclick) {
+              if (_this.player_pause) {
+                api.sendEvent({
+                  name: 'videoPlay',
+                });
+              } else {
+                api.sendEvent({
+                  name: 'videoPause',
+                });
+              }
+              _this.player_pause = !_this.player_pause
+              _this.dblclick = true;
+            }
+
+          }, 500)
+        },
+
+        follow: function () {
+          var _this = this;
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          api.ajax({
+            url: baseUrl + 'user/follow',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                to_uid: _this.id
+              },
+            }
+          }, function (ret, err) {
+            api.hideProgress();
+            if (ret) {
+              api.toast({
+                msg: ret.message[0]
+              });
+              if (ret.status == 200) {
+                _this.is_follow = 1
+              }
+              if (ret.status == 201) {
+                _this.is_follow = 0
+              }
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        },
+
+        like: function () {
+          var _this = this;
+          // api.showProgress({
+          //   title: '',
+          //   text: ''
+          // });
+          api.ajax({
+            url: baseUrl + 'video/like',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                id: _this.video_id
+              },
+            }
+          }, function (ret, err) {
+            // api.hideProgress();
+            if (ret) {
+              api.toast({
+                msg: ret.message[0]
+              });
+              if (ret.status == 200) {
+                _this.is_like = 1
+                _this.like_size++
+              }
+              if (ret.status == 201) {
+                _this.is_like = 0
+                _this.like_size--
+              }
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        },
+
+        call: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: $api.getStorage('uid'),
+            fromName: $api.getStorage('uname'),
+            fromAvatar: $api.getStorage('uavatar'),
+            toId: _this.id,
+            toName: _this.name,
+            toAvatar: _this.avatarr,
+          };
+          // 发起视频
+          api.ajax({
+            url: baseUrl + 'message/videoCall',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                from_uid: $api.getStorage('uid'),
+                to_uid: _this.id,
+                type: '0',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              api.sendEvent({
+                name: 'videoPause',
+              });
+              api.openWin({
+                name: 'call1',
+                url: 'call1.html',
+                slidBackEnabled: false,
+                pageParam: {
+                  extra: tempExtra,
+                  type: 'videoCall',
+                  time: ret.data.time,
+                }
+              });
+            } else if (ret.status == 401) {
+              _this.getDialogBoxRecharge(ret.message[0]);
+            } else {
+              api.toast({
+                msg: ret.message[0]
+              })
+            }
+          })
+        },
+        closdialg: function () {
+          var dialogBox = api.require('dialogBox');
+          dialogBox.close({
+            dialogName: 'actionMenu'
+          });
+        },
+        getDialogBoxRecharge: function (txt) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: txt,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+      }
+    })
+  }
+</script>

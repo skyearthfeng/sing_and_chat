@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>短视频</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/video_length.css" />
+</head>
+
+<body>
+    <div id="app">
+        <!-- <div class="wrap flex-wrap flex-vertical">
+            <div class="videoControl-wrap">
+            </div>
+        </div> -->
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                videoList: [],
+                info: {},
+                page: 1
+            },
+            created: function () {
+                var _this = this;
+                _this.initVideoPlayer();
+
+            },
+            mounted: function () {
+                var _this = this;
+            },
+            methods: {
+                initVideoPlayer: function () {
+                    var videoPlayer = api.require('videoPlayer');
+                    videoPlayer.play({
+                        texts: {
+                            // head: {
+                            //     title: '顶部文字'
+                            // }
+                        },
+                        styles: {
+                            head: {
+                                bg: 'rgba(0.5,0.5,0.5,0.7)',
+                                height: 44,
+                                titleSize: 14,
+                                titleColor: '4#fff',
+                                backSize: 14,
+                                backImg: 'fs://img/back.png',
+                                setSize: 14,
+                                setImg: 'fs://img/set.png'
+                            },
+                            foot: {
+                                bg: 'rgba(0.5,0.5,0.5,0.7)',
+                                height: 44,
+                                playSize: 14,
+                                playImg: 'fs://img/back.png',
+                                pauseImg: 'fs://img/back.png',
+                                nextSize: 0,
+                                nextImg: 'fs://img/back.png',
+                                timeSize: 14,
+                                timeColor: '#fff',
+                                sliderImg: 'fs://img/slder.png',
+                                progressColor: '#696969',
+                                progressSelected: '#76EE00'
+                            }
+                        },
+                        path: 'http://7o50kb.com2.z0.glb.qiniucdn.com/c1.1.mp4', //（可选项）字符串类型；文档的路径，支持网络和本地（fs://）路径；默认：未传值时不播放
+                        //在 android 平台上不支持 widget://
+                        autoPlay: true //（可选项）布尔类型；打开时是否自动播放；默认：true（自动播放）
+                    }, function (ret, err) {
+                        if (ret) {
+                            // alert(JSON.stringify(ret));
+                        } else {
+                            // alert(JSON.stringify(err));
+                        }
+                    });
+
+                },
+            }
+        })
+    }
+</script>

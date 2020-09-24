@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>搜索all</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/skill.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header id="header" class="border-bottom">
+            <div class="im-header header-wrap">
+                <div class="header-left">
+                    <i @click="goback" class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">更多</div>
+            </div>
+        </header>
+        <div>
+            <p class="skill_title">游戏</p>
+            <ul class="skill_items">
+                <li v-for='item in titleList' @click='getSearch(item)' :key='item.id' v-if="item.lx == 1">
+                    <div class="skill_items_img">
+                        <img :src="item.img" alt="">
+                    </div>
+                    <p>{{item.title}}</p>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <p class="skill_title">娱乐</p>
+            <ul class="skill_items">
+                <li v-for='item in titleList' @click='getSearch(item)' :key='item.id' v-if="item.lx == 2">
+                    <div class="skill_items_img">
+                        <img :src="item.img" alt="">
+                    </div>
+                    <p>{{item.title}}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                titleList: {},
+            },
+            mounted() {
+                $api.fixStatusBar($api.dom('#header'))
+                this.getAll()
+                // this.titleList = api.pageParam.titleList;
+            },
+            methods: {
+                getAll(){
+                    axios('home_all', 'get', '', '', (res, err) => {
+                        if (res) {
+                            this.titleList = res.data
+                            console.log(JSON.stringify( res.data))
+                        }
+                    })
+                },
+                // 返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                // 跳转搜索
+                getSearch(item) {
+                    api.openWin({
+                        name: 'search_details',
+                        url: 'search_details.html',
+                        pageParam: {
+                            title: item.title
+                            // id: item.id,
+                            // title: item.title
+                        }
+                    })
+                }
+            }
+        })
+    }
+</script>

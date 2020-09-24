@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>表情</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_expression.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="swiper-container" class="swiper-wrap"   @click.stop="api.closeFrame()">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="slide in List" >
+                    <div class="gift-wrap">
+                        <div class="gift-item" v-for="(item,i) in slide" :key="item.id">
+                            <div class="img-wrap" @click="sendExpression(item.active_img,item.static_img)">
+                                <img :src="item.static_img" alt="" class="gift-img">
+                            </div>
+                            <p class="name">{{item.content}}</p>
+                            <!-- <span class="bottom">
+                                <span>{{item.gold}}</span>
+                                <img src="../image/sign_in_icon_diamonds.png" alt="">
+                            </span> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 如果需要分页器 -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    let app, rong;
+    apiready = function () {
+        rong = api.require('rongCloud2')
+        app = new Vue({
+            el: '#app',
+            data: {
+                List: [],
+                micSeat: api.pageParam.micSeat,
+                roomid: api.pageParam.roomid
+            },
+            created() {},
+            mounted() {
+                var _this = this
+                this.getIndex()
+                this.getUserIndex()
+            },
+            methods: {
+                //发送表情
+                sendExpression(img,img1) {
+                    // var img = 'http://admin1.changliaoapp.com/' + img
+                    var _this=this
+                    rong.sendTextMessage({
+                        conversationType: 'CHATROOM',
+                        targetId: _this.roomid,
+                        text: 'expression',
+                        senderUserId: $api.getStorage('uid'),
+                        extra:{
+                            micSeat:api.pageParam.micSeat,
+                            img:img
+                        }
+                    }, function(ret, err) {
+
+                    })
+                    api.sendEvent({
+                        name: 'sendExpression',
+                        extra: {
+                            micSeat:api.pageParam.micSeat,
+                            img:img
+                        }
+                    })
+                    api.closeFrame()
+                },
+
+                // 获取账户信息
+                getUserIndex: function () {
+                    var _this = this;
+                    api.ajax({
+                        url: baseUrl + 'user/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == 200) {
+                            _this.userInfo = ret.data;
+                        }
+                    })
+                },
+
+                // 获取表情列表
+                getIndex: function () {
+                    var _this = this
+                    console.log(JSON.stringify(1))
+                    api.ajax({
+                        url: lotteryUrl+'feelings_index',
+                        method: 'get',
+                    }, function (ret, err) {
+                        console.log(JSON.stringify(ret))
+                            console.log(JSON.stringify(err))
+                        if (ret.code == 200) {
+                            // _this.List=ret.data
+                            var after=ret.data
+                            for(var k=0;k<after.length;k++){
+                                api.imageCache({
+                                    url: after[k].static_img,
+                                    tag:k
+                                }, function(ret, err) {
+                                    var url = ret.url;
+                                    after[ret.tag].static_img=url
+                                    if(ret.tag==after.length-1){
+                                        _this.updateList(after)
+                                    }
+                                })
+                            }
+                            // console.log(JSON.stringify(after))
+                        }
+                    })
+                },
+
+                updateList(after) {
+                    var _this=this
+                    var page = Math.ceil(after.length / 10)
+                            for (var i = 0; i < page; i++) {
+                                var tempArr = [];
+                                for (var j = 0; j < 10; j++) {
+                                    if (!!after[(i * 10 + j)]) {
+                                        tempArr.push(after[(i * 10 + j)])
+                                    }
+                                }
+                                _this.List.push(tempArr)
+                            }
+                            setTimeout(
+                                function () {
+                                    let mySwiper = new Swiper('.swiper-container', {
+                                        pagination: {
+                                            el: '.swiper-pagination',
+                                        },
+                                        loop: false, // 循环模式选项
+                                    })
+                                }, 200)
+                },
+
+                getGiftList() {
+                    axios('gift_index', '', (res) => {
+                        if (res.code == 200) {
+
+                        }
+                    })
+                },
+
+                selectGift(i, id, img, name) {
+                    this.activeIndex = i
+                    this.gift_id = id
+                    this.giftImg = img
+                    this.giftName = name
+                },
+
+                openRecharge: function () {
+                    api.openWin({
+                        name: 'recharge',
+                        url: 'recharge.html',
+                        slidBackEnabled: false
+                    });
+                },
+
+                // closeFrm() {
+                //     $event.closeFrame()
+                // },
+                //选择赠送的对象
+                selectUser(id, name, avatar) {
+                    this.objectName = name
+                    this.objectAvatar = avatar
+                    this.donee_ids = id
+                },
+                //选择所有
+                selectAllUser() {
+                    var userId = '';
+                    for (var i = 0; i < api.pageParam.datas.length; i++) {
+                        if (api.pageParam.datas[i].user_id != '') {
+                            userId += api.pageParam.datas[i].user_id + ','
+                        }
+                    }
+                    this.donee_ids = userId
+                },
+
+                //赠送礼物
+                giftGive() {
+                    var _this = this
+                    let data = {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid'),
+                        roomid: api.pageParam.roomid,
+                        gift_id: _this.gift_id,
+                        nums: _this.nums,
+                        donee_ids: _this.donee_ids + '',
+                    }
+                    axios1('dlchat/api_gift/reward', 'post', data,
+                        function (res, err) {
+                            api.toast({
+                                msg: res.msg
+                            })
+                            if (res.code == 1) {
+                                rong = api.require('rongCloud2')
+                                rong.sendRichContentMessage({
+                                    conversationType: 'CHATROOM',
+                                    targetId: api.pageParam.roomid,
+                                    title: 'giveGift',
+                                    description: _this.objectName,
+                                    imageUrl: _this.giftImg,
+                                    extra: {
+                                        name: $api.getStorage('uname'),
+                                        nums: _this.nums,
+                                        giftName: _this.giftName,
+                                    }
+                                }, function (ret, err) {
+
+                                })
+                                api.sendEvent({
+                                    name: 'giveGift',
+                                    extra: {
+                                        name: $api.getStorage('uname'),
+                                        nums: _this.nums,
+                                        giftName: _this.giftName,
+                                        toname: _this.objectName,
+                                        imageUrl: _this.giftImg,
+                                    }
+                                })
+                            }
+                            api.hideProgress()
+                            api.sendEvent({
+                                name: 'closeGif',
+                            })
+                        }
+                    )
+                },
+
+                judge(gift_id) {
+                    let _this = this
+                    if (api.pageParam.type == 'call') {
+                        var rong = api.require('rongCloud2');
+                        rong.getCallSession(function (ret) {
+                            let data = {
+                                time: ret.activeTime,
+                                gift_id: gift_id
+                            }
+                            axios('message_data', data, (res) => {
+                                if (res.code == 200) {
+                                    _this.giveGift(gift_id)
+                                } else if (res.code == 400) {
+                                    $event.openFrame('balance_not_frm')
+                                }
+                            }, 'post')
+                        })
+                    } else {
+                        _this.giveGift(gift_id)
+                    }
+                },
+
+                giveGift(gift_id) {
+                    let data = {
+                        member_id: api.pageParam.toId,
+                        gift_id: gift_id
+                    }
+                    axios('gift_send', data, (res) => {
+                        if (res.code == 200) {
+                            $event.toast('赠送成功')
+                            $event.execScript('video_call_control', '', 'app.getInfo()')
+                        } else if (res.code == 400) {
+                            $event.openFrame('balance_not_frm')
+                        }
+                        $event.closeFrame()
+                    }, 'post')
+                }
+            },
+        })
+    }
+</script>

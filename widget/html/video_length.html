@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视讯</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video_length.css" />
+</head>
+
+<body>
+  <div id="app" >
+    <div class="vide-list">
+        <div class="list-img">
+            <img src="../image/img1.jpg" alt="">
+        </div>
+        <div class="lsit-info">
+            <div class="info-left">
+                <img src="../image/img1.png" alt="">
+                <span>12</span>
+            </div>
+            <div class="info-right">
+                <span>13分钟</span>
+                <span>12点击量</span>
+            </div>
+        </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        videoList: [],
+        info: {},
+        page: 1
+      },
+      created: function () {
+        var _this = this;
+       
+
+      },
+      mounted: function () {
+        var _this = this;
+      },
+      methods: {
+       
+      }
+    })
+  }
+</script>

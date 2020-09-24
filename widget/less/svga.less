@@ -1,0 +1,27 @@
+// out: ../css/svga.css
+@import 'common';
+html,
+body {
+  background: rgba(0, 0, 0, 0);
+}
+#svgaCanvas {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 99999;
+}
+#svgaCanvas_tips {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 80px;
+  z-index: 999999;
+  text-align: center;
+  background: url(../image/give_gift_notice_bg1.png) no-repeat center center;
+  background-size: 300px 30px;
+  color: #fff;
+  font-size: 12px;
+}

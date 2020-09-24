@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>歌曲播放</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_music.css" />
+</head>
+
+<body>
+    <div id="app">
+        <ul>
+            <li v-for="item in list" @click="palyMusic(item.title,item.artist,item.url)">
+                {{item.title}}-{{item.artist}}
+            </li>
+        </ul>
+        <p v-if="list==''">暂无本地歌曲</p>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+    var app, audioPlayer;
+    apiready = function () {
+        audioPlayer = api.require('audioPlayer')
+        app = new Vue({
+            el: '#app',
+            data: {
+                list: []
+            },
+            created() {},
+            mounted() {
+                var _this = this
+                api.addEventListener({
+                    name: 'navitembtn'
+                }, function (ret, err) {
+                    if (ret.type == 'left') {
+                        api.sendEvent({
+                            name: 'videoPlay',
+                        });
+                        api.closeWin();
+                    }
+                })
+                var audioPlayer = api.require('audioPlayer');
+                audioPlayer.scanAudioLibrary(function (ret) {
+                    console.log(JSON.stringify(ret))
+                    _this.list = ret.audios
+                })
+            },
+            methods: {
+                palyMusic(title, artist, url) {
+                    api.sendEvent({
+                        name: 'closeMusic',
+                        extra: {}
+                    })
+                    // api.closeFrame({
+                    //     name:'chat_music_frm'
+                    // })
+                    setTimeout(function () {
+                        api.sendEvent({
+                            name: 'openMusic',
+                            extra: {
+                                title: title,
+                                artist: artist,
+                                url: url
+                            }
+                        })
+                    }, 1000)
+                   setTimeout(function () {
+                     api.closeWin()
+                   },1200)
+                },
+
+                pause() {
+                    audioPlayer.pause()
+                },
+
+                play() {
+                    audioPlayer.play()
+                }
+            },
+        })
+    }
+</script>

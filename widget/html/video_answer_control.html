@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视频通话控制层</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/call.css" />
+  <style>
+    .flex-con{
+ 	     background: rgba(0, 0, 0, 0);
+ 	  }
+  </style>
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="call-wrap flex-con">
+        <div v-if="message != ''" class="message-wrap">
+          <div class="message-con">对方送来 {{message}}{{message_extra}}</div>
+          <div class="message-close" @click="closeMessage">
+            <i class="iconfont icon-close"></i>
+          </div>
+        </div>
+        <div :class="['user-info', isConnect ? 'hidden' : '']">
+          <div class="name">{{name}}</div>
+          <div class="avatar">
+            <img :src="avatar" alt="">
+          </div>
+          <div class="info">
+            <span :class="['sex', 'sex' + sex]">
+              <i :class="['iconfont', 'icon-sex' + sex]"></i>{{age}}</span>
+            <span class="tags">新</span>
+          </div>
+          <div class="signature">{{signature}}</div>
+        </div>
+        <div v-if="!isConnect" class="tips">{{tips}}</div>
+        <div v-else>
+          <div class="timer">{{timeText}}</div>
+          <div class="menu-list">
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-guanzhu0"></i>
+              </div>
+              <div class="menu-text">关注</div>
+            </div> -->
+            <div class="menu-item">
+              <div class="menu-icon" @click="switchCamera">
+                <i class="icon icon-camera"></i>
+              </div>
+              <div class="menu-text">切换摄像头</div>
+            </div>
+            <div class="menu-item">
+              <div class="menu-icon" @click="openGiftBox">
+                <i class="iconfont icon-gift"></i>
+              </div>
+              <div class="menu-text">礼物</div>
+            </div>
+            <div class="menu-item">
+              <div class="menu-icon" @click="enableBeautify">
+                <i class="icon icon-meiyan"></i>
+              </div>
+              <div class="menu-text">美颜</div>
+            </div>
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-jinggao"></i>
+              </div>
+              <div class="menu-text">举报</div>
+            </div> -->
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-jingyin"></i>
+              </div>
+              <div class="menu-text">静音</div>
+            </div> -->
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-gaopinzhiyinzhi"></i>
+              </div>
+              <div class="menu-text">高质</div>
+            </div> -->
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-mianti"></i>
+              </div>
+              <div class="menu-text">免提</div>
+            </div> -->
+          </div>
+        </div>
+        <div class="control-wrap">
+          <div v-if="!isConnect" @click="answer" class="control-item answer">
+            <i class="icon icon-answer"></i>
+            <span>接听</span>
+          </div>
+          <div @click="hangUp" class="control-item hangUp">
+            <i class="icon icon-hangUp"></i>
+            <span>挂断</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox;
+  apiready = function () {
+    dialogBox = api.require('dialogBox');
+    app = new Vue({
+      el: '#app',
+      data: {
+        id: '',
+        name: '',
+        avatar: '',
+        sex: '',
+        age: '',
+        signature: '',
+        isConnect: false,
+        tips: '',
+        extra: {},
+        type: '',
+        time: 0,
+        timeText: '00:00:00',
+        message: '',
+        message_num: 0,
+        message_extra: '',
+        judgeAnswer: true,
+        rechargeflag: true
+      },
+      created: function () {
+        var _this = this;
+        _this.close();
+        api.addEventListener({
+          name: 'message'
+        }, function (ret, err) {
+          if (ret.value.fromId != _this.extra.fromId) {
+						return false;
+					}
+					if(ret.value.GiftSvga != '') {
+						api.openFrame({
+							name: 'svga',
+							url: 'svga.html',
+							rect: {
+								x: 0,
+								y: 0,
+								w: api.winWidth,
+								h: api.winHeight
+							},
+							bounces: false,
+							pageParam: ret.value
+						});
+					}
+          _this.message_num++;
+          if (_this.message == ret.value.GiftName) {
+            _this.message_extra = 'x' + _this.message_num;
+          } else {
+            _this.message_num = 0;
+            _this.message_extra = '';
+            _this.message = ret.value.GiftName;
+          }
+        });
+        api.addEventListener({
+          name: 'refreshCallTime'
+        }, function(ret, err){
+          _this.time = ret.value.time;
+        });
+      },
+      mounted: function () {
+        this.getPageParam();
+      },
+      methods: {
+        close: function () {
+          var _this = this;
+          setTimeout(function () {
+            if (_this.judgeAnswer) {
+              _this.hangUp()
+            }
+          }, 10000)
+        },
+        // 获取页面传入数据
+        getPageParam: function () {
+          var _this = this;
+          _this.extra = api.pageParam.extra;
+          _this.type = api.pageParam.type;
+          _this.id = _this.extra.fromId;
+          _this.name = _this.extra.fromName;
+          _this.avatar = _this.extra.fromAvatar;
+          _this.sex = api.pageParam.sex;
+          _this.age = api.pageParam.age;
+          _this.signature = api.pageParam.signature;
+          if (_this.type == 'voiceCall') {
+            _this.tips = _this.extra.fromName + '正在邀请你语音通话……'
+          }
+          if (_this.type == 'videoCall') {
+            _this.tips = _this.extra.fromName + '正在邀请你视频通话……'
+          }
+        },
+
+        // 计时器
+        timer: function (t) {
+          var _this = this;
+          var time = t,
+            hour = 0,
+            minute = 0,
+            second = 0,
+            tempMinute = 0;
+          second = time % 60;
+          tempMinute = Math.floor(time / 60);
+          minute = tempMinute % 60;
+          hour = Math.floor(tempMinute / 60);
+          _this.timeText = hour < 10 ? '0' + hour + ':' : hour + ':';
+          _this.timeText += minute < 10 ? '0' + minute + ':' : minute + ':';
+          _this.timeText += second < 10 ? '0' + second : second + '';
+          if (minute >= (_this.time - 2)) {
+            if (_this.rechargeflag) {
+              api.sendEvent({
+                name: 'callTime',
+                extra: {
+                  con: '您剩余聊币视频通话已不足2分钟，请及时充值'
+                }
+              });
+              _this.rechargeflag = false;
+            }
+          }
+          if (minute >= _this.time) {
+            api.toast({
+              msg: '您的聊币已用完，结束视频通话'
+            });
+            _this.hangUp();
+          }
+          time++;
+          setTimeout(function () {
+            _this.timer(time);
+          }, 1000);
+        },
+
+        // 接听
+        answer: function () {
+          var _this = this;
+          // 接收视频邀请
+          _this.judgeAnswer = false;
+          api.ajax({
+            url: baseUrl + 'message/accept',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                from_uid: _this.extra.fromId,
+                to_uid: $api.getStorage('uid'),
+                type: '0',
+                option: 'accept'
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              api.sendEvent({
+                name: 'videoAnswer',
+              })
+              _this.time = ret.data.time;
+              _this.isConnect = true;
+              _this.timer(0);
+            }
+            if (ret.status == 401) {
+              _this.showRechargeDialog('聊币不够了快去充值吧！');
+            }
+            if(ret.status == 402){
+              api.toast({
+              msg: ret.message[0]
+            });
+              _this.hangUp();
+            }
+          })
+        },
+
+        openGiftBox: function () {
+          api.sendEvent({
+            name: 'openGiftBox',
+          })
+        },
+
+        switchCamera: function () {
+          api.sendEvent({
+            name: 'switchCamera',
+          })
+        },
+
+        enableBeautify: function () {
+          api.sendEvent({
+            name: 'enableBeautify',
+          })
+        },
+
+        // 挂断
+        hangUp: function () {
+          var _this = this;
+          api.sendEvent({
+            name: 'videoAnswerHangUp',
+          })
+        },
+
+        // 聊币不足弹窗
+        showRechargeDialog: function (title) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: title,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+
+        closeMessage: function () {
+          var _this = this;
+          _this.message = '';
+          _this.message_extra = '';
+          _this.message_num = 0;
+        }
+
+      },
+    })
+  }
+</script>

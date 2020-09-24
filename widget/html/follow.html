@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的关注</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/nearby.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <!-- <header id="header" class=" border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的关注</div>
+        </div>
+      </header> -->
+      <div v-if="empty" class="empty-wrap">
+        <img class="empty-img" src="../image/empty.png">
+        <div class="empty-text">没有关注的人~</div>
+      </div>
+      <div class="flex-con" v-if="follow">
+        <div class="list-wrap">
+          <div @click="openDetail(item.member_id)" v-for="(item, i) in list" :key="item.id" class="list-item border-bottom">
+            <div class="avatar">
+              <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+              <div class="name">{{item.name}}<span :class="['age' + item.sex]"><i :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span></div>
+              <div class="info">{{item.city}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        empty: false,
+        follow: true,
+        list: [],
+      },
+      created: function () {
+        var _this=this;
+        api.setRefreshHeaderInfo({
+          bgColor: '#ccc',
+          textColor: '#fff',
+          textDown: '下拉刷新...',
+          textUp: '松开刷新...'
+        }, function (ret, err) {
+          setTimeout(function () {
+            _this.showBankList();
+          }, 1000);
+        });
+
+      },
+      mounted: function () {
+        this.showBankList();
+      },
+      methods: {
+        openDetail: function (id) {
+          api.openWin({
+            name: 'user_home',
+            url: 'user_home.html',
+            slidBackEnabled: false,
+            pageParam: {
+              member_id: id
+            }
+          });
+        },
+        showBankList: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'user/fans',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            api.refreshHeaderLoadDone()
+            if (ret.status == '200') {
+              //alert('1');
+              if (ret.data == '') {
+                __this.empty = true;
+                __this.follow = false;
+              } else {
+                __this.empty = false;
+                __this.follow = true;
+                //alert(1);
+                __this.list = [];
+                for (var i = 0; i < ret.data.length; i++) {
+                  __this.list.push({
+                    id: i + 1,
+                    member_id: ret.data[i].member_id,
+                    name: ret.data[i].name,
+                    avatar: ret.data[i].avatar,
+                    city: ret.data[i].city,
+                    sex: ret.data[i].sex,
+                    age: ret.data[i].age
+                  })
+                }
+              }
+
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

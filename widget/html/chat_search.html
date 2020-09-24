@@ -1,0 +1,315 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>搜索</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/search.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../css/chat.css" /> -->
+    <style>
+        #header {
+            position: fixed;
+            width: 100%
+        }
+
+        /* .searchBox{margin-top: 65px;position: fixed;} */
+        .flex-con {
+            margin-top: 110px
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="wrap flex-wrap flex-vertical">
+            <header id="header" class="border-bottom">
+                <div class="header-wrap">
+                    <div class="header-left" tapmode onclick="api.closeWin()">
+                        <i class="iconfont icon-pre"></i>
+                    </div>
+                    <div class="header-title">搜索</div>
+                </div>
+                <div class="searchBox">
+                    <i class="searchImg iconfont icon-search"></i>
+                    <input class="search-input" v-model="Keyword" placeholder="请输入房间ID或房间名" @keyup.enter="search" />
+                    <button @click="search" id="search-btn" type="button">搜索</button>
+                </div>
+            </header>
+            <div class="flex-con">
+                <div class="searchResult">
+                    <div v-if="searchResult" class="searchResult-title">搜索结果</div>
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid'>
+                            <div class="chat_items_img">
+                                <img :src="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- <div v-else class="searchResult-title">你有可能喜欢</div> -->
+
+                    <!-- <div class="searchResult-list"> -->
+                    <!-- <div @click="openDetail(item.member_id)" v-for="(item, i) in list" :key="item.member_id" class="searchResult-item">
+              <div class="avatar">
+                <img :src="item.avatar" alt="">
+              </div>
+              <div class="info-wrap">
+                <div class="name">{{item.name}}
+                  <span class="age" :class="['age' + item.sex]">
+                    <i  :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span>
+                </div>
+                <div class="info">{{item.signature}}</div>
+              </div>
+              <i class="iconfont icon-next"></i>
+            </div> -->
+                    <!-- </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        $api.fixStatusBar($api.dom('#header'));
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+        app = new Vue({
+            el: '#app',
+            data: {
+                searchResult: false,
+                Keyword: '',
+                roomData: [],
+            },
+            created: function () {
+
+            },
+            mounted: function () {
+                // this.showSearchDate();
+            },
+            methods: {
+                search: function () {
+                    if (this.Keyword == '') {
+                        api.toast({
+                            msg: '请输入搜索内容'
+                        });
+                        return false;
+                    }
+                    //   this.searchResult = true;
+                    this.showSearchDate();
+                },
+                openDetail(roomid, userID, type) {
+                    var _this=this
+                    setTimeout(function () {
+                        api.sendEvent({
+                            name:'searchChat',
+                            extra:{
+                                roomid:roomid,
+                                // userID:userID,
+                                type:type
+                            }
+                        })
+                    }, 200)
+                    api.closeWin('chat_search')
+                    // var creater = userID == $api.getStorage('uid')
+                    // api.openWin({
+                    //     name: 'chat_detail',
+                    //     url: 'chat_detail.html',
+                    //     bgColor: 'widget://img/ic_bg_room_notice.png',
+                    //     // singleInstance: true,
+                    //     // reload:true,
+                    //     pageParam: {
+                    //         roomid: roomid,
+                    //         creater: creater
+                    //     }
+                    // })
+                    // if (userID == $api.getStorage('uid')) {
+                    //     api.openWin({
+                    //         name: 'chat_detail',
+                    //         url: 'chat_detail.html',
+                    //         bgColor: 'widget://img/ic_bg_room_notice.png',
+                    //         pageParam: {
+                    //             roomid: roomid
+                    //         }
+                    //     })
+                    // } else {
+                    //     api.openWin({
+                    //         name: 'chat_detail',
+                    //         url: 'chat_detail.html',
+                    //         bgColor: 'widget://img/ic_bg_room_notice.png',
+                    //         pageParam: {
+                    //             roomid: roomid
+                    //         }
+                    //     })
+                    // }
+
+                },
+
+                showPassword(roomid, userID, type) {
+                    var _this = this
+                    var dialogBox = api.require('dialogBox')
+                    dialogBox.input({
+                        keyboardType: 'default',
+                        texts: {
+                            title: '本房间已加密',
+                            placeholder: '输入密码',
+                            leftBtnTitle: '取消',
+                            rightBtnTitle: '确定'
+                        },
+                        styles: {
+                            bg: '#fff',
+                            corner: 2,
+                            w: 300,
+                            h: 240,
+                            title: {
+                                h: 60,
+                                alignment: 'center',
+                                size: 14,
+                                color: '#000',
+                                marginT: 30,
+                            },
+                            input: {
+                                h: 60,
+                                y: 30,
+                                marginT: 15,
+                                marginLeft: 10,
+                                marginRight: 10,
+                                textSize: 14,
+                                textColor: '#000'
+                            },
+                            dividingLine: {
+                                width: 0.5,
+                                color: '#696969'
+                            },
+                            left: {
+                                bg: 'rgba(0,0,0,0)',
+                                color: '#007FFF',
+                                size: 12
+                            },
+                            right: {
+                                bg: 'rgba(0,0,0,0)',
+                                color: '#007FFF',
+                                size: 12
+                            }
+                        }
+                    }, function (ret) {
+                        if (ret.eventType == 'left') {
+                            dialogBox.close({
+                                dialogName: 'input'
+                            })
+                        } else {
+                            var password = ret.text
+                            axios1('dlchat/api_chat/enter', 'post', {
+                                    token: $api.getStorage('deviceToken'),
+                                    user_id: $api.getStorage('uid'),
+                                    roomid: roomid,
+                                    // type: 1,
+                                    key: password
+                                },
+                                function (res, err) {
+                                    console.log(JSON.stringify(res))
+                                    dialogBox.close({
+                                        dialogName: 'input'
+                                    })
+                                    if (res.code == 1) {
+                                        _this.openChat(roomid, userID, type, password)
+                                    } else if (res.code == 3001) {
+                                        api.toast({
+                                            msg: '密码错误'
+                                        })
+                                    } else {
+                                        api.toast({
+                                            msg: '网络错误，请稍候重试'
+                                        })
+                                    }
+                                    api.hideProgress()
+                                }
+                            )
+                        }
+                    })
+                },
+
+
+                openChat(roomid, userID, type, password) {
+                    api.sendEvent({
+                        name: 'chatClose'
+                    })
+                    console.log(JSON.stringify({
+                        roomid: roomid,
+                        type: type,
+                        key: password
+                    }))
+                    setTimeout(() => {
+                        var creater = userID == $api.getStorage('uid')
+                        api.openFrame({
+                            name: 'chat_detail',
+                            url: 'chat_detail.html',
+                            bgColor: 'widget://img/ic_bg_room_notice.png',
+                            // singleInstance:true,
+                            // singleInstance: true,
+                            // reload:true,
+                            pageParam: {
+                                roomid: roomid,
+                                creater: creater,
+                                type: type,
+                                key: password
+                            }
+                        })
+                    }, 500)
+                },
+
+                showSearchDate: function () {
+                    var _this = this;
+                    let data = {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid'),
+                        keyword: _this.Keyword
+                    }
+                    axios1('dlchat/api_room/retrieve', 'post', data,
+                        (res, err) => {
+                            if (res.code == 1) {
+                                _this.roomData = res.data
+                            }
+                        }
+                    )
+                    //   api.ajax({
+                    //     url: baseUrl + 'search/index',
+                    //     method: 'post',
+                    //     headers: {
+                    //       token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //       values: {
+                    //         Keyword: _this.Keyword,
+                    //         uid: $api.getStorage('uid')
+                    //       },
+                    //     }
+                    //   }, function (ret, err) {
+                    //     if (ret.status == 200) {
+                    //       _this.list = ret.data;
+                    //     }
+                    //   })
+                }
+            },
+        })
+    }
+</script>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>用户充值量</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/common.css" />
+  <link rel="stylesheet" type="text/css" href="../css/nearby.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">用户充值量</div>
+        </div>
+      </header>
+      <div v-if="empty" class="empty-wrap">
+        <img class="empty-img" src="../image/empty.png">
+        <span class="empty-text">暂无数据</span>
+      </div>
+      <div class="flex-con" v-if="orderCount">
+        <div class="list-wrap" v-for="(item, i) in resultList" :key="item.id">
+          <div class="list-item list-item-top">
+            <div class="info-wrap">{{item.sn}}</div>
+            <div class="item.pay_way">{{item.pay_way | pay_way_text}}</div>
+          </div>
+          <div class="list-item">
+            <div class="avatar">
+              <img :src="item.member.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+              <div class="name">{{item.member.name}}<span class="age"><i :class="['icon-sex' + item.member.sex, 'iconfont']"></i>{{item.member.age}}</span></div>
+              <div class="info">{{item.description}}</div>
+            </div>
+            <span class="price">{{item.price}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        empty: false,
+        orderCount: false,
+        resultList: [{
+          sn: '121111:',
+          pay_way: '1',
+          description: '',
+          price: '',
+          member: {
+            id: '1',
+            avatar: '../image/img1.png',
+            name: '1111',
+            sex: '1',
+            age: '23'
+          }
+        }],
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+        this.showBankList();
+      },
+      methods: {
+        showBankList: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'spread/orders',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              //alert('1');
+              if (ret.data == '') {
+                __this.empty = true;
+                __this.orderCount = false;
+              } else {
+                __this.empty = false;
+                __this.orderCount = true;
+                //alert(1);
+                __this.resultList = ret.data;
+              }
+
+            }
+          })
+        },
+
+      },
+      filters: {
+        pay_way_text(value) {
+          if (value == '0') return '微信支付';
+          if (value == '1') return '支付宝支付';
+        },
+      }
+    })
+  }
+</script>

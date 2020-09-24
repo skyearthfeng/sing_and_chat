@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我推荐的用户</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/common.css" />
+  <link rel="stylesheet" type="text/css" href="../css/nearby.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我推荐的用户</div>
+        </div>
+      </header>
+      <div v-if="empty" class="empty-wrap">
+        <img class="empty-img" src="../image/empty.png">
+        <span class="empty-text">没有推荐的用户~</span>
+      </div>
+      <div v-if="recommend" class="flex-con">
+        <div class="list-wrap">
+          <div v-for="(item, i) in list" :key="item.id" class="list-item">
+            <div class="avatar">
+              <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+              <div class="name">{{item.name}}
+                <span class="age">
+                  <i :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span>
+              </div>
+              <div class="info">{{item.city}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        empty: false,
+        recommend: true,
+        list: [],
+        page: 1,
+        pagination: {},
+      },
+      created: function () {
+        var _this = this;
+        api.addEventListener({
+          name: 'getDynamicList'
+        }, function (ret, err) {
+          _this.page = 1;
+          _this.showBankList();
+        })
+        api.setRefreshHeaderInfo({
+          bgColor: '#ccc',
+          textColor: '#fff',
+          textDown: '下拉刷新...',
+          textUp: '松开刷新...'
+        }, function (ret, err) {
+          _this.page = 1;
+          setTimeout(function () {
+            _this.showBankList();
+          }, 1000);
+        });
+        api.addEventListener({
+          name: 'scrolltobottom',
+          extra: {
+            threshold: 0
+          }
+        }, function (ret, err) {
+          _this.showBankList();
+        });
+      },
+      mounted: function () {
+        this.showBankList();
+      },
+      methods: {
+        showBankList: function () {
+          var _this = this;
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          api.ajax({
+            url: baseUrl + 'spread/install',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                paginate: _this.paginate,
+                page: _this.page,
+              },
+            }
+          }, function (ret, err) {
+            api.refreshHeaderLoadDone();
+            api.hideProgress();
+            if (ret.status == '200') {
+              if (_this.page == 1) {
+                _this.page++;
+                _this.list = ret.data;
+              } else if (_this.page <= ret.pagination.last_page) {
+                _this.page++;
+                for (var i = 0; i < ret.data.length; i++) {
+                  _this.list.push(ret.data[i])
+                }
+              } else {
+                api.toast({
+                  msg: '没有更多了'
+                })
+              }
+              _this.pagination = ret.pagination;
+              // _this.list = [];
+              // __this.empty = false;
+              // __this.recommend = true;
+              // for (var i = 0; i < ret.data.length; i++) {
+              //   _this.list.push({
+              //     id: i + 1,
+              //     member_id: ret.data[i].member_id,
+              //     name: ret.data[i].name,
+              //     avatar: ret.data[i].avatar,
+              //     city: ret.data[i].city,
+              //     sex: ret.data[i].sex,
+              //     age: ret.data[i].age
+              //   })
+              // }
+            }
+            // }
+          })
+        }
+      },
+    })
+  }
+</script>

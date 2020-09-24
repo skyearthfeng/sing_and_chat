@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+  />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>分成计划</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/share.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom" v-if='headerShow'>
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <h1 class="header-title">分成计划</h1>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div class="myPage-header">
+          <div class="MyUserImg">
+            <img class="touxiang" :src="avatar">
+          </div>
+          <div class="MyUserTxt">
+            <h4 class="header-title">{{name}}</h4>
+            <p class="header-info">{{signature}}</p>
+          </div>
+        </div>
+        <div class="planList-con">
+          <div class="flex-item planList" @click="openRecommended">
+            <i class="planList-img"></i>
+            <p class="planList-number">{{list.install}}</p>
+            <span class="planList-title">我推荐的用户</span>
+          </div>
+          <div class="flex-item planList" @click="openOrderCount">
+            <i class="planList-img"></i>
+            <p class="planList-number">{{list.ordercount}}</p>
+            <span class="planList-title">用户充值量</span>
+          </div>
+          <div class="flex-item planList">
+            <i class="planList-img"></i>
+            <p class="planList-number">{{list.money}}</p>
+            <span class="planList-title">收益额(分成计划比例{{list.scale}})</span>
+          </div>
+        </div>
+        <div class="planList-btn" @click="openActionMenu">去分享</div>
+        <div class="principle">
+          <h4 class="principle-title">分成规则</h4>
+          <p>1.所有用户都可以参与推广计划。</p>
+          <p>2.通过自己分享的专属“推广计划”或“二维码”下载APP并注册的用户,才算作“我推广的用户”。</p>
+          <p>3.“我推广的用户”充值即可产生收益。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, wx, qq;
+  apiready = function () {
+    if (api.systemType == 'android') {
+      api.setScreenSecure({
+        secure: true
+      });
+    }
+    $api.fixStatusBar($api.dom('#header'));
+    wx = api.require('wx');
+    qq = api.require('QQPlus');
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        shareTitle: '',
+        shareContent: '',
+        shareUrl: '',
+        shareImage: '',
+        shareImageQQ: '',
+        avatar: $api.getStorage('uavatar'),
+        name: $api.getStorage('uname'),
+        signature: $api.getStorage('usignature'),
+        list: {
+          scale: "0.10",
+          money: 0,
+          ordercount: 0,
+          install: 0
+        },
+        headerShow:api.pageParam.show,
+        leve:0,
+      },
+      created: function () {
+        // alert($api.getStorage('uavatar'))
+      },
+      mounted: function () {
+        this.showList();
+        this.planShare();
+        this.level=api.pageParam.userInfo.level;
+        // alert(JSON.stringify() )
+      },
+      methods: {
+        showList: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'spread/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              __this.list = ret.data;
+              // alert(JSON.stringify(ret.data))
+            }
+          })
+        },
+        openActionMenu: function () {
+          var __this = this;
+          if(__this.level == '0'){
+            api.toast({
+                    msg: '此功能仅针对VIP,请开通VIP功能'
+            });
+            return false;
+          }
+          var dialogBox = api.require('dialogBox');
+          dialogBox.actionMenu({
+            rect: {
+              h: 100
+            },
+            items: [{
+                text: '微信好友',
+                icon: 'widget://image/circular-WeChat.png'
+              },
+              {
+                text: '微信朋友圈',
+                icon: 'widget://image/circle-friend.png'
+              },
+              {
+                text: 'QQ空间',
+                icon: 'widget://image/circular-qq_space.png'
+              },
+              {
+                text: 'QQ好友',
+                icon: 'widget://image/circular-QQ.png'
+              }
+            ],
+            styles: {
+              bg: '#FFF',
+              column: 4,
+              itemText: {
+                color: '#000',
+                size: 14,
+                marginT: 5
+              },
+              itemIcon: {
+                size: 50
+              }
+            },
+            tapClose: true
+          }, function (ret) {
+            if (ret.index == 0) {
+              wx.shareWebpage({
+                // apiKey: wx_apiKey,
+                scene: 'session',
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                thumb: __this.shareImage,
+                contentUrl: __this.shareUrl
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 1) {
+              wx.shareWebpage({
+                // apiKey: wx_apiKey,
+                scene: 'timeline',
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                thumb: __this.shareImage,
+                contentUrl: __this.shareUrl
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 2) {
+              qq.shareNews({
+                type: 'QZone',
+                url: __this.shareUrl,
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                imgUrl: __this.shareImageQQ
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+            if (ret.index == 3) {
+              qq.shareNews({
+                type: 'QFriend',
+                url: __this.shareUrl,
+                title: __this.shareTitle,
+                description: __this.shareContent,
+                imgUrl: __this.shareImageQQ
+              }, function (ret, err) {
+                __this.closdialg();
+                if (ret.status) {
+                  api.toast({
+                    msg: '分享成功'
+                  });
+                } else {
+                  api.toast({
+                    msg: '分享失败'
+                  });
+                }
+              });
+            }
+          });
+        },
+        planShare: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'share/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: 'spread'
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              __this.shareTitle = ret.data.title;
+              __this.shareContent = ret.data.content;
+              __this.shareUrl = ret.data.url + '?channel=' + $api.getStorage('channel') + '&tuid=' + $api.getStorage('uid');
+              __this.shareImage = ret.data.image;
+              __this.shareImageQQ = ret.data.image;
+            }
+          })
+        },
+        openRecommended: function () {
+          api.openWin({
+            name: 'my_recommend',
+            url: 'my_recommend.html',
+            bounces: false,
+            pageParam: {
+              key: 'value'
+            }
+          });
+        },
+        openOrderCount: function () {
+          api.openWin({
+            name: 'my_order_count',
+            url: 'my_order_count.html',
+            bounces: false,
+            pageParam: {
+              key: 'value'
+            }
+          });
+        },
+        goback: function () {
+          api.closeWin();
+        },
+        closdialg: function () {
+          var dialogBox = api.require('dialogBox');
+          dialogBox.close({
+            dialogName: 'actionMenu'
+          });
+        }
+
+      }
+    })
+  }
+</script>

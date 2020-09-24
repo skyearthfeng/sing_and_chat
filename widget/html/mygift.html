@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>赠送礼物列表</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/mygift.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的礼物</div>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div v-if="empty" class="empty-wrap">
+          <img class="empty-img" src="../image/empty.png">
+          <div class="empty-text">暂无礼物~</div>
+        </div>
+        <div v-if="follow" class="giftList">
+          <div v-for="(item, index) in giftList" :key="item.id" class="gift-item">
+            <div v-if="item.gift.type == 1" class="gift-item-vip">
+              <img src="../image/gift_vip.png" alt="">
+            </div>
+            <img class="gift-item-img" :src="item.gift.file" alt="">
+            <p>{{item.gift.name}}</p>
+            <span>{{item.gift.gold}}聊币</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        giftList: [],
+        empty: false,
+        follow: true,
+      },
+      created: function () {
+        this.getGiftIndex();
+      },
+      mounted: function () {},
+      methods: {
+        // 获取礼物列表
+        getGiftIndex: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'user/gift',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              if (ret.data == '') {
+                _this.empty = true;
+                _this.follow = false;
+              } else {
+                _this.empty = false;
+                _this.follow = true;
+                _this.giftList = ret.data;
+              }
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

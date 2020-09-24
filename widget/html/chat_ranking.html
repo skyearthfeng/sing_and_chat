@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>排行榜</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/chat_ranking.css" />
+  <link rel="stylesheet" type="text/css" href="../css/swiper.min.css">
+</head>
+
+<style>
+
+</style>
+
+<body>
+  <div id="app">
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div class="header-left" @click="goback">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-content">
+            <div class="content-item " :class='rankingIndex==0?"active content-item":"content-item"'
+              @click='swiperSlide(0)'>
+              贡献榜
+            </div>
+            <div class="content-item" :class='rankingIndex==1?"active content-item":"content-item"'
+              @click='swiperSlide(1)'>
+              魅力榜
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="swiper-container" style="min-height:500px">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="ranking_title_wrap">
+              <div class="ranking_title" @click='devote(3)'>
+                <span :class="devoteIndex==3?'active':''">日榜</span>
+              </div>
+              <div class="ranking_title" @click='devote(1)'>
+                <span :class="devoteIndex==1?'active':''">周榜</span>
+              </div>
+              <div class="ranking_title" @click='devote(0)'>
+                <span :class="devoteIndex==0?'active':''">总榜</span>
+              </div>
+            </div>
+            <div class="list-wrap">
+              <div class="list-item" v-for='(item,i) in devotelist' :key='item.user_id' @click="openUser(item.user_id)">
+                <div class="eq">
+                  <!-- <i v-if="i < 3" :class="['icon', icon-ranking1]"></i> -->
+                  <span class="eq-text">{{i+1}}</span>
+                </div>
+                <div class="avatar">
+                  <img :src="item.avatar" alt="">
+                </div>
+                <div class="info-wrap">
+                  <div class="name">{{item.nickname}}
+                    <span :class="['age'+ item.sex]">
+                      <i :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span>
+                  </div>
+                  <!-- <div class="info"></div> -->
+                </div>
+                <span>{{item.cost}}</span>
+                <!-- <i class="iconfont icon-next"></i> -->
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="ranking_title_wrap">
+              <div class="ranking_title" @click='charm(3)'>
+                <span :class="charmIndex==3?'active':''">日榜</span>
+              </div>
+              <div class="ranking_title" @click='charm(1)'>
+                <span :class="charmIndex==1?'active':''">
+                  周榜
+                </span>
+              </div>
+              <div class="ranking_title" @click='charm(0)'>
+                <span :class="charmIndex==0?'active':''">
+                  总榜
+                </span>
+              </div>
+            </div>
+            <div class="list-wrap">
+              <div class="list-item" v-for='(item,i) in charmlist' :key='item.user_id' @click="openUser(item.donee_id)">
+                <div class="eq">
+                  <!-- <i v-if="i < 3" :class="['icon', icon-ranking1]"></i> -->
+                  <span class="eq-text">{{i+1}}</span>
+                </div>
+                <div class="avatar">
+                  <img :src="item.avatar" alt="">
+                </div>
+                <div class="info-wrap">
+                  <div class="name">{{item.nickname}}
+                    <span :class="['age'+ item.sex]">
+                      <i :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span>
+                  </div>
+                  <!-- <div class="info"></div> -->
+                </div>
+                <span>{{item.cost}}</span>
+                <!-- <i class="iconfont icon-next"></i> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <ul class="ranking_list">
+                        <li>
+                            <div class="ranking_list_item">
+                                <div class="item_ranking">
+                                    1
+                                </div>
+                                <div class="item_content">
+                                    <div class="content_img">
+                                        <img src="../image/img1.jpg" alt="">
+                                    </div>
+                                    <div class="content_info">
+                                        <p>苏</p>
+                                        <p>22</p>
+                                    </div>
+                                </div>
+                                <div class="item_num">
+                                    <img src="../image/one_position_contribution.png" alt="">
+                                    <span>25</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul> -->
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+
+<script type="text/javascript">
+  var app, mySwiper;
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        rankingIndex: 0,
+        devoteIndex: 3,
+        charmIndex: 1,
+        userInfo: {},
+        devotelist: [],
+        charmlist: [],
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+        var _this = this
+        this.devote(3)
+        this.charm(1)
+        mySwiper = new Swiper('.swiper-container', {
+          on: {
+            slideChangeTransitionEnd: function () {
+              _this.rankingIndex = this.activeIndex; //切换结束时，告诉我现在是第几个slide
+            },
+          }
+        })
+      },
+      methods: {
+        swiperSlide(i) {
+          mySwiper.slideTo(i)
+        },
+        goback() {
+          api.closeWin();
+        },
+        swiperInit() {
+
+        },
+        devote(i) {
+          var _this = this
+          this.devoteIndex = i;
+          var data = {
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: api.pageParam.roomid,
+            type: _this.devoteIndex,
+            nums: 20,
+          }
+          axios1('dlchat/api_gift/devotelist', 'post', data,
+            function (res, err) {
+              console.log(JSON.stringify(res))
+              if (res.code == 1) {
+                _this.devotelist = res.data;
+              } else {
+                api.toast({
+                  msg: res.msg
+                })
+              }
+            }
+          )
+        },
+
+        charm(i) {
+          this.charmIndex = i;
+          let data = {
+            token: $api.getStorage('deviceToken'),
+            user_id: $api.getStorage('uid'),
+            roomid: api.pageParam.roomid,
+            type: this.devoteIndex,
+            nums: 20,
+          }
+          // console.log(JSON.stringify(data))
+          axios1('dlchat/api_gift/charmlist', 'post', data,
+            (res, err) => {
+              console.log(JSON.stringify(res))
+              if (res.code == 1) {
+                this.charmlist = res.data;
+              } else {
+                api.toast({
+                  msg: res.msg
+                })
+              }
+            }
+          )
+        },
+
+        //打开用户
+        openUser(id) {
+          console.log(JSON.stringify(id))
+          api.openWin({
+            name: 'userHome',
+            url: 'user_home.html',
+            pageParam: {
+              member_id: id
+            }
+          })
+        },
+      }
+    })
+  }
+</script>

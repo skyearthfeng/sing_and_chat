@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视频详情</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="videoControl-wrap">
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  // videos=$api.getStorage('videos')
+  // num=parseInt(10 * Math.random())
+
+
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        dataInfo: {},
+        videos: '',
+        video: ''
+      },
+      created: function () {},
+      mounted: function () {
+        var _this = this;
+        _this.videos = $api.getStorage('videos')
+        console.log(JSON.stringify(this.videos))
+        _this.video = this.videos[parseInt(this.videos.length * Math.random())];
+        console.log(this.video)
+        this.initVideoPlayer();
+        this.videoControl();
+        api.addEventListener({
+          name: 'open'
+        }, function (ret, err) {
+          //  alert("guan")
+          _this.closeVideoPlayer()
+        });
+      },
+      methods: {
+        initVideoPlayer: function () {
+          var videoPlayer = api.require('videoPlayer');
+          var _this = this;
+          // alert(_this.video+"123")
+          videoPlayer.open({
+            rect: {
+              x: 0,
+              y: 0,
+              w: ((api.winHeight / 18) * 10 + 5) < api.winWidth ? api.winWidth : ((api.winHeight / 18) * 10 +
+                5),
+              h: ((api.winHeight / 18) * 10 + 5) < api.winWidth ? api.winWidth * 18 / 10 : api.winHeight,
+            },
+            // path:"http://youdaoyoudao.test.upcdn.net/b17.mp4",
+            // path:"http://cdn.vliao1.xyz/prod/video/64_1523273416000_gbypen1o4t1hde1cbo6i-compressed",
+            path: _this.video,
+            scalingMode: 'scaleAspectFit',
+
+          }, function (ret, err) {
+            if (ret) {
+
+              // _this.isPlaying = true;
+              // api.alert({
+              //   title: 'videoPlayer',
+              //   msg: JSON.stringify(ret)
+              // });
+            }
+          });
+          videoPlayer.addEventListener({
+            name: 'play'
+          }, function (ret, err) {
+            if (ret && ret.eventType == 'complete') {
+              videoPlayer.close();
+              api.sendEvent({
+                name: 'black',
+              });
+              // api.closeWin()
+              // _this. videoControl()
+            }
+          });
+
+          // api.addEventListener({
+          //   name: 'videoPlay'
+          // }, function(ret, err) {
+          //   videoPlayer.start();
+          // })
+          // api.addEventListener({
+          //   name: 'videoPause'
+          // }, function(ret, err) {
+          //   videoPlayer.pause();
+          // })
+        },
+
+        // 初始化video控制层
+        videoControl: function () {
+          // 打开video控制层
+          api.openFrame({
+            name: 'voice',
+            url: 'voice.html',
+            rect: {
+              x: 0,
+              y: 0,
+              w: api.winWidth,
+              h: api.winHeight
+            },
+            pageParam: this.dataInfo
+          });
+        },
+        closeVideoPlayer: function () {
+          // videoPlayer.pause();
+          api.closeWin()
+        },
+      }
+    })
+  }
+</script>

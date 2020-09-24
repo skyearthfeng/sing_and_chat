@@ -1,0 +1,128 @@
+// out: ../css/share.css
+@import 'common';
+html,
+body {
+  background-color: #eff3f4;
+}
+
+
+.myPage-header {
+  height: 80px;
+  box-sizing: border-box;
+  background: @main-color;
+  margin-bottom: 4px;
+  padding: 10px;
+  color: #fff;
+}
+
+.MyUserImg,
+.touxiang {
+  float: left;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.MyUserTxt {
+  margin-left: 70px;
+  font-size: 12px;
+  padding-top: 5px;
+}
+
+.MyUserTxt .header-title {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.header-info {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  display: -webkit-box-flex;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.planList-con {
+  width: 100%;
+  background: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.planList {
+  -moz-box-flex: 1;
+  -webkit-box-flex: 1;
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: #333;
+}
+
+.planList-img {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 2px;
+  display: block;
+  background: url(../image/icons.png) no-repeat;
+  background-position: -120px -80px;
+  background-size: 400px 400px;
+}
+
+.planList-con .planList .planList-number {
+  font-size: 14px;
+  color: #9fe094;
+}
+
+.planList-con .planList:nth-child(2) {
+  .planList-img {
+    background-position: -160px -80px;
+  }
+  .planList-number {
+    color: #69c5ff;
+  }
+}
+
+.planList-con .planList:nth-child(3) {
+  .planList-img {
+    background-position: -80px -121px;
+  }
+  .planList-number {
+    color: #e12e85;
+  }
+}
+
+.planList-btn {
+  width: 60%;
+  height: 40px;
+  margin: 40px auto 20px;
+  background: #e12e85;
+  color: #fff;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 20px;
+}
+
+.principle {
+  padding: 0 10px;
+}
+
+.principle .principle-title {
+  text-align: center;
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.principle p {
+  padding-bottom: 4px;
+  color: #555;
+  line-height: 1.5;
+  text-align: justify;
+}

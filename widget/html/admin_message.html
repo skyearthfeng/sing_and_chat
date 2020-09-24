@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>消息</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/im.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header" class=" border-bottom">
+				<div class="im-header header-wrap">
+					<div class="header-left">
+						<i @click="goback" class="iconfont icon-pre"></i>
+					</div>
+					<div class="header-title">{{toName}}</div>
+				</div>
+			</header>
+			<div id="im-main" class="im-main flex-con">
+				<div id="message-list" class="message-list">
+					<div v-for="(item, i) in messageList" :key="i" :class="['message-item ', item.mode]">
+						<div class="avatar">
+							<img :src="item.avatar" alt="">
+						</div>
+						<div class="message-con">
+							<div v-if="item.type == 'RC:TxtMsg'" class="message-text border-bottm">{{item.con}}</div>
+							<div v-if="item.type == 'RC:ImgMsg'" class="message-img">
+								<img :src="item.con" alt="">
+							</div>
+							<div v-if="item.type == 'RC:VcMsg'" class="message-voice" :style="{ width: (item.con.duration/60)*100 + '%' }"
+							 @click="playVoice(i, item)">
+								<div v-if="item.mode == 'SEND'" class="voice">
+									<span>{{item.con.duration}}"</span>
+									<img :id="'voice' + i" src="../image/stop1.png" alt="">
+								</div>
+								<div v-if="item.mode == 'RECEIVE'" class="voice">
+									<img :id="'voice' + i" src="../image/stop.png" alt="">
+									<span>{{item.con.duration}}"</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app, rong;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'dark'
+		});
+		rong = api.require('rongCloud2');
+		app = new Vue({
+			el: '#app',
+			data: {
+				id: $api.getStorage('uid'),
+				name: $api.getStorage('uname'),
+				avatar: $api.getStorage('uavatar'),
+				toId: '',
+				toName: '',
+				toAvatar: '',
+				message: '',
+				messageList: [],
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'keyback'
+				}, function (ret, err) {
+					api.sendEvent({
+						name: 'refreshMessage',
+					});
+					api.closeWin();
+				});
+				api.addEventListener({
+					name: 'updateIM'
+				}, function (ret, err) {
+					var userid, username, useravatar, msgCon;
+					if (ret.value.result.message.messageDirection == 'SEND') {
+						userid = _this.id;
+						username = _this.name;
+						useravatar = _this.avatar;
+					}
+					if (ret.value.result.message.messageDirection == 'RECEIVE') {
+						userid = _this.toId;
+						username = _this.toName;
+						useravatar = _this.toAvatar;
+					}
+					if (ret.value.result.message.objectName == 'RC:TxtMsg') {
+						msgCon = ret.value.result.message.content.text;
+					}
+					if (ret.value.result.message.objectName == 'RC:ImgMsg') {
+						msgCon = ret.value.result.message.content.imageUrl;
+					}
+					if (ret.value.result.message.objectName == 'RC:VcMsg') {
+						msgCon = ret.value.result.message.content;
+					}
+					_this.messageList.push({
+						type: ret.value.result.message.objectName,
+						con: msgCon,
+						mode: ret.value.result.message.messageDirection,
+						id: userid,
+						name: username,
+						avatar: useravatar
+					})
+					setTimeout(function () {
+						_this.msgScrollToBottom();
+					}, 1000);
+					rong.setMessageReceivedStatus({
+						messageId: ret.value.result.message.messageId,
+						receivedStatus: 'READ'
+					}, function (ret, err) {
+						// api.toast({ msg: ret.status });
+					})
+				});
+			},
+			mounted: function () {
+				this.getPageParam();
+				this.getRecentMessages();
+				this.clearMessagesUnreadStatus();
+			},
+			methods: {
+
+				// 获取页面传参
+				getPageParam: function () {
+					if (api.pageParam.fromId == this.id) {
+						this.toId = api.pageParam.toId;
+						this.toName = api.pageParam.toName;
+						this.toAvatar = api.pageParam.toAvatar;
+					} else {
+						this.toId = api.pageParam.fromId;
+						this.toName = api.pageParam.fromName;
+						this.toAvatar = api.pageParam.fromAvatar;
+					}
+				},
+
+				// 获取最近消息
+				getRecentMessages: function () {
+					var _this = this;
+					rong.getLatestMessages({
+						conversationType: 'PRIVATE',
+						targetId: _this.toId,
+						count: 10
+					}, function (ret, err) {
+						// api.alert({
+						// 	title: 'getLatestMessages',
+						// 	msg: JSON.stringify(ret)
+						// })
+						if (ret.status == 'success') {
+							for (var i = 0; i < ret.result.length; i++) {
+								var userid, username, useravatar, msgCon;
+								if (ret.result[i].messageDirection == 'SEND') {
+									userid = _this.id;
+									username = _this.name;
+									useravatar = _this.avatar;
+								}
+								if (ret.result[i].messageDirection == 'RECEIVE') {
+									userid = _this.toId;
+									username = _this.toName;
+									useravatar = _this.toAvatar;
+								}
+								if (ret.result[i].objectName == 'RC:TxtMsg') {
+									msgCon = ret.result[i].content.text;
+								}
+								if (ret.result[i].objectName == 'RC:ImgMsg') {
+									msgCon = ret.result[i].content.imageUrl;
+								}
+								if (ret.result[i].objectName == 'RC:VcMsg') {
+									msgCon = ret.result[i].content;
+								}
+								_this.messageList.push({
+									type: ret.result[i].objectName,
+									con: msgCon,
+									mode: ret.result[i].messageDirection,
+									id: userid,
+									name: username,
+									avatar: useravatar
+								})
+							}
+							_this.messageList.reverse();
+							setTimeout(function () {
+								_this.msgScrollToBottom();
+							}, 1000);
+						}
+					})
+				},
+
+				// 清除未读状态
+				clearMessagesUnreadStatus: function () {
+					rong.clearMessagesUnreadStatus({
+						conversationType: 'PRIVATE',
+						targetId: this.toId
+					}, function (ret, err) {
+						// api.toast({ msg: ret.status });
+					})
+				},
+
+				// 滚动到底部
+				msgScrollToBottom: function () {
+					var ele = $api.dom('#message-list');
+					ele.scrollTop = ele.scrollHeight;
+				},
+
+				// 播放语音
+				playVoice: function (index, item) {
+					var _this = this;
+					if (_this.voicePlaying) {
+						api.stopPlay();
+						if (item.mode == 'SEND') {
+							$api.attr($api.dom('#voice' + _this.voicePlayingIndex), 'src', '../image/stop1.png');
+						}
+						if (item.mode == 'RECEIVE') {
+							$api.attr($api.dom('#voice' + _this.voicePlayingIndex), 'src', '../image/stop.png');
+						}
+					} else {
+						_this.voicePlaying = true;
+					}
+					_this.voicePlayingIndex = index;
+					if (item.mode == 'SEND') {
+						$api.attr($api.dom('#voice' + index), 'src', '../image/playing1.gif');
+					}
+					if (item.mode == 'RECEIVE') {
+						$api.attr($api.dom('#voice' + index), 'src', '../image/playing.gif');
+					}
+					api.startPlay({
+						path: item.con.voicePath
+					}, function (ret, err) {
+						if (item.mode == 'SEND') {
+							$api.attr($api.dom('#voice' + index), 'src', '../image/stop1.png');
+						}
+						if (item.mode == 'RECEIVE') {
+							$api.attr($api.dom('#voice' + index), 'src', '../image/stop.png');
+						}
+					});
+				},
+				goback: function () {
+					api.sendEvent({
+						name: 'refreshMessage',
+					});
+					api.closeWin();
+				},
+
+			},
+		})
+	}
+</script>

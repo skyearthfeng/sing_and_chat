@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>会员中心</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/pay_frame.css" />
+
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div @click="goback" class="flex-con"></div>
+      <div class="pay-wrap">
+        <h1>充值</h1>
+        <div class="info">支付金额：{{activePrice}}</div>
+        <ul class="pay-type">
+          <li @click="selectPayType('wechat')" class="weixin active">
+            <div class="label">
+              <i class="iconfont icon-weixinzhifu"></i>
+              <span>微信</span>
+            </div>
+            <i v-if="option == 'wechat'" class="iconfont icon-right-1"></i>
+            <i v-else class="iconfont icon-yuanquan"></i>
+          </li>
+          <li @click="selectPayType('alipay')" class="alipay">
+            <div class="label">
+              <i class="iconfont icon-zhifubao"></i>
+              <span>支付宝</span>
+            </div>
+            <i v-if="option == 'alipay'" class="iconfont icon-right-1"></i>
+            <i v-else class="iconfont icon-yuanquan"></i>
+          </li>
+        </ul>
+        <div class="pay-btn">
+          <button @click="pay" type="button">立即支付</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    var activeIndex = api.pageParam.activeIndex
+    var activePrice = api.pageParam.activePrice
+
+    app = new Vue({
+      el: '#app',
+      data: {
+        activeIndex: activeIndex,
+        activePrice: activePrice,
+        option: 'alipay',
+        recharge_type: api.pageParam.type
+
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+
+      },
+      methods: {
+        selectPayType: function (type) {
+          var _this = this
+          _this.option = type
+        },
+         pay: function () {
+          var __this = this
+          api.showProgress()
+          console.log(JSON.stringify($api.getStorage('deviceToken')))
+          console.log(JSON.stringify({
+                uid: $api.getStorage('uid'),
+                type: __this.recharge_type,
+                tid: __this.activeIndex,
+                option: __this.option,
+                channel: $api.getStorage('channel'),
+                tuid: $api.getStorage('tuid'),
+              }))
+          api.ajax({
+            url: baseUrl + 'pay/store',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: __this.recharge_type,
+                tid: __this.activeIndex,
+                option: __this.option,
+                channel: $api.getStorage('channel'),
+                tuid: $api.getStorage('tuid'),
+              },
+            }
+          }, function (ret, err) {
+            console.log(JSON.stringify(ret))
+            api.hideProgress()
+            if (ret.status == '200') {
+              if (__this.option == 'wechat') {
+                __this.appKey=ret.data.appid
+                __this.partnerid = ret.data.partnerid;
+                __this.prepayid = ret.data.prepayid;
+                __this.package = ret.data.package;
+                __this.noncestr = ret.data.noncestr;
+                __this.timestamp = ret.data.timestamp + '';
+                __this.sign = ret.data.sign;
+                var wxPay = api.require('wxPay');
+                wxPay.payOrder({
+                  apiKey:__this.appKey,
+                  orderId: __this.prepayid,
+                  mchId: __this.partnerid,
+                  nonceStr: __this.noncestr,
+                  timeStamp: __this.timestamp,
+                  package: __this.package,
+                  sign: __this.sign
+                }, function (ret, err) {
+                  if (ret.status) {
+                    //  刷新会员中心页面
+                    api.sendEvent({
+                      name: 'vip_refresh',
+                    });
+                    api.sendEvent({
+                      name: 'video_refresh',
+                    });
+                    api.closeFrame();
+                  } else {
+                    if(err.code==-2){
+                      api.toast({
+                      msg: '已取消'
+                      })
+                    }else{
+                      err.code
+                    }
+                  }
+                });
+              }
+              if (__this.option == 'alipay') {
+                __this.orderInfo = ret.data
+                console.log(JSON.stringify(ret.data))
+                var aliPayPlus = api.require('aliPayPlus')
+                aliPayPlus.payOrder({
+                  orderInfo: __this.orderInfo[0],
+                }, function (ret, err) {
+                  //9000：支付成功
+                  //8000：正在处理中，支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
+                  //4000：订单支付失败
+                  //5000：重复请求
+                  //6001：用户中途取消支付操作
+                  //6002：网络连接出错
+                  //6004：支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
+
+                  if (ret.code == 9000) {
+                    // 刷新会员中心页面
+                    api.sendEvent({
+                      name: 'recharge_refresh',
+                    });
+                    api.sendEvent({
+                      name: 'vip_refresh',
+                    });
+                    api.sendEvent({
+                      name: 'video_refresh',
+                    });
+                    api.sendEvent({
+                      name: 'recharge_u',
+                    });
+                    api.closeFrame();
+                  } else {
+                    api.toast({
+                      msg: '支付失败'
+                    })
+                  }
+                });
+              }
+            } 
+            else if (ret.status == '400') {
+              api.toast({
+                msg: ret.message[0],
+                duration: 2000,
+                location: 'bottom'
+              });
+
+            }
+          }
+          
+          )
+        },
+        goback: function () {
+          api.closeFrame();
+
+        },
+      },
+
+    })
+
+  }
+</script>

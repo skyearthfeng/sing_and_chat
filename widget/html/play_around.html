@@ -1,0 +1,363 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>约玩</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+    <link rel="stylesheet" type="text/css" href="../css/play_around.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak @click.stop='closeTime'>
+        <header id="header" class="border-bottom">
+            <div class="header-wrap">
+                <div @click="goback" class="header-left">
+                    <i class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">约玩信息</div>
+            </div>
+        </header>
+        <div class="user_info">
+            <img :src='item.picture' title='用户头像' alt="用户头像" />
+            <!-- <div class="info_name">
+                <span v-text='name'></span>
+            </div> -->
+        </div>
+        <div class="play_info">
+            <div class="border-bottom" >
+                <span class="play_info_title" >购买技能</span>
+                <div>{{item.yy.title}}<i class="iconfont icon-next"></i></div>
+            </div>
+            <div class="border-bottom">
+                <span class="play_info_title">服务时间</span>
+                <div @click.stop='getTime'><span v-if='hour==-1'>请选择时间</span> <span v-else>{{hour+':'+minit}}</span> <i
+                        class="iconfont icon-next"></i></div>
+                <!-- <div class="play_info_time"></div> -->
+            </div>
+            <div @click='getNuber' class="border-bottom">
+                <span class="play_info_title">购买数量</span>
+                <div><span v-if='nuber==0'>请选择数量</span> <span v-else>{{nuber}}</span><i class="iconfont icon-next"></i>
+                </div>
+            </div>
+            <div class='plat_money'>
+                <span>数量：{{nuber}}</span>
+                <span>小计：{{item.price}}元</span>
+            </div>
+            <div>
+                <label class="play_info_title">备注</label>
+                <input class="play_info_input" type="text" v-model="note" placeholder="简单说一下您的要求吧,50字以内" />
+            </div>
+        </div>
+        <div class="play_sub" @click="pay">
+            <div>
+                总额：<span>{{totalPrice}}</span>元
+            </div>
+            <button>提交订单</button>
+        </div>
+        <div class="play_time_bk" v-show='playTime'>
+            <div class="play_time_title">
+                <span class="play_time_left" @click='closeTime'>取消</span>
+                <span class="play_time_right" @click='closeTime'>确定</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    apiready = () => {
+        let app, timeSelector, dialogBox;
+
+        $api.fixStatusBar($api.dom('#header'));
+        app = new Vue({
+            el: '#app',
+            data: {
+                prc: undefined,
+                name: undefined,
+                userId: undefined,
+                title:undefined,
+                // 页面传递参数
+                playTime: false,
+                hour: -1,
+                minit: -1,
+                nuber: 1,
+                price:0,
+                all_price:0,
+                note:undefined,
+                item:undefined
+                
+            },
+            mounted() {
+                // this.getUrlVal();
+                this.item=api.pageParam.item
+                console.log(JSON.stringify(api.pageParam.item))
+                // this.getCurrentTime();
+                timeSelector = api.require('timeSelector'),
+                // UIActionSelector = api.require('UIActionSelector')
+                dialogBox = api.require('dialogBox')
+            },
+            computed:{
+                totalPrice(){
+                    this.all_price=this.nuber*this.item.price
+                    return this.all_price
+                }
+            },
+            methods: {
+                pay() {
+                    if(this.hour==-1){
+                        api.toast({
+                            msg:'请选择时间'
+                        })
+                        return false
+                    }
+                    if($api.getStorage('uid') == this.item.member_id){
+                        api.toast({
+                            msg:'自己不能给自己下单'
+                        })
+                        return false
+                    }
+                    let data={
+                        member_id:$api.getStorage('uid'),
+                        certified_anchor_id:this.item.id,
+                        skills_id:this.item.yy_id,
+                        skills_name:this.item.yy.title,
+                        service_time:this.hour+':'+this.minit,
+                        num:this.nuber,
+                        price:this.item.price,
+                        all_price:this.all_price,
+                        note:this.note
+                    }
+                    axios('order_create','get',$api.getStorage('deviceToken'),data,(res,err)=>{
+                        console.log(JSON.stringify(res))
+                        console.log(JSON.stringify(err))
+                        if(res.code == 200){
+                            api.openFrame({
+                                name: 'pay_play',
+                                url: 'pay_play.html',
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: api.winWidth,
+                                    h: api.winHeight
+                                },
+                                pageParam: {
+                                    title: '充值',
+                                    type: 'defaullt',
+                                    // activeIndex: __this.activeIndex,
+                                    activePrice: this.all_price,
+                                    id:res.data.order_id
+                                }
+                                });
+                        }else{
+                            api.toast({
+                                msg:'网络错误'
+                            })
+                        }
+                    })
+                },
+                // http() {
+                //     $$.ajaxData('/pay/vip', 'get', '1', function(res, err) {
+                //         api.alert(JSON.stringify(res))
+                //         api.alert(JSON.stringify(err))
+                //     })
+                // },
+                // 获取页面传参
+                // getUrlVal() {
+                //     let getVal = api.pageParam.item;
+                //     this.prc = getVal.member.avatar;
+                //     this.price=getVal.price
+                //     this.name = getVal.member.to_name;
+                //     this.userId = getVal.member_id;
+                //     this.title=api.pageParam.title
+                // },
+               
+                // 返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                // getSkill() {
+                //     var _this=this;
+                //     UIActionSelector.open({
+                //         datas: [{
+                //             name: '陪聊',
+                //             id: 1
+                //         }, {
+                //             name: '陪玩',
+                //             id: 2
+                //         }, {
+                //             name: '玩游戏',
+                //             id: 3
+                //         }],
+                //         layout: {
+                //             row: 5,
+                //             col: 1,
+                //             height: 30,
+                //             size: 14,
+                //             sizeActive: 16,
+                //             rowSpacing: 5,
+                //             colSpacing: 10,
+                //             maskBg: 'rgba(0,0,0,0.2)',
+                //             bg: '#fff',
+                //             color: '#888',
+                //             colorActive: '#f00',
+                //             colorSelected: '#f00'
+                //         },
+                //         cancel: {
+                //             text: '取消',
+                //             size: 14,
+                //             w: 60,
+                //             h: 32,
+                //             bg: '#6cd9b6',
+                //             bgActive: '#ccc',
+                //             color: '#fff',
+                //             colorActive: '#fff'
+                //         },
+                //         ok: {
+                //             text: '确定',
+                //             size: 14,
+                //             w: 60,
+                //             h: 32,
+                //             bg: '#6cd9b6',
+                //             bgActive: '#ccc',
+                //             color: '#fff',
+                //             colorActive: '#fff'
+                //         },
+                //         title: {
+                //             text: '请选择技能',
+                //             size: 14,
+                //             h: 44,
+                //             bg: '#fff',
+                //             color: '#888'
+                //         }
+                //     }, (res, err) => {
+                //         if(res.eventType=='ok'){
+                //             _this.title=res.selectedInfo[0].name
+                //         }
+                //         if (res) {
+                //             // this.title=
+                //         } else {
+                //             api.toast({
+                //                 msg: JSON.stringify(err)
+                //             })
+                //         }
+                //     })
+                // },
+                getNuber() {
+                    dialogBox.amount({
+                        texts: {
+                            title: '修改购买数量',
+                            default: '1',
+                            leftBtnTitle: '取消',
+                            rightBtnTitle: '确定'
+                        },
+                        styles: {
+                            bg: '#fff',
+                            corner: 1,
+                            w: 300,
+                            h: 180,
+                            title: {
+                                marginT: 20,
+                                size: 14,
+                                color: '#000'
+                            },
+                            input: {
+                                w: 150,
+                                h: 44,
+                                marginT: 15,
+                                size: 14,
+                                color: '#000'
+                            },
+                            dividingLine: {
+                                // marginT: 10,
+                                marginB: 0,
+                                width: 0.5,
+                                color: '#696969'
+                            },
+                            left: {
+                                marginL: 15,
+                                w: 100,
+                                h: 55,
+                                bg: '#fff',
+                                color: '#9b9b9b',
+                                size: 16
+                            },
+                            right: {
+                                marginR: 15,
+                                w: 100,
+                                h: 55,
+                                bg: '#fff',
+                                color: '#e12e85',
+                                size: 16
+                            }
+                        },
+                        tapClose: true
+                    }, function (ret) {
+                        // api.alert({
+                        //     msg: JSON.stringify(ret)
+                        // });
+                        if (ret.eventType == 'left') {
+                            // var dialogBox = api.require('dialogBox');
+                            dialogBox.close({
+                                dialogName: 'amount'
+                            });
+                        }
+                        if (ret.eventType == 'right') {
+                            // var dialogBox = api.require('dialogBox');
+                            this.nuber = ret.amount
+                            dialogBox.close({
+                                dialogName: 'amount'
+                            });
+
+                        }
+                    }.bind(app));
+                },
+                getTime() {
+                    this.playTime = true;
+                    let myDate = new Date()
+                    let hours = myDate.getHours()
+                    let minutes = myDate.getMinutes()
+                    timeSelector.open({
+                        // x: 30,
+                        y: api.winHeight - 220,
+                        width: api.frameWidth,
+                        height: 220,
+                        fixedOn: api.frameName,
+                        hour: hours,
+                        minute: minutes,
+                    }, function (ret, err) {
+                        if (ret) {
+                            this.hour = ret.hour
+                            this.minit = ret.minit
+                        } else {
+                        }
+                    }.bind(app));
+                },
+                closeTime() {
+                    timeSelector.close();
+                    this.playTime = false;
+                },
+                // 获取当前时间
+                // getCurrentTime(){
+                //     let myDate = new Date();
+                //     let getDay = myDate.getDay();
+                //     let getHours = myDate.getHours();
+                //     let getMinutes = myDate.getMinutes();
+                // },
+                // getTime(){
+                //     let UIDatePicker = api.require('UILinkageSelector');
+                //     UILinkageSelector.open({
+
+                //     })
+                // }
+            }
+        })
+    }
+</script>

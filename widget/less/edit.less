@@ -1,0 +1,264 @@
+// out: ../css/edit.css
+@import 'common';
+img {
+	display: block;
+}
+
+html,
+body {
+	background-color: #fff;
+}
+.wallet-item {
+	display: flex;
+	text-align: center;
+	height: 60px;
+	line-height: 60px;
+	background-color: #fff;
+	font-size:18px; 
+	li{
+		flex: 1
+	}
+	.active{
+		color: #e12e85;
+	}
+}
+.flex-con {
+	overflow-y: auto;
+}
+.wallet-pop{
+	z-index: 999;
+	position: fixed;
+	top:0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	.bg{
+		// z-index: 999;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+	.copy{
+		position: absolute;
+		z-index: 999;
+		width: 200px;
+		height: 100px;
+		top: 30%;
+		left: 20%;
+		margin-top: -50px;
+		margin-left: -100px;
+		background-color: #fff;
+		margin: auto;
+		P{
+			text-align: center;
+			line-height: 50px;
+		}
+	}
+	
+}
+.sex-wrap {
+	border: none;
+	justify-content: space-around;
+	.sex{
+	  padding: 0 20px;
+	  position: relative;
+	  font-size: 12px;
+	  border-radius: 50px;
+	  background-color: #ccc;
+	  height: 40px;
+	  line-height: 40px;
+	  color: #fff;
+	  .iconfont{
+		font-size: 14px;
+		color: #fff;
+		margin-right: 3px;
+	  }
+	  input{
+		position: absolute;
+		left: 0;
+		top: 0;
+		visibility: hidden;
+	  }
+	  &.sex1.active {
+		background-color: #54b2ff;
+	  }
+	  &.sex2.active {
+		background-color: #ff74a0;
+	  }
+	}
+  }
+.imglist {
+	padding: 2px;
+	background: #f0f4f3;
+	box-sizing: border-box;
+	.imgleft {
+		float: left;
+		width: 66.66666%;
+		img {
+			width: 100%;
+			border: 2px solid #f0f4f3;
+			box-sizing: border-box;
+		}
+	}
+	.imgright {
+		float: right;
+		width: 33.333333%;
+		img {
+			width: 100%;
+			border: 2px solid #f0f4f3;
+			box-sizing: border-box;
+		}
+	}
+	.imgbottom {
+		.imgbottom-l {
+			width: 33.3333%;
+			float: left;
+			img {
+				width: 100%;
+				border: 2px solid #f0f4f3;
+				box-sizing: border-box;
+			}
+		}
+	}
+}
+
+.edit-info {
+	background-color: #fff;
+	.input-wrap {
+		display: flex;
+		padding: 10px 10px;
+		
+		.label {
+			font-size: 14px;
+			line-height: 38px;
+		}
+		.value {
+			flex: 1;
+			line-height: 38px;
+			text-align: right;
+			font-size: 14px;
+		}
+		input {
+			flex: 1;
+			line-height: 38px;
+			text-align: right;
+			font-size: 14px;
+		}
+		span{
+			display: block;
+			flex: 1;
+			line-height: 38px;
+			text-align: right;
+			font-size: 14px;
+		}
+		
+	}
+	p{
+		color: #eee;
+		text-align: center;
+	}
+	.textarea-wrap {
+		padding: 0 10px;
+		.label {
+			font-size: 14px;
+			line-height: 38px;
+		}
+		textarea {
+			width: 100%;
+			height: 60px;
+			background-color: #fff;
+			box-sizing: border-box;
+		}
+	}
+}
+.identity-content{
+	padding: 10px;
+	p{
+		font-size: 16px;
+	}
+	.identity-item{
+		display: flex;
+		height: 100px;
+		margin-top: 30px;
+		span{
+			flex: 1;
+			line-height: 100px;
+			color: #999;
+		}
+		.img-wrap{
+			flex: 2;
+			img{
+				width: 100%;
+				height: 100%;;
+				
+			}
+			.blur{
+				filter: url(blur.svg#blur); 
+				-webkit-filter: blur(2px); /* Chrome, Opera */
+				-moz-filter: blur(2px);
+				 -ms-filter: blur(2px);    
+					 filter: blur(2px);
+			 
+			 filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius=10, MakeShadow=false);
+			}
+		}
+	}
+
+}
+.btn-wrap {
+	margin-top: 10px;
+	.btn{
+		margin-left: 10%;
+		width: 80%;
+		height: 40px;
+		line-height: 40px;
+		border-radius: 6px;
+		background-color: #e12e85;
+		color: #fff;
+	}
+}
+.btn-active{
+  width: 80%;
+  margin-left: 10%;
+  height: 40px;
+  line-height: 40px;
+  background-color: #ea709c;
+  color: #fff;
+  border-radius: 5px;
+}
+.editConfirm-tishi {
+	p {
+		padding: 5px;
+	}
+	.editConfirm-tishiImgBox {
+		display: flex;
+		padding: 0 5px;
+		.editConfirm-tishiImg {
+			flex: 1;
+			& + .editConfirm-tishiImg {
+				margin-left: 5px;
+			}
+			img {
+				width: 100%;
+			}
+		}
+	}
+}
+.FNImageClip-control {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 50px;
+	background-color: #000;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	span {
+		height: 100%;
+		line-height: 50px;
+		padding: 0 20px;
+		color: #fff;
+		font-size: 16px;
+	}
+}

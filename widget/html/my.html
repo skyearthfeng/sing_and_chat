@@ -1,0 +1,671 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/my.css" />
+  <!-- <link rel="stylesheet" href="../css/swiper.min.css"> -->
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="flex-con">
+        <div class="user-info" @click="openEdit">
+          <div class="avatar">
+            <img id="avatar" :src="userInfo.avatar" alt="">
+          </div>
+          <div class="info">
+            <div id="name" class="name">
+              <span class="name-text">{{userInfo.name}}(ID{{userInfo.pretty_no}})</span>
+              <span v-if="userInfo.level == '1'" class="icon icon-vip1"></span>
+              <span v-if="userInfo.certification == '1'" class="icon icon-auth1"></span>
+            </div>
+            <div class="sign">{{userInfo.signature}}</div>
+          </div>
+        </div>
+        <ul class="balance border-bottom">
+          <li>
+            <p>{{userInfo.gold}}</p>
+            <span>聊币</span>
+          </li>
+          <!-- <li>
+            <p>{{userInfo.u}}</p>
+            <span>U钻</span>
+          </li> -->
+          <li @click="openExchange()">
+            <p>{{userInfo.money}}</p>
+            <span>钻石</span>
+          </li>
+        </ul>
+        <ul class="exchange  border-bottom">
+          <li @click="openWithdraw">
+            <!-- <a href="javascript:;" > -->
+            <div>
+              <img src="../image/forward.png" alt="">
+            </div>
+            <span>申请提现</span>
+            <!-- </a> -->
+          </li>
+          <li @click="openIncome">
+            <!-- <a href="income.html"  >  -->
+            <div>
+              <img src="../image/record.png" alt="">
+            </div>
+            <span>收益明细</span>
+            <!-- </a> -->
+          </li>
+          <!-- <li @click="openShare">
+            <div>
+              <img src="../image/friend.png" alt="">
+            </div>
+            <span>渠道管理</span>
+          </li> -->
+          <!-- <li @click="openWallet">
+            <div>
+              <img src="../image/wallet.png" alt="">
+            </div>
+            <span>U钻管理</span>
+          </li> -->
+        </ul>
+        <!-- <div class="swiper-container">
+            <div class="swiper-wrapper"  >
+                <div class="swiper-slide" v-for="(item,index) in bannerList">
+                    <a href="javascript;">
+                      <img :src="item" alt="">
+                    </a>
+                  </div> -->
+        <!-- <div class="swiper-slide">
+                <a href="javascript;">
+                  <img src="../image/img1.jpg" alt="">
+                </a>
+              </div>
+              <div class="swiper-slide"><img src="../image/img1.jpg" alt=""></div> -->
+        <!-- </div>
+            <div class="swiper-pagination"></div>
+        </div> -->
+        <!-- <div id="banner" class="banner-wrap"></div> -->
+        <div class="menu-list">
+          <div class="menu-item border-bottom" @click='openOrder'>
+            <img src="../image/order.png" class="myimg ">
+            <div class="menu-info">
+              <div class="title">我的订单</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div>
+          <div @click="openHistory" class="menu-item border-bottom">
+            <!-- <i class="icon icon-follow"></i> -->
+            <img src="../image/history.png" class="myimg ">
+            <div class="menu-info">
+              <div class="title">我的访客</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div>
+        </div>
+        <div class="menu-list">
+          <!-- <div @click="openMessage" class="menu-item border-bottom">
+            <img src="../image/message1.png" class="myimg ">
+            <div class="menu-info">
+              <div class="title">我的消息</div>
+              <span v-if="messageBadge" class="messageBadge"></span>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <!-- <div @click="openVip" class="menu-item border-bottom">
+            <i class="icon icon-vip"></i>
+            <div class="menu-info">
+              <div class="title">我的VIP</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <div @click="openRecharge" class="menu-item border-bottom" v-if="systemType=='android'">
+            <i class="icon icon-recharge"></i>
+            <div class="menu-info">
+              <div class="title">我的充值</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div>
+          <div @click="openRecord" class="menu-item border-bottom">
+            <img src="../image/myRecord.png" class="myimg ">
+            <div class="menu-info">
+              <div class="title">我的记录</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div>
+          <!-- <div @click="openIncome" class="menu-item border-bottom">
+            <i class="icon icon-income"></i>
+            <div class="menu-info">
+              <div class="title">我的收益</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <!-- <div @click="openShare" class="menu-item border-bottom">
+            <i class="icon icon-share"></i>
+            <div class="menu-info">
+              <div class="title">分成计划</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <!-- <div @click="openMygift" class="menu-item border-bottom">
+             <i class="icon icon"></i>
+            <div class="mygift"></div>
+            <div class="menu-info">
+              <div class="title">我的礼物</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+        </div>
+        <!-- <div class="swiper-container">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <a href="javascript;">
+                <img src="../image/img1.jpg" alt="">
+              </a>
+            </div>
+            <div class="swiper-slide"><img src="../image/img1.jpg" alt=""></div>
+          </div>
+          <div class="swiper-pagination"></div>
+        </div> -->
+        <div class="menu-list">
+          <!-- <div @click="openFollow" class="menu-item border-bottom">
+            <i class="icon icon-follow"></i>
+            <div class="menu-info">
+              <div class="title">我的关注</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <!-- <div @click="openOffer" class="menu-item border-bottom">
+            <i class="icon icon-offer"></i>
+            <div class="menu-info">
+              <div class="title">我的报价</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div> -->
+          <div @click="openAuth" class="menu-item border-bottom">
+            <i class="icon icon-auth1"></i>
+            <div class="menu-info">
+              <div class="title">信息认证</div>
+            </div>
+            <!-- <span>{{userInfo.certification | getStatus}}</span> -->
+            <i class="iconfont icon-next"></i>
+          </div>
+          <div @click="openSetting" class="menu-item item-bottom">
+            <i class="icon icon-setting"></i>
+            <div class="menu-info">
+              <div class="title">设置</div>
+            </div>
+            <i class="iconfont icon-next"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<!-- <script type="text/javascript" src="../script/fastClick.js"></script> -->
+<!-- <script src="https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js"></script> -->
+<script type="text/javascript" src="../script/common.js"></script>
+
+<!-- <script src="../script/swiper.min.js"></script> -->
+<script type="text/javascript">
+  var app, UIScrollPicture;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    UIScrollPicture = api.require('UIScrollPicture');
+    app = new Vue({
+      el: '#app',
+      data: {
+        systemType: api.systemType,
+        banner: [],
+        bannerList: [],
+        userInfo: {
+          name: '',
+          avatar: '',
+          signature: '',
+          occupation: '',
+          background: [],
+          level: '0',
+          certification: '1',
+        },
+        messageBadge: false,
+        authSt: '',
+      },
+      created: function () {
+        var _this = this;
+        // api.addEventListener({
+        //   name: 'pause'
+        // }, function (ret, err) {
+        //   time1 = window.setInterval(function () {
+        //     _this.getUserIndex();
+        //   }, 10000)
+        // });
+        // api.addEventListener({
+        //   name: 'resume'
+        // }, function (ret, err) {
+        //   clearInterval(time1)
+        // });
+      },
+      mounted: function () {
+        var _this = this;
+        this.getUserIndex();
+        api.setRefreshHeaderInfo({
+          bgColor: '#ccc',
+          textColor: '#fff',
+          textDown: '下拉刷新...',
+          textUp: '松开刷新...'
+        }, function (ret, err) {
+          _this.getUserIndex();
+        });
+        api.addEventListener({
+          name: 'refreshMy'
+        }, function (ret, err) {
+          _this.getUserIndex();
+        })
+        //设置监听
+        api.addEventListener({
+          name: 'settingStatus'
+        }, function (ret, err) {
+          _this.getUserIndex();
+        })
+
+        api.addEventListener({
+          name: 'messageBadge'
+        }, function (ret, err) {
+          _this.messageBadge = true
+        });
+        // this.authType()
+        // window.FastClick.attach(document.body);
+      },
+      methods: {
+        //认证状态
+        // authType() {
+        //   axios('api/rzst','post','',{
+        //     member_id:$api.getStorage('uid')
+        //   },
+        //   (ret,err)=>{
+        //       if(ret.code==200){
+        //         this.authSt=ret.data.youxi[0].st
+        //       }else{
+
+        //       }
+        //   })
+        // },
+        openWithdraw: function () {
+          api.openWin({
+            name: 'withdraw',
+            url: 'withdraw.html',
+            bounces: false,
+            // pageParam: this.userInfo
+          });
+        },
+        // 轮播图
+        // initBanner: function () {
+        //   var _this = this;
+        //   var bannerList = [];
+        //   var ad_link = [];
+        //   if (_this.banner.length > 0) {
+        //     for (var i = 0; i < _this.banner.length; i++) {
+        //       bannerList.push(_this.banner[i].ad_file)
+        //       ad_link.push(_this.banner[i].ad_link)
+        //     }
+        //     var banner_offset = $api.offset($api.byId('banner'));
+        //     UIScrollPicture.open({
+        //       rect: {
+        //         x: banner_offset.l,
+        //         y: banner_offset.t,
+        //         w: banner_offset.w,
+        //         h: banner_offset.h
+        //       },
+        //       data: {
+        //         paths: bannerList
+        //       },
+        //       styles: {
+        //         indicator: {
+        //           dot: {
+        //             w: 5,
+        //             h: 5,
+        //             r: 2,
+        //             margin: 5
+        //           },
+        //           align: 'center',
+        //           color: '#FFFFFF',
+        //           activeColor: '#DA70D6'
+        //         },
+        //       },
+        //       placeholderImg: 'widget:../image/photo.png',
+        //       contentMode: 'scaleToFill',
+        //       interval: 3,
+        //       fixedOn: api.frameName,
+        //       loop: true,
+        //       fixed: false
+        //     }, function (ret, err) {
+        //       // var _this = this
+        //       // d_link = ret.index
+        //       if (ret.eventType == 'click') {
+        //         api.openWin({
+        //           name: 'ad_link',
+        //           url: ad_link[ret.index],
+        //           // pageParam: {
+        //           //   link: _this.banner[d_link].ad_link,
+        //           //   ad_name: _this.banner[d_link].ad_name
+        //           // }
+
+        //         });
+        //       }
+        //     });
+        //   } else {
+        //     $api.css($api.byId('banner'), 'height: 0px;');
+        //   }
+        // },
+        getUserIndex: function () {
+          var _this = this;
+          // api.showProgress({
+          //   title: '',
+          //   text: ''
+          // });
+          api.ajax({
+            url: baseUrl + 'user/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+              },
+            }
+          }, function (ret, err) {
+            // _this.initBanner();
+            api.refreshHeaderLoadDone();
+            // api.hideProgress();
+            if (ret.status == '200') {
+              console.log(JSON.stringify(ret))
+              _this.userInfo = ret.data.info;
+              $api.setStorage('uavatar', ret.data.info.avatar);
+              _this.banner = ret.data.banner;
+              $api.setStorage('uname', ret.data.info.name);
+              $api.setStorage('uid', ret.data.info.member_id);
+              $api.setStorage('uage', ret.data.info.age);
+              if (_this.userInfo.status == 0) {
+                api.ajax({
+                  url: baseUrl + 'oauth/logout',
+                  method: 'get',
+                  headers: {
+                    token: $api.getStorage('deviceToken')
+                  },
+                  data: {
+                    values: {
+                      uid: $api.getStorage('uid'),
+                      type: 1,
+                    },
+                  }
+                }, function (ret, err) {
+                  if (ret && ret.status == 200) {
+                    api.sendEvent({
+                      name: 'settingStatus'
+                    })
+                    // if (ret.data.status == 4) {
+                    //   api.toast({
+                    //     msg: '勿扰打开'
+                    //   })
+                    // } else {
+                    //   api.toast({
+                    //     msg: '勿扰关闭'
+                    //   })
+                    // }
+                  }
+                });
+              }
+              //轮播图
+              // _this.initBanner();
+              //  var bannerList = [];
+              // if (_this.banner.length > 0) {
+              // for (var i = 0; i < _this.banner.length; i++) {
+              //   _this.bannerList.push(_this.banner[i].ad_file)
+              // }
+              // alert( _this.bannerList)
+              // }
+            }
+          })
+        },
+        //我的订单
+        openOrder: function () {
+          api.openTabLayout({
+            name: 'order',
+            url: 'order.html',
+            title: '我的订单',
+            hideNavigationBar: false,
+            navigationBar: {
+              background: '#fff',
+              color: '#333',
+              leftButtons: [{
+                iconPath: 'widget://image/back.png',
+              }]
+            }
+          });
+          // api.openWin({
+          //   name: 'order',
+          //   url: 'order.html',
+          //   bounces: false,
+          // });
+        },
+        //我的钱包
+        openWallet: function () {
+          api.openWin({
+            name: 'wallet',
+            url: 'wallet.html',
+            bounces: false,
+          });
+        },
+        //我的资料
+        openEdit: function () {
+          api.openWin({
+            name: 'edit1',
+            url: 'edit1.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        //我的消息
+        openMessage: function () {
+          api.openWin({
+            name: 'message',
+            url: 'message.html',
+            bounces: false,
+            bgColor: '#fff',
+            // pageParam: this.userInfo
+          });
+        },
+        //VIP
+        openVip: function () {
+          api.openWin({
+            name: 'vip',
+            url: 'vip.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        //充值
+        openRecharge: function () {
+          api.openWin({
+            name: 'recharge',
+            url: 'recharge.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        //充值
+        openRecord: function () {
+          api.openWin({
+            name: 'record',
+            url: 'record.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        openIncome: function () {
+          api.openWin({
+            name: 'income',
+            url: 'income.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+
+        openShare: function () {
+          var _this = this;
+          // if (_this.userInfo.level == '0') {
+          //   api.toast({
+          //     msg: '只对会员开放',
+          //   });
+          // } else {
+          api.openWin({
+            name: 'subordinate',
+            url: 'subordinate.html',
+            bounces: false,
+            pageParam: {
+              // show: true,
+              tag: _this.userInfo.tag
+            }
+          });
+          // }
+
+        },
+        //关注
+        openFollow: function () {
+          api.openWin({
+            name: 'follow',
+            url: 'follow.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        //礼物
+        openMygift: function () {
+          api.openWin({
+            name: 'mygift',
+            url: 'mygift.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+
+        openOffer: function () {
+          var _this = this;
+          if (this.userInfo.certification == '0') {
+            api.toast({
+              msg: '请先进行认证',
+              duration: 2000,
+              location: 'bottom'
+            });
+            setTimeout(function () {
+              api.openWin({
+                name: 'auth',
+                url: 'auth.html',
+                bounces: false,
+                pageParam: _this.userInfo
+              });
+            }, 1000);
+          } else if (this.userInfo.certification == '1') {
+            api.openWin({
+              name: 'offer',
+              url: 'offer.html',
+              bounces: false,
+              pageParam: _this.userInfo
+            });
+          } else if (this.userInfo.certification == '2') {
+            api.toast({
+              msg: '认证中，请耐心等待',
+              duration: 2000,
+              location: 'bottom'
+            });
+          }
+        },
+
+        openAuth: function () {
+          // if (this.userInfo.certification == '') {
+          api.openWin({
+            name: 'skill',
+            url: 'skill.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+          // } else if (this.userInfo.certification == '1') {
+          //   api.toast({
+          //     msg: '您已认证',
+          //     duration: 2000,
+          //     location: 'bottom'
+          //   });
+          // } else if (this.userInfo.certification == '2') {
+          //   api.toast({
+          //     msg: '认证中，请耐心等待',
+          //     duration: 2000,
+          //     location: 'bottom'
+          //   });
+          // }
+        },
+
+        openSetting: function () {
+          api.openWin({
+            name: 'setting',
+            url: 'setting.html',
+            bounces: false,
+            pageParam: this.userInfo
+          });
+        },
+        openHistory: function () {
+          api.openWin({
+            name: 'history',
+            url: 'history.html',
+            bounces: false,
+            pageParam: this.userInfo
+          })
+        },
+
+        openExchange() {
+          api.openWin({
+            name: 'my_exchange',
+            url: 'my_exchange.html',
+          })
+        }
+
+      },
+      filters: {
+        getStatus: function (value) {
+          if (value == '') {
+            return '未认证';
+          }
+          if (value == '1') {
+            return '已认证';
+          }
+          if (value == '2') {
+            return '认证中';
+          }
+        },
+      }
+    })
+  }
+  // 刷新页面
+  function refresh() {
+    api.showProgress({
+      title: '',
+      text: ''
+    });
+    setTimeout(function () {
+      api.hideProgress();
+      location.reload();
+    }, 1000);
+  }
+</script>

@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>小视频</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../css/call.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../css/video.css" />
+    <link rel="stylesheet" href="../css/swiper.min.css">
+</head>
+    <style>
+        #app{
+            overflow: hidden;
+        }
+    </style>
+<body>
+    </div>
+    <div id="app" v-cloak>
+        <!-- <div class="top-img">
+            <div class="pop"></div>
+            <div class="img-wrap">
+                <img src="../image/shang.png" alt="">
+                <p>向上滑动查看更多视频哦</p>
+            </div>
+        </div> -->
+        <!-- <div class="swiper-container" style="background:#000">
+            <div class="swiper-wrapper"> -->
+                <!-- <div class="swiper-slide" > -->
+                    <!-- <video :src="item.files.filename" height='100%' width='100%' loop class="video1" preload="none"
+                        :poster="item.files.filename+'?vframe/jpg/offset/0'" playsinline="true"
+                        webkit-playsinline="true"></video> -->
+                        <img :src="item.files.filename" alt="" style="width: 100%;height:100%;">
+                    <div class="control-wrap" v-show='contentShow'>
+                        <div  @dblclick="dbl(item.id)" class="playing">
+                            <i v-if="!player_pause" class="iconfont icon-bofang"></i>
+                        </div>
+                        <div class="goback" @click="goback">
+                            <i class="iconfont icon-pre"></i>
+                        </div>
+                        <div class="userInfo">
+                            <div class="name">@{{item.member.name}}</div>
+                            <div class="description">{{item.description}}</div>
+                        </div>
+                        <div class="menu-list">
+                            <div class="menu-item avatar-wrap">
+                                <img :src="item.member.avatar" alt="" @click.stop='openUser(item.member.member_id)'>
+                                <i @click.stop="follow(item.member.member_id)" v-if="item.is_follow == 0"
+                                    class="iconfont icon-font-add"></i>
+                                <i @click.stop="follow(item.member.member_id)" v-else class="iconfont icon-right-2"></i>
+                            </div>
+                            <div @click="like(item.id)" class="menu-item like-wrap">
+                                <i :class="['iconfont', 'icon-xin', item.is_like == 1 ? 'active' : '']"></i>
+                                <div class="text">{{item.like_size}}</div>
+                            </div>
+                            <div class="menu-item read-wrap">
+                                <i class="iconfont icon-yanjing"></i>
+                                <div class="text">{{item.view_size}}</div>
+                            </div>
+                            <div class="menu-item share-wrap" @click='openshare'>
+                                <i class="iconfont icon-fenxiang"></i>
+                                <div class="text">{{item.share_size}}</div>
+                            </div>
+                            <div class="menu-item video-wrap" @click="openSkill(item.member.member_id)">
+                                <!-- <i class="iconfont icon-shipin1"></i> -->
+                                <img class="brt-img iconfont" style="
+                                        width: 20px;
+                                        height: 20px;
+                                        float: left;
+                                        display: block;
+                                        line-height: 20px;
+                                        margin-right:10px;
+                                      " src='../image/play_around.png'>
+                                <span>下单约TA</span>
+                            </div>
+                        </div>
+                    </div>
+                <!-- </div> -->
+            </div>
+            <!-- <div class="swiper-pagination"></div>
+        </div> -->
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    var app, swiper, wx, qq, dialogBox;
+    apiready = function () {
+        wx = api.require('wx');
+        qq = api.require('QQPlus');
+        dialogBox = api.require('dialogBox');
+        app = new Vue({
+            el: '#app',
+            data: {
+                shareTitle: '',
+                shareContent: '',
+                shareUrl: '',
+                shareImage: '',
+                shareImageQQ: '',
+                index: 0,
+                video_id: '',
+                id: '',
+                name: '',
+                description: '',
+                avatar: '',
+                like_size: '',
+                view_size: '',
+                share_size: '',
+                is_follow: 0,
+                is_like: 0,
+                player_pause: true,
+                dblclick: true,
+                systemType: api.systemType == 'ios',
+                videoList: [
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    },
+                    {
+                        file: "http://files.xinxingwanggou.com/T2.mp4"
+                    }
+
+                ],
+                videoIndex: 0,
+                videoContent: {
+                    info: {
+                        member: {
+
+                        }
+                    },
+                    is_like: '',
+                },
+                contentShow: true,
+                video1: document.getElementsByClassName("video1"),
+                item:{}
+
+            },
+            created: function () {
+                var _this = this
+                // _this.videoList = [];
+                this.item=api.pageParam.item
+                // console.log(JSON.stringify(api.pageParam.videoList))
+                // _this.videoList = api.pageParam.videoList;
+                // api.openFrame({
+                //     name: 'top',
+                //     url: 'top.html',
+                //     rect: {
+                //         x: 0,
+                //         y: 0,
+                //         w: 'auto',
+                //         h: 'auto'
+                //     },
+                //     pageParam: {
+
+                //     }
+                // });
+            },
+            mounted: function () {
+                var _this = this
+                // var pageList = api.pageParam.videoList
+                // var video1 = document.getElementsByClassName("video1");
+                // var index = 0;
+                // video1[api.pageParam.index].play()
+                // var swiper = new Swiper('.swiper-container', {
+                //     direction: 'vertical',
+                //     width: window.innerWidth,
+                //     height: window.innerHeight,
+                //     initialSlide: api.pageParam.index,
+                //     on: {
+                //         init: function () {
+                //             //Swiper初始化了
+                //             this.emit('transitionEnd');//在初始化时触发一次transitionEnd事件
+                //             _this.videoIndex = this.activeIndex
+                //             // _this.videoContent= api.pageParam.videoList[this.activeIndex]
+                //             // api.ajax({
+                //             //     url: baseUrl + 'video/detail',
+                //             //     method: 'get',
+                //             //     headers: {
+                //             //         token: $api.getStorage('deviceToken')
+                //             //     },
+                //             //     data: {
+                //             //         values: {
+                //             //             uid: $api.getStorage('uid'),
+                //             //             id: api.pageParam.videoList[this.activeIndex].id
+                //             //         },
+                //             //     }
+                //             // }, function (ret, err) {
+                //             //     _this.planShare();
+                //             //     api.hideProgress();
+                //             //     if (ret) {
+                //             //         _this.videoContent = ret.data;
+                //             //         console.log(JSON.stringify(_this.videoContent))
+                //             //     }
+                //             //     if (err) {
+                //             //         api.toast({
+                //             //             msg: '网络错误，请稍后再试'
+                //             //         });
+                //             //     }
+                //             // });
+                //             video1[this.activeIndex].autoplay = true
+                //             video1[this.activeIndex].load()
+                //             // video1[this.activeIndex].paly()
+                //         },
+                //         sliderMove: function (event) {
+                //             _this.contentShow = false;
+                //         },
+                //         transitionEnd: function () {
+                //             _this.contentShow = true;
+                //         },
+                //         slideChangeTransitionEnd: function () {
+                //             _this.player_pause = true
+                //             // _this.videoContent = {
+                //             //     info: {
+                //             //         member: {
+
+                //             //         }
+                //             //     },
+                //             //     is_like: '',
+                //             // },
+                //             // api.ajax({
+                //             //     url: baseUrl + 'video/detail',
+                //             //     method: 'get',
+                //             //     headers: {
+                //             //         token: $api.getStorage('deviceToken')
+                //             //     },
+                //             //     data: {
+                //             //         values: {
+                //             //             uid: $api.getStorage('uid'),
+                //             //             id: api.pageParam.videoList[this.activeIndex].dynamic_id
+                //             //         },
+                //             //     }
+                //             // }, function (ret, err) {
+                //             //     console.log(JSON.stringify(ret))
+                //             //     console.log(JSON.stringify(err))
+                //             //     api.hideProgress();
+                //             //     if (ret && ret.status == '200') {
+                //             //         console.log(JSON.stringify(ret.data))
+                //             //         _this.videoContent = ret.data;
+                //             //     }
+                //             //     if (err) {
+                //             //         api.toast({
+                //             //             msg: '网络错误，请稍后再试'
+                //             //         });
+                //             //     }
+                //             // });
+                //             video1[index].pause()
+                //             // video1[this.activeIndex].autoplay = true
+                //             if (_this.systemType) {
+                //                 video1[this.activeIndex].autoplay = true
+                //                 video1[this.activeIndex].load()
+                //                 // video1[this.activeIndex].play()
+                //             } else {
+                //                 video1[this.activeIndex].play()
+                //             }
+                //             // video1[this.activeIndex].load()
+                //             video1[this.activeIndex].play()
+                //             // video1[this.activeIndex].pause()
+
+                //             index = this.activeIndex;
+
+                //             _this.videoIndex = this.activeIndex
+                //         },
+                //         slideChangeTransitionStart: function () {
+                //             // alert(this.activeIndex);
+                //         },
+                //         reachEnd: function () {
+                //             //你的事件
+                //             api.sendEvent({
+                //                 name: 'videoPush',
+                //             })
+                //             setTimeout(function () {
+                //                 swiper.updateSlides();
+                //             }, 500)
+
+                //         },
+                //     },
+
+                // })
+                // 左滑打开个人中心
+                var currentX = 0;
+                var moveX = 0;
+                var endX = 0;
+                addEventListener("touchstart", function (event) {
+                    currentX = event.changedTouches[0].screenX;
+                });
+                addEventListener("touchmove", function (event) {
+                    moveX = event.changedTouches[0].screenX;
+                });
+                addEventListener("touchend", function (event) {
+                    endX = event.changedTouches[0].screenX;
+                    if (currentX - endX > 100) {
+                        _this.openUser(_this.videoList[_this.videoIndex].member.member_id)
+                    }
+                });
+                // 监听退出外边向上卷曲
+                api.addEventListener({
+                    name: 'keyback'
+                }, (ret, err) => {
+                    this.goback()
+                    // var scrollIndex = _this.videoIndex
+                    // scrollIndex = Math.floor(scrollIndex / 2);
+                    // api.sendEvent({
+                    //     name: 'scrollIndex',
+                    //     extra: {
+                    //         key1: scrollIndex,
+                    //     }
+                    // });
+                    // api.closeWin()
+                });
+                //监听外边分页的内容  加载
+                api.addEventListener({
+                    name: 'pushList',
+                }, function (ret, err) {
+                    for (var i = 0; i < ret.value.key1.length; i++) {
+                        _this.videoList.push(ret.value.key1[i])
+                    }
+                });
+                // api.addEventListener({
+                //     name: 'videoPlay'
+                // }, function (ret, err) {
+                //     _this.video1[_this.videoIndex].play()
+                // });
+            },
+            methods: {
+                openUser: function (id) {
+                    api.openWin({
+                        name: 'user_home',
+                        url: 'user_home.html',
+                        slidBackEnabled: false,
+                        pageParam: {
+                            member_id: id,
+                            // navbarIndex:index
+                        },
+                        animation: {
+                            type: "movein",                //动画类型（详见动画类型常量）
+                            subType: "from_right",       //动画子类型（详见动画子类型常量）
+                            duration: 100
+                        },
+                        delay:0
+                    });
+                    this.video1[this.videoIndex].pause()
+                    // api.sendEvent({
+                    //     name: 'videoPause',
+                    // });
+                },
+
+                openSkill(id) {
+                    api.openTabLayout({
+                        name: 'user_home_skill',
+                        url: 'user_home_skill.html',
+                        title: 'TA的技能',
+                        hideNavigationBar: false,
+                        navigationBar: {
+                            background: '#fff',
+                            color: '#333',
+                            leftButtons: [{
+                                iconPath: 'widget://image/back.png'
+                            }]
+                        },
+                        pageParam: {
+                            id: id
+                        }
+                    });
+                },
+
+                dbl: function (id) {
+                    var _this = this;
+                    this.like(id);
+                    _this.dblclick = false;
+                    setTimeout(function () {
+                        _this.dblclick = true;
+                    }, 500)
+                },
+                goback() {
+                    api.sendEvent({
+                        name: 'refresh',
+                    });
+                    api.closeWin();
+                },
+                getDialogBoxRecharge: function (txt) {
+                    dialogBox.evaluation({
+                        styles: {
+                            bg: '#fff',
+                            corner: 2,
+                            w: 300,
+                            title: {
+                                marginT: 20,
+                                size: 14,
+                                h: 50,
+                                color: '#000',
+                                bold: true,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            },
+                            buttons: [{
+                                w: 300,
+                                h: 50,
+                                color: '#0077ff',
+                                size: 14,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            }, {
+                                w: 300,
+                                h: 50,
+                                color: '#0077ff',
+                                size: 14,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            }, {
+                                w: 300,
+                                h: 50,
+                                color: '#000',
+                                size: 14
+                            }]
+                        },
+                        texts: {
+                            title: txt,
+                            buttons: [{
+                                text: '去赚钱'
+                            }, {
+                                text: '去充值'
+                            }, {
+                                text: '取消'
+                            }]
+                        },
+                        tapClose: true
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (ret.index == 0) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                                api.openWin({
+                                    name: 'share',
+                                    url: 'share.html',
+                                    slidBackEnabled: false
+                                });
+                            }
+                            if (ret.index == 1) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                                api.openWin({
+                                    name: 'recharge',
+                                    url: 'recharge.html',
+                                    slidBackEnabled: false
+                                });
+                            }
+                            if (ret.index == 2) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                            }
+                        }
+                    });
+                },
+                // togglePlayStatus: function () {
+                //     var _this = this;
+                //     setTimeout(function () {
+                //         if (_this.dblclick) {
+                //             if (_this.player_pause) {
+                //                 _this.video1[_this.videoIndex].pause()
+                //             } else {
+                //                 _this.video1[_this.videoIndex].play()
+                //             }
+                //             _this.player_pause = !_this.player_pause
+                //             _this.dblclick = true;
+                //         }
+                //     }, 500)
+                // },
+                follow: function (id) {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    api.ajax({
+                        url: baseUrl + 'user/follow',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                to_uid: id
+                            },
+                        }
+                    }, function (ret, err) {
+                        api.hideProgress();
+                        if (ret) {
+                            api.toast({
+                                msg: ret.message[0]
+                            });
+                            if (ret.status == 200) {
+                                _this.item.is_follow = 1
+                            }
+                            if (ret.status == 201) {
+                                _this.item.is_follow = 0
+                            }
+                        }
+                        if (err) {
+                            api.toast({
+                                msg: '网络错误，请稍后再试'
+                            });
+                        }
+                    });
+                },
+                closdialg: function () {
+                    var dialogBox = api.require('dialogBox');
+                    dialogBox.close({
+                        dialogName: 'actionMenu'
+                    });
+                },
+
+                like(id) {
+                    var _this = this;
+                    // api.showProgress({
+                    //   title: '',
+                    //   text: ''
+                    // });
+                    let data = {
+                        member_id: $api.getStorage('uid'),
+                        id: id
+                    }
+                    axios('dynamic_like', 'get', $api.getStorage('deviceToken'), data, (res, err) => {
+                        console.log(JSON.stringify(res))
+                        if (res) {
+                            api.toast({
+                                msg: res.msg
+                            });
+                            if (res.code == 200) {
+                                _this.item.is_like = 1
+                                _this.item.like_size++
+                            } else if (res.code == 400) {
+                                _this.item.is_like = 0
+                                _this.item.like_size--
+                            }
+                        }
+                    })
+                    // api.ajax({
+                    //     url: baseUrl + 'video/like',
+                    //     method: 'post',
+                    //     headers: {
+                    //         token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //         values: {
+                    //             uid: $api.getStorage('uid'),
+                    //             id: video_id
+                    //         },
+                    //     }
+                    // }, function (ret, err) {
+                    //     if (ret) {
+                    //         api.toast({
+                    //             msg: ret.message[0]
+                    //         });
+                    //         if (ret.status == 200) {
+                    //             _this.videoList[_this.videoIndex].is_like = 1
+                    //             _this.videoList[_this.videoIndex].info.like_size++
+
+                    //         }
+                    //         if (ret.status == 201) {
+                    //             _this.videoList[_this.videoIndex].is_like = 0
+                    //             _this.videoList[_this.videoIndex].info.like_size--
+                    //         }
+                    //     }
+                    //     if (err) {
+                    //         api.toast({
+                    //             msg: '网络错误，请稍后再试'
+                    //         });
+                    //     }
+                    // });
+                },
+                planShare: function () {
+                    var __this = this;
+                    api.ajax({
+                        url: baseUrl + 'share/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                type: 'spread'
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == '200') {
+                            __this.shareTitle = ret.data.title;
+                            __this.shareContent = ret.data.content;
+                            __this.shareUrl = ret.data.url + '?channel=' + $api.getStorage('channel') + '&tuid=' + $api.getStorage('uid');
+                            __this.shareImage = ret.data.image;
+                            __this.shareImageQQ = ret.data.image;
+                        }
+                    })
+                },
+                //打开分享
+                openshare: function () {
+                    var __this = this;
+                    var dialogBox = api.require('dialogBox');
+                    dialogBox.actionMenu({
+                        rect: {
+                            h: 100
+                        },
+                        items: [{
+                            text: '微信好友',
+                            icon: 'widget://image/circular-WeChat.png'
+                        },
+                        {
+                            text: '微信朋友圈',
+                            icon: 'widget://image/circle-friend.png'
+                        },
+                        {
+                            text: 'QQ空间',
+                            icon: 'widget://image/circular-qq_space.png'
+                        },
+                        {
+                            text: 'QQ好友',
+                            icon: 'widget://image/circular-QQ.png'
+                        }
+                        ],
+                        styles: {
+                            bg: '#FFF',
+                            column: 4,
+                            itemText: {
+                                color: '#000',
+                                size: 14,
+                                marginT: 5
+                            },
+                            itemIcon: {
+                                size: 50
+                            }
+                        },
+                        tapClose: true
+                    }, function (ret) {
+                        if (ret.index == 0) {
+                            wx.shareWebpage({
+                                // apiKey: wx_apiKey,
+                                scene: 'session',
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                thumb: __this.shareImage,
+                                contentUrl: __this.shareUrl
+                            }, function (ret, err) {
+                                __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 1) {
+                            wx.shareWebpage({
+                                // apiKey: wx_apiKey,
+                                scene: 'timeline',
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                thumb: __this.shareImage,
+                                contentUrl: __this.shareUrl
+                            }, function (ret, err) {
+                                __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 2) {
+                            qq.shareNews({
+                                type: 'QZone',
+                                url: __this.shareUrl,
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                imgUrl: __this.shareImageQQ
+                            }, function (ret, err) {
+                                __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 3) {
+                            qq.shareNews({
+                                type: 'QFriend',
+                                url: __this.shareUrl,
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                imgUrl: __this.shareImageQQ
+                            }, function (ret, err) {
+                                __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                },
+                openAbout(member_id, name, avatar) {
+                    api.openWin({
+                        name: 'play_around',
+                        url: 'play_around.html',
+                        pageParam: {
+                            to_uid: member_id,
+                            to_uname: name,
+                            to_avatar: avatar,
+                            to_price: 20,
+                        }
+                    })
+                },
+                call: function (id) {
+                    var _this = this;
+                    var tempExtra = {
+                        fromId: $api.getStorage('uid'),
+                        fromName: $api.getStorage('uname'),
+                        fromAvatar: $api.getStorage('uavatar'),
+                        toId: id,
+                        toName: _this.name,
+                        toAvatar: _this.avatarr,
+                    };
+                    // 发起视频
+                    api.ajax({
+                        url: baseUrl + 'message/videoCall',
+                        method: 'post',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                from_uid: $api.getStorage('uid'),
+                                to_uid: id,
+                                type: '0',
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == 200) {
+                            _this.video1[_this.videoIndex].pause()
+                            // api.sendEvent({
+                            //     name: 'videoPause',
+                            // });
+                            api.openWin({
+                                name: 'call1',
+                                url: 'call1.html',
+                                slidBackEnabled: false,
+                                pageParam: {
+                                    extra: tempExtra,
+                                    type: 'videoCall',
+                                    time: ret.data.time,
+                                }
+                            });
+                        } else if (ret.status == 401) {
+                            _this.getDialogBoxRecharge(ret.message[0]);
+                        } else {
+                            api.toast({
+                                msg: ret.message[0]
+                            })
+                        }
+                    })
+                },
+                getDialogBoxRecharge: function (txt) {
+                    dialogBox.evaluation({
+                        styles: {
+                            bg: '#fff',
+                            corner: 2,
+                            w: 300,
+                            title: {
+                                marginT: 20,
+                                size: 14,
+                                h: 50,
+                                color: '#000',
+                                bold: true,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            },
+                            buttons: [{
+                                w: 300,
+                                h: 50,
+                                color: '#0077ff',
+                                size: 14,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            }, {
+                                w: 300,
+                                h: 50,
+                                color: '#0077ff',
+                                size: 14,
+                                borderColor: '#eee',
+                                borderWidth: 1
+                            }, {
+                                w: 300,
+                                h: 50,
+                                color: '#000',
+                                size: 14
+                            }]
+                        },
+                        texts: {
+                            title: txt,
+                            buttons: [{
+                                text: '去赚钱'
+                            }, {
+                                text: '去充值'
+                            }, {
+                                text: '取消'
+                            }]
+                        },
+                        tapClose: true
+                    }, function (ret, err) {
+                        if (ret) {
+                            if (ret.index == 0) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                                api.openWin({
+                                    name: 'share',
+                                    url: 'share.html',
+                                    slidBackEnabled: false
+                                });
+                            }
+                            if (ret.index == 1) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                                api.openWin({
+                                    name: 'recharge',
+                                    url: 'recharge.html',
+                                    slidBackEnabled: false
+                                });
+                            }
+                            if (ret.index == 2) {
+                                dialogBox.close({
+                                    dialogName: 'evaluation'
+                                });
+                            }
+                        }
+                    });
+                },
+
+
+            },
+        })
+    }
+</script>

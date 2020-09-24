@@ -1,0 +1,638 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>首页</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/home.css" />
+</head>
+
+<body>
+  <div id="app" >
+   <!-- <div class="home-content">
+    <div class="content-wrap" style="float: right">
+      <div class="content-wrap-item">
+        <div class="item-img">
+          <img src="../image/img1.jpg" alt="">
+        </div>
+        <div class="item-autograph">
+          <p>收拾好了今日甜甜的我114587878787878</p>
+        </div>
+         <div class="item-skill">
+            <div>LOL</div>
+            <div>10币 / 局</div>
+        </div>
+         <div class="">
+
+        </div>
+      </div>
+    </div> -->
+    <div class="wrap flex-wrap flex-vertical">
+       <div class="home-main flex-con">
+        <!-- <div id="banner" class="banner-wrap"></div> -->
+        <!-- <div class="imgLinkBox">
+          <div class="imgLink" tapmode @click="openWinVideoChat">
+            <img src="../image/function_img1.png" alt="">
+          </div>
+          <div class="imgLink" tapmode @click="openWinShare">
+            <img src="../image/function_img2.png" alt="">
+          </div>
+        </div> -->
+        <!-- <div @click="randomCall" class="matchBox">
+          <div class="match-l">
+            <img src="../image/random-img.png" alt="">
+          </div>
+          <div class="match-c mt">
+            <div class="match-info">
+              <div>随机匹配</div>
+              <div>{{random.people}}人正在偶遇</div>
+            </div>
+            <div>{{random.scale}}聊币/分</div>
+          </div>
+          <div class="match-r"> 
+            <div class="matchImg">
+              <img :src="random.list[0]" alt="">
+            </div>
+            <div class="matchImg">
+              <img :src="random.list[1]" alt="">
+            </div>
+            <div class="match-icon">
+              <i class="iconfont icon-next"></i>
+            </div>
+          </div>
+        </div> -->
+        <div class="home-title">
+          <div v-for='(item, index) in titleList' :key='item.id' @click='getSearch(item)' class="title-wrap">
+            <img :src='item.img' />
+            <div v-text='item.title' class="title"></div>
+          </div>
+        </div>
+        <div class="homeList flex-con" id="homeList">
+          <div class="homeRinght">
+            <div @click="openDetail(item.member_id)" v-for="(item, index) in homeList" :key=item.member_id
+              class="homeList-item" v-if='index%2==0'>
+              <img v-lazy="item.background[0]" alt="">
+              <p v-text='item.tag'></p>
+              <div class="item-user">
+                <div class="userMsg">
+                  <img v-lazy="item.avatar + '?imageView2/1/w/300'" alt="">
+                  <div>{{item.name}}</div>
+                </div>
+                <span>{{item.price}}聊币/分</span>
+              </div>
+              <div class="homeList-status">
+                <i :class="['status' + item.status]"></i>{{item.status | getStatus}}
+              </div>
+            </div>
+          </div>
+          <div class="homeLeft">
+            <div @click="openDetail(item.member_id)" v-for="(item, index) in homeList" :key=item.member_id
+              class="homeList-item" v-if='index%2!=0'>
+              <img v-lazy="item.background[0]" alt="">
+              <p v-text='item.tag'></p>
+              <div class= "item-user">
+                <div class="userMsg">
+                  <img :src="item.avatar + '?imageView2/1/w/300'" alt="">
+                  <div>{{item.name}}</div>
+                </div>
+                <span>{{item.price}}聊币/分</span>
+              </div>
+              <div class="homeList-status">
+                <i :class="['status' + item.status]"></i>{{item.status | getStatus}}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div v-if='adList.length > 0' v-for="(item, index) in adList" class="homeList-item">
+          <a :href="item.ad_link" target="_parent">
+            <img :src="item.ad_file + '?imageView2/1/w/200'" alt="">
+            <img src="../image/ad.png" alt="" class="adImg"> -->
+            <!-- <div class="item-user">
+            <div class="userMsg">
+              <img :src="item.avatar + '?imageView2/1/w/300'" alt="">
+              <h4>{{item.name}}</h4>
+            </div>
+            <span>{{item.price}}聊币/分</span>
+          </div>
+          <div class="homeList-status">
+            <i :class="['status' + item.status]"></i>{{item.status | getStatus}}
+          </div> -->
+          <!-- </a> -->
+        <!-- </div> -->
+      <!-- </div> -->
+      <!-- <div @click="sayHello" class="sayHello">
+        <img src="../image/hi.png" alt="">
+      </div> -->
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/vue-lazyload.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox, d_link;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    dialogBox = api.require('dialogBox');
+    UIScrollPicture = api.require('UIScrollPicture');
+    Vue.use(VueLazyload);
+
+    app = new Vue({
+      el: '#app',
+      data: {
+        banner: [],
+        adList: [],
+        random: {
+          scale: '10',
+          people: 962,
+          list: ['', '']
+        },
+        homeList: [],
+        info: {},
+        page: 1,
+        sex: 0,
+        onTop: 0,
+        ad: [],
+        titleList: []
+      },
+      created: function () {
+        var _this = this;
+        api.setRefreshHeaderInfo({
+          bgColor: '#ccc',
+          textColor: '#fff',
+          textDown: '下拉刷新...',
+          textUp: '松开刷新...'
+        }, function (ret, err) {
+          _this.page = 1;
+          setTimeout(function () {
+            _this.getHomeIndex();
+          }, 1000);
+        });
+        api.addEventListener({
+          name: 'refreshHome'
+        }, function (ret, err) {
+          _this.page = 1;
+          _this.getHomeIndex();
+        });
+        api.addEventListener({
+          name: 'backRefreshHome'
+        }, function (ret, err) {
+          _this.page = 1;
+          _this.getHomeIndex();
+        });
+        //检测滑动到底部
+        api.addEventListener({
+          name: 'scrolltobottom',
+          extra: {
+            threshold: 0
+          }
+        }, function (ret, err) {
+          setTimeout(function () {
+            _this.getHomeIndex();
+          }, 500);
+        });
+        // 检测滑动
+        // window.addEventListener('scroll', this.handleScroll);
+        // window.addEventListener('touchstart',function(e){
+        //                                 console.log('touchstart');
+        //                         })
+        // window.addEventListener('touchmove',function(event){
+        //                                 console.log(event.touches[0].clientX);
+        // })
+      },
+      mounted: function () {
+        var _this = this;
+        _this.getHomeIndex();
+        _this.getHomeImg();
+        // 诱导弹出页面
+        // t2 = setTimeout(
+        //   function () {
+        //     // alert(_this.info.certification)
+        //       if (_this.info.level == 0) {
+        //         _this.jumpVoice()
+        //       }
+
+        //     }
+        //   }, 10000)
+        // t3 = setTimeout(
+        //   function () {
+        //     if (_this.info.certification == 0) {
+        //       if (_this.info.level == 0) {
+        //         _this.jumpVoice()
+        //       }
+        //     }
+        //   }, 600000)
+        // api.addEventListener({
+        //   name: 'clearTimer'
+        // }, function (ret, err) {
+        //   if (ret) {
+        //     clearTimeout(t2)
+        //     clearTimeout(t3)
+        //   }
+        // });
+      },
+      methods: {
+        // 上划下划隐藏显示
+        // handleScroll() {
+        //   const top = document.body.scrollTop
+        //   if (top>=50 ) {
+
+        //       if(top > this.onTop){
+        //         api.sendEvent({
+        //             name: 'topGlide',
+        //             extra: {}
+        //         });
+        //       this.onTop=top
+        //       }
+        //     }else{
+        //       api.sendEvent({
+        //           name: 'dowmGlide',
+        //           extra: {}
+        //       });
+        //     this.onTop=top
+        //     }
+        // },
+        getSearch(item) {
+          if (item.title != '全部') {
+            api.openWin({
+              name: 'search_details',
+              url: 'search_details.html',
+              pageParam: {
+                id: item.id,
+                title: item.title,
+                type:item.lx
+              },
+              animation: {
+              type: "movein",                //动画类型（详见动画类型常量）
+              subType: "from_right",       //动画子类型（详见动画子类型常量）
+              duration: 300
+            }
+            })
+          } else {
+            api.openWin({
+              name: 'search_all',
+              url: 'search_all.html',
+              pageParam: {
+                titleList: this.titleList
+              }
+            })
+          }
+          // api.toast({
+          //     msg: id,
+          //     duration: 2000,
+          //     location: 'bottom'
+          // });
+        },
+        jumpVoice: function () {
+          api.openWin({
+            name: 'video_voice',
+            url: 'video_voice.html',
+          })
+        },
+        //轮播图
+        initBanner: function () {
+          var _this = this;
+          var bannerList = [];
+          if (_this.banner.length > 0) {
+            for (var i = 0; i < _this.banner.length; i++) {
+              bannerList.push(_this.banner[i].ad_file)
+            }
+            var banner_offset = $api.offset($api.byId('banner'));
+            UIScrollPicture.open({
+              rect: {
+                x: banner_offset.l,
+                y: banner_offset.t,
+                w: banner_offset.w,
+                h: banner_offset.h
+              },
+              data: {
+                paths: bannerList
+              },
+              styles: {
+                indicator: {
+                  dot: {
+                    w: 1,
+                    h: 1,
+                    r: 2,
+                    margin: 2
+                  },
+                  align: 'center',
+                  color: '#FFFFFF',
+                  activeColor: '#DA70D6'
+                },
+              },
+              placeholderImg: 'widget:../image/photo.png',
+              contentMode: 'scaleToFill',
+              interval: 3,
+              fixedOn: api.frameName,
+              loop: true,
+              fixed: false
+            }, function (ret, err) {
+              // var _this = this
+              // console.log(JSON.stringify(ret))
+              d_link = ret.index
+              if (ret.eventType == 'click') {
+                api.openWin({
+                  name: 'new1',
+                  url: 'new1.html',
+                  pageParam: {
+                    link: _this.banner[d_link].ad_link,
+                    ad_name: _this.banner[d_link].ad_name
+                  }
+
+                });
+              }
+            });
+          } else {
+            $api.css($api.byId('banner'), 'height: 0px;');
+          }
+        },
+        getHomeIndex: function () {
+          var _this = this;
+          // _this.adL();
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          api.ajax({
+            url: baseUrl + 'home/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                page: _this.page,
+              },
+            }
+          }, function (ret, err) {
+            api.refreshHeaderLoadDone();
+            api.hideProgress();
+            if (ret.status == 200) {
+              _this.banner = ret.data.banner;
+              if (_this.page == 1) {
+                _this.banner = ret.data.banner;
+                _this.page++;
+                _this.random = ret.data.random;
+                _this.info = ret.info;
+                _this.sex = ret.info.sex;
+                if (ret.data.list.length > 0) {
+                  _this.homeList = ret.data.list;
+                  // console.log(JSON.stringify(_this.homeList));
+                  // for(var i=0;i<_this.adList.length;i++){
+                  //   _this.homeList.push(_this.adList[i])
+                  // }
+                  // _this.homeList.push(_this.adList)
+                  // console.log(JSON.stringify(_this.homeList))
+                }
+                // _this.initBanner();
+              } else if (_this.page <= ret.pagination.last_page) {
+                _this.page++;
+                for (var i = 0; i < ret.data.list.length; i++) {
+                  _this.homeList.push(ret.data.list[i])
+                }
+              } else {
+                api.toast({
+                  msg: '没有更多了'
+                })
+              }
+            }
+          })
+        },
+        getHomeImg() {
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          axios('home_index', 'get', '', '', (res, err) => {
+            if (res) {
+              this.titleList = res.data
+              // console.log(JSON.stringify( res.data))
+            }
+          })
+        },
+        //打开他人页面
+        openDetail: function (id) {
+          api.openWin({
+            name: 'user_home',
+            url: 'user_home.html',
+            slidBackEnabled: true,
+            useWKWebView:true,
+            historyGestureEnabled:true,
+            bgColor: '#fff',
+            pageParam: {
+              member_id: id
+            },
+            animation: {
+              type: "movein",                //动画类型（详见动画类型常量）
+              subType: "from_right",       //动画子类型（详见动画子类型常量）
+              duration: 300
+            }
+          });
+        },
+
+        openWinVideoChat: function () {
+          api.sendEvent({
+            name: 'openWinVideoChat',
+          });
+        },
+        //搜索
+        openWinShare: function () {
+          api.openWin({
+            name: 'share',
+            url: 'share.html',
+            slidBackEnabled: false
+          });
+        },
+        //随机
+        randomCall: function () {
+          var _this = this;
+          if (Number(_this.info.gold) < Number(_this.random.scale)) {
+            _this.getDialogBoxRecharge('聊币不够了');
+          } else {
+            api.openWin({
+              name: 'random',
+              url: 'random.html',
+              slidBackEnabled: false,
+              pageParam: _this.info
+            });
+          }
+        },
+
+        getDialogBoxRecharge: function (txt) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: txt,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+        //广告
+        // adL:function(){
+        //   var _this = this;
+        //   api.ajax({
+        //     url: baseUrl + 'ad/index',
+        //     method: 'get',
+        //     headers: {
+        //       token: $api.getStorage('deviceToken')
+        //     },
+        //     data: {
+        //       values: {
+        //         uid: $api.getStorage('uid'),
+        //         type:'home'
+        //       },
+        //     }
+        //   }, function (ret, err) {
+        //     // _this.ad.push(ret.data[0],ret.data[2])
+        //     // _this.ad_link=ret.data[0].ad_link;
+        //     // _this.ad_file=ret.data[0].ad_file;
+        //     // for(var i=0;i<ret.data.length;i++){
+        //     //   var ad=ret.data[i]
+        //     //    _this.adList.push(ret.data[i][0])
+        //     // }
+        //     _this.adList=ret.data
+        //   })
+        // },
+        //一键打招呼
+        sayHello: function () {
+          var _this = this;
+          api.showProgress({
+            animationType: 'zoom',
+            title: '',
+            text: ''
+          });
+          api.ajax({
+            url: baseUrl + 'home/greet',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+              },
+            }
+          }, function (ret, err) {
+            api.hideProgress();
+            if (ret) {
+              if (ret.status == 200) {
+                api.toast({
+                  msg: '打招呼成功',
+                });
+              }
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        },
+
+      },
+
+      filters: {
+        getStatus: function (value) {
+          if (value == '0') {
+            return '离线';
+          }
+          if (value == '1') {
+            return '在线';
+          }
+          if (value == '2') {
+            return '离开';
+          }
+          if (value == '4') {
+            return '忙碌';
+          }
+        },
+      }
+    })
+
+
+
+
+
+  }
+</script>

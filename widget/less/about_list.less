@@ -1,0 +1,182 @@
+// out: ../css/about_list.css
+@import 'common';
+.about_list{
+    // width: 400px;
+    
+    .about_items{
+        margin: 40px 10px;
+        box-shadow: 0px 0px 5px #9b9b9b;
+        position: relative;
+        border-radius: 5px;
+        .about_items_plan{
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            font-size: 20px;
+            background-color: #fff;
+            color: #9b9b9b;
+            span{
+                color: #333;
+            }
+        }
+        .about_items_cost{
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            color: #e12e85;
+            font-size: 20px;
+            background-color: #fff;
+        }
+        .about_items_content{
+            padding: 30px 20px;
+            position: relative;
+            color: #9b9b9b;
+            .content_info{
+                .content_info_time{
+                    line-height: 40px;
+                }
+            }
+            .content_img{
+                width: 80px;
+                height: 80px;
+                position: absolute; 
+                top: 30px;
+                right: 10px;
+                img{
+                    width: 100%;
+                    height: 100%;
+                    border-radius:3px;
+                }
+            }
+        }
+        .about_items_user{
+            padding: 0 20px;
+            .user_img{
+                width: 46px;
+                height: 46px;
+                background-color: #000;
+                border-radius:50%; 
+                display: inline-block;
+                img{
+                    width: 40px;
+                    height: 40px;
+                    border-radius:50%;
+                    margin: 3px;
+                }
+            }
+            .user_info{
+                height: 100%;
+                display: inline-block;
+                vertical-align: top;
+                .user_info_age{
+                    color: #9b9b9b;
+                    line-height: 35px;
+                }
+            }
+            .user_button{
+                float: right;
+                padding: 5px 15px;
+                border-radius: 25px;
+                border: 1px solid #000;
+                margin-top: 5px;
+            }
+        }
+    }
+}
+.about_add{
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius:50%;
+    position: fixed;
+    right: 30px;
+    bottom: 10%; 
+    background-color: #e12e85;
+    text-align: center;
+    z-index: 2; /* Safari 和 Chrome */
+    // -o-transform:rotate(40deg); 
+    .icon-font-add{
+        color: #fff;
+       
+    }
+}
+.about_add_active{
+    animation:trans .1s linear infinite ;
+    animation-iteration-count:1;
+    animation-fill-mode : forwards;
+   
+}
+.about_add_return{
+    animation:trans1 .1s linear infinite ;
+    animation-iteration-count:1;
+    animation-fill-mode : forwards;
+}
+@keyframes trans{
+    from{-webkit-transform:rotate(0deg)}
+    to{-webkit-transform:rotate(45deg)}
+}
+@keyframes trans1{
+    from{-webkit-transform:rotate(45deg)}
+    to{-webkit-transform:rotate(0deg)}
+}
+.about_found{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    .about_found_bg{
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, .3)
+    }
+    .about_found_content{
+        width: 90%;
+        margin-left: 5%;
+        height: 300px;
+        background-color: #fff;
+        position: absolute;
+        border-radius:5px; 
+        top:20%;
+        .found_title{
+            width: 100%;
+            line-height: 50px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .found_items{
+            width: 100%;
+            ul{
+                width: 100%;
+                height: 200px;
+                display: flex;
+                flex-wrap: wrap;
+                margin-top: 20px;
+                li{
+                    width: 25%;
+                    height: 80px;
+                    padding: 0 5px;
+                    box-sizing: border-box;
+                    div{
+                        width: 60px;
+                        height: 60px;
+                        border-radius:50%; 
+                        background-color: #000;
+                        margin: 0 auto;
+                        img{
+                            width: 100%;
+                            height: 100%;
+                            border-radius:50%; 
+                        }
+                    }
+                    p{
+                        margin-top: 10px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+    
+}

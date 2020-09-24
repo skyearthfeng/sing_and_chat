@@ -1,0 +1,79 @@
+@import 'http://at.alicdn.com/t/font_578379_k03tx603kw.css';
+html, body{
+    width: 100%;
+    font-size: 14px;
+    color: #333;
+    background-color: #f6f6f6;
+}
+#app{
+    width: 100%;
+}
+
+.establish-info{
+    width: 100%;
+    margin-top: 10px;
+}
+
+.establish-border{
+    width: 90%;
+    margin: 0 auto 20px;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.establish-content{
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 1px solid #999;
+    display: flex;
+    justify-content: space-between;
+}
+
+.establish-content:last-child{
+    border-bottom: none;
+}
+
+.content-title{
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.content-info{
+    margin-right: 20px;
+    font-size: 12px;
+    color: #666;
+}
+
+.establish-content input{
+    width: 31%;
+    color: #666;
+    font-size: 12px;
+    margin-right: 20px;
+}
+
+.explain{
+    width: 95%;
+    margin: 0 auto;
+}
+
+.explain-title{
+    margin-bottom: 15px;
+}
+
+.explain textarea{
+    width: 94%;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 10px;
+    height: 60px;
+}
+
+.photo{
+    width: 95%;
+    margin: 30px auto 0;
+    border: 1px solid #333;
+    border-radius: 20px;
+    height: 80px;
+}

@@ -1,0 +1,356 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>编辑个人资料</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/edit.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class=" border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <h1 class="header-title">编辑个人资料</h1>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div class="imglist">
+          <div class="imglist-t clearfix">
+            <div class="imgleft">
+              <img @click="showActionSheet(5)" :src="avatar" alt="">
+            </div>
+            <div class="imgright">
+              <img @click="showActionSheet(0)" :src="imgList[0]" alt="">
+              <img @click="showActionSheet(1)" :src="imgList[1]" alt="">
+            </div>
+          </div>
+          <div class="imgbottom clearfix">
+            <div class="imgbottom-l">
+              <img @click="showActionSheet(2)" :src="imgList[2]" alt="">
+            </div>
+            <div class="imgbottom-l">
+              <img @click="showActionSheet(3)" :src="imgList[3]" alt="">
+            </div>
+            <div class="imgbottom-l">
+              <img @click="showActionSheet(4)" :src="imgList[4]" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="edit-info">
+          <div class="input-wrap">
+            <div class="label">昵称</div>
+            <input v-model="form.name" type="text" placeholder="请填写昵称">
+          </div>
+          <div class="input-wrap">
+            <div class="label">职业</div>
+            <input v-model="form.occupation" type="text" placeholder="请填写职业">
+          </div>
+          <div class="textarea-wrap">
+            <div class="label">个性签名</div>
+            <textarea v-model="form.signature" placeholder="请填写个性签名"></textarea>
+          </div>
+        </div>
+        <div class="btn-wrap">
+          <button @click="edtiorSubmit" type="button">提交</button>
+        </div>
+        <div v-if="FNImageClipShow" class="FNImageClip-control">
+          <span @click="FNImageClip_cancel">取消</span>
+          <span @click="FNImageClip_enter">确定</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, FNImageClip;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    FNImageClip = api.require('FNImageClip');
+    app = new Vue({
+      el: '#app',
+      data: {
+        form: {
+          uid: $api.getStorage('uid'),
+          name: '',
+          occupation: '',
+          signature: '',
+          avatar: '',
+          files0: '',
+          files1: '',
+          files2: '',
+          files3: '',
+          files4: ''
+        },
+        avatar: '../image/img1.jpg',
+        imgList: ['../image/img1.jpg', '../image/img_edit_add.png', '../image/img_edit_add.png',
+          '../image/img_edit_add.png', '../image/img_edit_add.png'
+        ],
+        qiniuToken: '',
+        FNImageClipShow: false,
+        imgIndex: -1
+      },
+      created: function () {
+        this.getPageParam();
+        this.getQiniuToken();
+      },
+      mounted: function () {},
+      methods: {
+        // 获取页面传值
+        getPageParam: function () {
+          this.avatar = api.pageParam.avatar;
+          this.form.name = api.pageParam.name;
+          this.form.signature = api.pageParam.signature;
+          this.form.occupation = api.pageParam.occupation;
+          for (var i = 0; i < api.pageParam.background.length; i++) {
+            if (api.pageParam.background[i] != '') {
+              this.imgList[i] = api.pageParam.background[i];
+              this.form['files' + i] = api.pageParam.background[i];
+            }
+          }
+        },
+
+        // 获取七牛token
+        getQiniuToken: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'qiniu/token',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              }
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              _this.qiniuToken = ret.data[0];
+            }
+          })
+        },
+
+        showActionSheet: function (index) {
+          var _this = this;
+          _this.imgIndex = index;
+          api.actionSheet({
+            title: '',
+            cancelTitle: '取消',
+            destructiveTitle: '',
+            buttons: ['拍照', '相册']
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.buttonIndex == 1) {
+                _this.getImageFile('camera');
+              }
+              if (ret.buttonIndex == 2) {
+                _this.getImageFile('library');
+              }
+            }
+          });
+        },
+
+        getImageFile: function (type) {
+          var _this = this;
+          api.getPicture({
+            sourceType: type,
+            encodingType: 'png',
+            mediaValue: 'pic',
+            destinationType: 'url',
+            allowEdit: false,
+            saveToPhotoAlbum: false
+          }, function (ret, err) {
+            if (ret) {
+              FNImageClip.open({
+                rect: {
+                  x: 0,
+                  y: 0,
+                  w: api.winWidth,
+                  h: api.winHeight - 50
+                },
+                srcPath: ret.data,
+                style: {
+                  mask: 'rgba(0,0,0,0.5)',
+                  clip: {
+                    w: api.winWidth - 2,
+                    h: api.winWidth - 2,
+                    x: 1,
+                    y: (api.winHeight - api.winWidth - 50) / 2,
+                    borderColor: '#0f0',
+                    borderWidth: 1,
+                    appearance: 'rectangle'
+                  }
+                },
+                mode: 'image',
+                fixedOn: api.frameName
+              }, function (ret, err) {
+                if (ret.status) {
+                  _this.FNImageClipShow = true;
+                }
+              });
+            }
+          });
+        },
+
+        FNImageClip_cancel: function () {
+          this.FNImageClipShow = false;
+          FNImageClip.close();
+        },
+
+        FNImageClip_enter: function () {
+          var _this = this;
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          FNImageClip.save({
+            destPath: 'fs://imageClip/liaola_' + (+new Date()) + '.png',
+            copyToAlbum: false,
+            quality: 1
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.destPath == undefined) {
+                api.hideProgress();
+                api.toast({
+                  msg: '图片保存失败'
+                })
+                this.FNImageClipShow = false;
+                FNImageClip.close();
+              } else {
+                _this.uploadImg(ret.destPath)
+              }
+            } else {
+              api.hideProgress();
+              api.toast({
+                msg: '图片保存失败'
+              })
+              this.FNImageClipShow = false;
+              FNImageClip.close();
+            }
+          });
+        },
+
+        // 上传图片
+        uploadImg: function (fileUrl) {
+          var _this = this;
+          api.ajax({
+            url: qiniuBaseUrl,
+            method: 'post',
+            data: {
+              values: {
+                token: this.qiniuToken
+              },
+              files: {
+                file: fileUrl
+              }
+            }
+          }, function (ret, err) {
+            api.hideProgress();
+            if (ret) {
+              _this.FNImageClipShow = false;
+              FNImageClip.close();
+              if (_this.imgIndex == 5) {
+                _this.form.avatar = ret.key;
+                _this.avatar = qiniuImageUrl + ret.key;
+              } else {
+                _this.form['files' + _this.imgIndex] = ret.key;
+                _this.imgList.splice(_this.imgIndex, 1, qiniuImageUrl + ret.key);
+              }
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试',
+                duration: 2000,
+                location: 'bottom'
+              });
+            }
+          });
+        },
+
+        edtiorSubmit: function () {
+          var _this = this;
+          if (_this.form.name == '') {
+            api.toast({
+              msg: '请填写昵称',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (_this.form.occupation == '') {
+            api.toast({
+              msg: '请填写职业',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (_this.form.signature == '') {
+            api.toast({
+              msg: '请填写个性签名',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          api.ajax({
+            url: baseUrl + 'user/store',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: _this.form
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              api.toast({
+                msg: '提交成功',
+                duration: 2000,
+                location: 'bottom'
+              });
+              api.sendEvent({
+                name: 'refreshMy',
+              });
+              api.closeWin();
+            }
+            if (ret.status == '400') {
+              api.toast({
+                msg: ret.message,
+                duration: 2000,
+                location: 'bottom'
+              })
+            }
+
+          })
+        },
+
+        // 后退
+        goback: function () {
+          api.closeWin();
+        },
+      },
+    })
+  }
+</script>

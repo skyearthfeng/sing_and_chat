@@ -1,0 +1,427 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>充值</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/recharge.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <!-- <div class="wrap flex-wrap flex-vertical"> -->
+        <header id="header" >
+            <div class="header-wrap">
+                <div @click="api.closeWin();" class="header-left">
+                    <i class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">渠道商管理</div>
+                <div class="header-go" @click='openShare'>去分享</div>
+            </div>
+        </header>
+        <!-- <div class="pop" v-if='tag == null'>
+                <header id="header" class="border-bottom">
+                    <div class="header-wrap">
+                        <div @click="api.closeWin();" class="header-left">
+                            <i class="iconfont icon-pre"></i>
+                        </div>
+                        <div class="header-title">渠道商申请</div>
+                    </div>
+                </header>
+                <input type="text" name="" id="" placeholder="请输入姓名" v-model='name'>
+                <input type="text" name="" id="" placeholder="请输入手机号" v-model='tel'>
+                <input type="text" name="" id="" placeholder="请输入邀请人ID" v-model='invite'>
+                <button @click='ensureTag'>确认开通</button> -->
+        <!-- </div> -->
+        <ul class="recharge-item border-bottom border-top">
+            <li @click='rechargeClick(0)' v-bind:class="[index==0?'active':'']" class="border-bottom">直推</li>
+            <li @click='rechargeClick(1)' v-bind:class="[index==1?'active':'']" class="border-bottom">间推</li>
+            <li @click='rechargeClick(2)' v-bind:class="[index==2?'active':'']" class="border-bottom">团队</li>
+        </ul>
+        <div v-for="(item, i) in info" class="list-item" v-show='index==0'>
+            <div class="avatar">
+                <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+                <div class="name">{{item.name}}(ID{{item.member_id}})
+                </div>
+                <div class="info">{{item.created_at}}</div>
+            </div>
+            <div>
+                <span>+{{item.subsize}}</span>
+            </div>
+        </div>
+        <div v-for="(item, i) in info_2" class="list-item" v-show='index==1'>
+            <div class="avatar">
+                <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+                <div class="name">{{item.name}}(ID{{item.member_id}})
+                </div>
+                <div class="info">{{item.created_at}}</div>
+            </div>
+            <div>
+                <span>+{{item.subsize}}</span>
+            </div>
+        </div>
+        <div v-for="(item, i) in info_3" class="list-item" v-show='index==2'>
+            <div class="avatar">
+                <img :src="item.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+                <div class="name">{{item.name}}(ID{{item.member_id}})
+                </div>
+                <div class="info">{{item.created_at}}</div>
+            </div>
+            <div>
+                <span>+{{item.subsize}}</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app, wx, qq;
+    apiready = function () {
+        wx = api.require('wx');
+        qq = api.require('QQPlus');
+        $api.fixStatusBar($api.dom('#header'));
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+        app = new Vue({
+            el: '#app',
+            data: {
+                index: 0,
+                recordRe: [],
+                recordCon: [],
+                name: '',
+                tel: '',
+                invite: '',
+                tag: api.pageParam.tag,
+                info: [],
+                info_2: [],
+                info_3: [],
+                shareTitle: '',
+                shareContent: '',
+                shareUrl: '',
+                shareImage: '',
+                shareImageQQ: '',
+                page1: 1,
+                page2: 1,
+                page3: 1,
+            },
+            created: function () {
+                this.rechargeClick(0);
+            },
+            mounted: function () {
+                var _this = this;
+                this.planShare();
+                //滑到底部
+                api.addEventListener({
+                    name: 'scrolltobottom',
+                    extra: {
+                        threshold: 0
+                    }
+                }, function (ret, err) {
+                    setTimeout(function () {
+                        _this.rechargeClick(_this.index);
+                    }, 500);
+                });
+            },
+            methods: {
+                //开通申请
+                ensureTag: function () {
+                    var _this = this;
+                    if (_this.name == '') {
+                        api.toast({
+                            msg: '请填写姓名',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        return false;
+                    };
+                    if (_this.tel == '') {
+                        api.toast({
+                            msg: '请填写手机号',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        return false;
+                    };
+                    if (_this.invite == '') {
+                        api.toast({
+                            msg: '请填写邀请人ID',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        return false;
+                    };
+                    api.ajax({
+                        url: baseUrl + 'user/store',
+                        method: 'post',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                tag: 1,
+                            },
+                        }
+                    }, function (ret, err) {
+                        _this.tag = 1;
+                        api.sendEvent({
+                            name: 'refreshMy',
+                        });
+                        api.toast({
+                            msg: ret.message[0]
+                        })
+                    })
+                },
+                // 获取列表信息
+                rechargeClick: function (index) {
+                    var _this = this;
+                    var type;
+                    var page;
+                    this.index = index;
+                    if (index == 0) {
+                        type = 'A';
+                        page = _this.page1;
+                    } else if (index == 1) {
+                        type = 'B';
+                        page = _this.page2;
+                    } else {
+                        type = 'C';
+                        page = _this.page3;
+                    }
+                    api.ajax({
+                        url: baseUrl + 'user/shares',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                type: type,
+                                page: page,
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (type == 'A') {
+                            if (_this.page1 == 1) {
+                                _this.page1++;
+                                if (ret.data.data.length > 0) {
+                                    _this.info = ret.data.data;
+                                }
+                            } else if (_this.page1 <= ret.data.last_page) {
+                                _this.page1++;
+                                for (var i = 0; i < ret.data.data.length; i++) {
+                                    _this.info.push(ret.data.data[i])
+                                }
+                            } else {
+                                api.toast({
+                                    msg: '没有更多了'
+                                })
+                            }
+                        } else if (type == 'B') {
+                            if (_this.page2 == 1) {
+                                _this.page2++;
+                                if (ret.data.data.length > 0) {
+                                    _this.info_2 = ret.data.data;
+                                }
+                            } else if (_this.page2 <= ret.data.last_page) {
+                                _this.page2++;
+                                for (var i = 0; i < ret.data.data.length; i++) {
+                                    _this.info_2.push(ret.data.data[i])
+                                }
+                            } else {
+                                api.toast({
+                                    msg: '没有更多了'
+                                })
+                            }
+                        } else {
+                            if (_this.page3 == 1) {
+                                _this.page3++;
+                                if (ret.data.data.length > 0) {
+                                    _this.info_3 = ret.data.data;
+                                }
+                            } else if (_this.page3 <= ret.data.last_page) {
+                                _this.page3++;
+                                for (var i = 0; i < ret.data.data.length; i++) {
+                                    _this.info_3.push(ret.data.data[i])
+                                }
+                            } else {
+                                api.toast({
+                                    msg: '没有更多了'
+                                })
+                            }
+                        }
+
+                    })
+
+                },
+                planShare: function () {
+                    var __this = this;
+                    api.ajax({
+                        url: baseUrl + 'share/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                                type: 'spread'
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == '200') {
+                            __this.shareTitle = ret.data.title;
+                            __this.shareContent = ret.data.content;
+                            __this.shareUrl = ret.data.url + '?channel=' + $api.getStorage('channel') + '&tuid=' + $api.getStorage('uid');
+                            __this.shareImage = ret.data.image;
+                            __this.shareImageQQ = ret.data.image;
+                        }
+                    })
+                },
+                openShare: function () {
+                    var __this = this;
+                    var dialogBox = api.require('dialogBox');
+                    dialogBox.actionMenu({
+                        rect: {
+                            h: 100
+                        },
+                        items: [{
+                            text: '微信好友',
+                            icon: 'widget://image/circular-WeChat.png'
+                        },
+                        {
+                            text: '微信朋友圈',
+                            icon: 'widget://image/circle-friend.png'
+                        },
+                        {
+                            text: 'QQ空间',
+                            icon: 'widget://image/circular-qq_space.png'
+                        },
+                        {
+                            text: 'QQ好友',
+                            icon: 'widget://image/circular-QQ.png'
+                        }
+                        ],
+                        styles: {
+                            bg: '#FFF',
+                            column: 4,
+                            itemText: {
+                                color: '#000',
+                                size: 14,
+                                marginT: 5
+                            },
+                            itemIcon: {
+                                size: 50
+                            }
+                        },
+                        tapClose: true
+                    }, function (ret) {
+                        if (ret.index == 0) {
+                            wx.shareWebpage({
+                                // apiKey: wx_apiKey,
+                                scene: 'session',
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                thumb: __this.shareImage,
+                                contentUrl: __this.shareUrl
+                            }, function (ret, err) {
+                                // __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 1) {
+                            wx.shareWebpage({
+                                // apiKey: wx_apiKey,
+                                scene: 'timeline',
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                thumb: __this.shareImage,
+                                contentUrl: __this.shareUrl
+                            }, function (ret, err) {
+                                // __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 2) {
+                            qq.shareNews({
+                                type: 'QZone',
+                                url: __this.shareUrl,
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                imgUrl: __this.shareImageQQ
+                            }, function (ret, err) {
+                                // __this.closdialg();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                        if (ret.index == 3) {
+                            qq.shareNews({
+                                type: 'QFriend',
+                                url: __this.shareUrl,
+                                title: __this.shareTitle,
+                                description: __this.shareContent,
+                                imgUrl: __this.shareImageQQ
+                            }, function (ret, err) {
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: '分享成功'
+                                    });
+                                } else {
+                                    api.toast({
+                                        msg: '分享失败'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                },
+                closdialg: function () {
+                    var dialogBox = api.require('dialogBox');
+                    dialogBox.close({
+                        dialogName: 'actionMenu'
+                    });
+                }
+            },
+        })
+    }
+</script>

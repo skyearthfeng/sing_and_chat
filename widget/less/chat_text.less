@@ -1,0 +1,104 @@
+// out : ../css/ranking.css
+@import 'common';
+.nav{
+    display: flex;
+    padding-left: 10px;
+    span{
+        padding: 10px 10px 10px 0;
+        position: relative;
+    }
+    .avtive:after{
+        position: absolute;
+        left: 2px;
+        bottom: 5px;
+        content: '';
+        width:25px;
+        height: 3px;
+        background-color: @main-color;
+        border-radius: 30px;
+    }
+}
+ul{
+    li{
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        .index{
+            // margin-right: 20px;
+            width: 36px;
+            text-align: left;
+            font-size: 18px;
+        }
+        .content{
+            display: flex;
+            margin-right: auto;
+            img{
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+            div{
+                display: flex;
+                flex-direction: column;
+                padding-left: 20px;
+                p{
+                    font-size: 16px;
+                }
+                .status{
+                    font-size: 14px;
+                    color: #bbb;
+                }
+            }
+        }
+        .gift{
+            width: 80px;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 30px;
+            background-image: url('../image/bg_noble_status.png');
+            background-size: 100% 100%;
+            text-align: center;
+            color: #fff;
+        }
+    }
+}
+.slidescroll{
+    height: auto;
+}
+.scroll {
+	height:100%;
+}
+#page {
+	margin-bottom:50px;
+	height:100%;
+}
+#page .slidepage {
+	height:100%;
+}
+nav{
+    display: flex;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 10px;
+    color: #bdb6c8;
+    font-size: 18px;
+    background-image: url('../image/bg_main_header.png');
+    background-size: 100% 100%;
+    box-sizing: content-box;
+    font-size: 18px;
+    div{
+        margin-right: 20px;
+    }
+    .search{
+        margin-left: auto;
+        padding-right: 20px;
+        .iconfont{
+            color: #ddd;
+            font-size: 18px;
+        }
+    }
+    .active{
+        color: #fff;
+    }
+}

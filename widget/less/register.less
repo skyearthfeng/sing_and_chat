@@ -1,0 +1,129 @@
+// out: ../css/register.css
+@import 'common';
+
+.form-wrap {
+  padding: 20px;
+  .form-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    .iconfont {
+      line-height: 40px;
+      color: #555;
+    }
+    input {
+      height: 40px;
+      line-height: 40px;
+      border-radius: 3px;
+      text-indent: 10px;
+      font-size: 12px;
+    }
+    .sendMessage-btn{
+      color: #fff;
+      background-color:#e12e85;
+      border-radius: 5px;
+      width: 100px;
+      font-size: 12px;
+      &.disabled {
+        background-color: #ccc;
+      }
+    }
+    &.sex-wrap {
+      border: none;
+      justify-content: space-around;
+      .sex{
+        padding: 0 20px;
+        position: relative;
+        font-size: 12px;
+        border-radius: 50px;
+        background-color: #ccc;
+        height: 40px;
+        line-height: 40px;
+        color: #fff;
+        .iconfont{
+          font-size: 14px;
+          color: #fff;
+          margin-right: 3px;
+        }
+        input{
+          position: absolute;
+          left: 0;
+          top: 0;
+          visibility: hidden;
+        }
+        &.sex0.active {
+          background-color: #54b2ff;
+        }
+        &.sex1.active {
+          background-color: #ff74a0;
+        }
+      }
+    }
+  }
+  .btn-wrap{
+    button{
+      width: 100%;
+      height: 40px;
+      line-height: 40px;
+      background-color: #e12e85;
+      color: #fff;
+      border-radius: 5px;
+    }
+    .btn{
+      width: 100%;
+      height: 40px;
+      line-height: 40px;
+      background-color: #e12e85;
+      color: #fff;
+      border-radius: 5px;
+    }
+  }
+}
+
+.box{
+  padding: 0 20px;
+  line-height: 30px;
+  .beizhu{
+    width: 100%;
+    color: #fbd043;
+    text-align: center;
+  }
+}
+
+.forget-wrap {
+  padding: 0 20px;
+  justify-content: space-between;
+  a {
+    color: #e12e85;
+  }
+}
+
+.agreement-wrap {
+  position: absolute;
+  left: 0;
+  bottom: 30px;
+  width: 100%;
+  text-align: center;
+  a {
+    color: #e12e85;
+  }
+  div {
+    text-align: center;
+    span{
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      border-radius: 20px;
+      background-color:#e12e85;
+      color: #fff;
+    }
+  }
+}
+.btn-active{
+  background-color: #faec80;
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  color: #fff;
+  border-radius: 5px;
+}

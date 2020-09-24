@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>支付</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/pay_frame.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div @click="closeFrame" class="flex-con"></div>
+      <div class="pay-wrap">
+        <h1>{{title}}</h1>
+        <div class="info">支付金额：{{activePrice}}</div>
+        <ul class="pay-type">
+          <li @click="selectPayType('wechat')" class="weixin active">
+            <div class="label">
+              <i class="iconfont icon-weixinzhifu"></i>
+              <span>微信</span>
+            </div>
+            <i v-if="option == 'wechat'" class="iconfont icon-right-1"></i>
+            <i v-else class="iconfont icon-yuanquan"></i>
+          </li>
+          <li @click="selectPayType('alipay')" class="alipay">
+            <div class="label">
+              <i class="iconfont icon-zhifubao"></i>
+              <span>支付宝</span>
+            </div>
+            <i v-if="option == 'alipay'" class="iconfont icon-right-1"></i>
+            <i v-else class="iconfont icon-yuanquan"></i>
+          </li>
+        </ul>
+        <div class="pay-btn">
+          <button @click="pay" type="button">立即支付</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        title: '充值',
+        type: '',
+        activePrice: '',
+        option: 'wechat',
+        wx_orderData: {},
+        alipay_orderData: '',
+        payData: {
+          order_no: '',
+          subject: '',
+          pay_type: '',
+          money: '',
+          app_id: '',
+          extra: '',
+          sign: ''
+        },
+        payUrl: ''
+      },
+      created: function () {
+        var _this = this;
+        _this.title = api.pageParam.title;
+        _this.type = api.pageParam.type;
+        _this.activePrice = '￥' + api.pageParam.price;
+      },
+      mounted: function () {},
+      methods: {
+        closeFrame: function () {
+          api.closeFrame({
+            name: 'pay_frame2'
+          });
+        },
+
+        selectPayType: function (type) {
+          var _this = this;
+          _this.option = type;
+        },
+
+        pay: function () {
+          var _this = this;
+          api.showProgress({
+            title: '',
+            text: '',
+          });
+          api.ajax({
+            url: baseUrl + 'pay/store',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: _this.type,
+                tid: api.pageParam.tid,
+                option: _this.option,
+                channel: $api.getStorage('channel'),
+                tuid: $api.getStorage('tuid'),
+              },
+            }
+          }, function (ret, err) {
+            //   alert(JSON.stringify(ret))
+            api.hideProgress();
+            if (ret.status == 200) {
+              _this.payData.order_no = ret.data.order_no;
+              _this.payData.subject = ret.data.subject;
+              _this.payData.pay_type = ret.data.pay_type + '';
+              _this.payData.money = ret.data.money + '';
+              _this.payData.app_id = ret.data.app_id;
+              _this.payData.extra = ret.data.extra;
+              _this.payData.sign = ret.data.sign;
+              _this.payUrl = ret.url;
+              api.openWin({
+                name: 'pay_person',
+                url: 'pay_person.html',
+                bounces: false,
+                pageParam: {
+                  payData: _this.payData,
+                  payUrl: _this.payUrl
+                }
+              });
+
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

@@ -1,0 +1,623 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>短视频</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+</head>
+<style type="text/css">
+    body {
+        background-color: #f8f8f9;
+    }
+
+    #app {
+        background-color: #f8f8f9;
+    }
+
+    .box {
+        /* height: 123px; */
+        /* padding: 10px; */
+        margin: 10px;
+        break-inside: avoid;
+        background: #fff;
+        border-radius: 5px;
+        padding-bottom: 10px;
+    }
+
+    /* .box:nth-child(odd) {
+    margin-right: 5px;
+} */
+
+    /* .box:nth-child(even) {
+    margin-left: 5px;
+}  */
+
+    .spe {
+        /* height: 225px; */
+    }
+
+    .box-wrapper {
+        column-count: 1;
+        column-gap: 0px;
+        background-color: #f8f8f9;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .ggg {
+        height: 100%;
+        overflow-wrap: break-word
+    }
+
+    .home-title {
+        width: 100%;
+        height: 100px;
+        display: flex;
+        background-color: #fff;
+    }
+
+    .home-title>div {
+        width: 25%;
+        height: 25vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        /* margin-left: 20px;
+        margin-right: 20px; */
+    }
+
+    .home-title>div>img {
+        width: 70%;
+        height: 70%;
+        border-radius: 50%;
+        /* margin-top: 15px; */
+        /* margin-bottom: 10px; */
+    }
+
+    .home-title>div>div {
+        font-size: 11px;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* .autograph{
+    font-size: 50px;
+} */
+    .item-img {
+        width: 100%;
+    }
+
+    .item-img>img {
+        width: 100%;
+        border-top-right-radius: 5px;
+        border-top-left-radius: 5px;
+    }
+
+    .item-autograph {
+        width: 100%;
+        font-size: 14px;
+        /* padding: 10px; */
+    }
+
+    .item-skill {
+        margin: 0 10px;
+        padding: 0 10px;
+        height: 30px;
+        line-height: 30px;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        background-color: #f6f7f9;
+        font-size: 12px;
+    }
+
+    .autograph {
+        /* text-overflow: -o-ellipsis-lastline; */
+        /* font-size:  */
+        margin: 10px 0;
+        padding: 0 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+        color: #2f2f2f;
+        font-weight: 800;
+    }
+
+    .skill-price {
+        color: #ff5151;
+    }
+
+    .item-info {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-right: 10px;
+        font-size: 12px;
+    }
+
+    .info-img {
+        width: 25px;
+        height: 25px;
+        border-radius: 5px;
+        margin: 0 10px;
+    }
+
+    .info-img>img {
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+    }
+
+    .info-name {
+        line-height: 25px;
+        color: #9b9b9b;
+        width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .info-like {
+        color: #9b9b9b;
+        line-height: 25px;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .info-like>.iconfont {
+        font-size: 20px;
+        margin-top: -3px;
+        margin-right: 5px;
+    }
+
+    .box-item {
+        position: relative;
+    }
+
+    .box-wrapper {
+        width: 49%;
+        display: inline-block;
+        float: left;
+    }
+
+    .box-right {
+        margin-left: 5px;
+    }
+
+    .box-left {
+        margin-right: 5px;
+    }
+
+    .videoIcon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #fff;
+    }
+</style>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="home-title">
+            <div v-for='(item, index) in titleList' :key='item.id' @click='getSearch(item)' class="title-wrap">
+                <img :src='item.img' />
+                <div v-text='item.title' class="title"></div>
+            </div>
+        </div>
+        <div class="box-wrapper wrap-left">
+            <div class="box box-left" v-for="(item, index) in videoList" v-if='index%2!=0'
+                v-if="item.files.filename!=null" @click="openVideoDetail(index,item)">
+                <div class="box-item ">
+                    <div class="item-img" style="position: relative">
+                        <img src="../image/videoBg.jpg" alt=""
+                            style="position: absolute;top:0;left:0;right:0;bottom:0;z-index:-1">
+                        <!-- <div v-if="item.video==1"> -->
+                        <img v-lazy="item.files.filename+'?vframe/jpg/offset/1'" alt="" v-show="imgShow"
+                            v-if="item.video==1">
+                        <img v-lazy="item.files.filename+'?vframe/jpg/offset/1.2'" alt="" v-show="!imgShow"
+                            v-if="item.video==1">
+                        <!-- </div> -->
+                        <img v-lazy="item.files.filename+'?imageslim'" alt="" v-else>
+                        <!-- <video :src="item.files.id" autoplay loop muted width="100%" height="100%"
+                            poster="../image/videoBg.jpg"></video> -->
+                    </div>
+                    <div class="videoIcon" v-if="item.video==1"> <i class="iconfont icon-bofang"></i> </div>
+                </div>
+                <div class="item-autograph" v-if="item.description!=0">
+                    <p class="autograph">{{item.description}}</p>
+                </div>
+                <div class="item-skill" v-if="item.skills_name!=null">
+                    <div>{{item.skills_name}}</div>
+                    <!-- <div class="skill-price">{{item.price}}币 / 局</div> -->
+                </div>
+                <div class="item-info">
+                    <div class="info-img">
+                        <img v-lazy="item.member.avatar" alt="">
+                    </div>
+                    <div class="info-name">
+                        {{item.member.name}}
+                    </div>
+                    <div class="info-like">
+                        <i class="iconfont icon-xin"></i>
+                        <span>
+                            {{item.like_size}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-wrapper wrap-right">
+            <div class="box box-right" v-for="(item, index) in videoList" v-if='index%2==0'
+                v-if="item.files.filename!=null" @click="openVideoDetail(index,item)">
+                <div class="box-item">
+                    <div class="item-img" style="position: relative">
+                        <img src="../image/videoBg.jpg" alt=""
+                            style="position: absolute;top:0;left:0;right:0;bottom:0;z-index:-1">
+                        <!-- <div v-if="item.video==1"> -->
+                        <img v-lazy="item.files.filename+'?vframe/jpg/offset/1'" alt="" v-show="imgShow"
+                            v-if="item.video==1">
+                        <img v-lazy="item.files.filename+'?vframe/jpg/offset/1.2'" alt="" v-show="!imgShow"
+                            v-if="item.video==1">
+                        <!-- </div> -->
+                        <img v-lazy="item.files.filename+'?imageslim'" alt="" v-else>
+                        <!-- <video :src="item.files[0].filename" autoplay loop muted width="100%" height="100%"
+                            poster="../image/videoBg.jpg"></video> -->
+                    </div>
+                    <div class="videoIcon" v-if="item.video==1"> <i class="iconfont icon-bofang"></i> </div>
+                </div>
+                <div class="item-autograph" v-if="item.description!=0">
+                    <p class="autograph">{{item.description}}</p>
+                </div>
+                <div class="item-skill" v-if="item.skills_name!=null">
+                    <div>{{item.skills_name}}</div>
+                    <!-- <div class="skill-price">{{item.price}}币 / 局</div> -->
+                </div>
+                <div class="item-info">
+                    <div class="info-img">
+                        <img v-lazy="item.member.avatar" alt="">
+                    </div>
+                    <div class="info-name">
+                        {{item.member.name}}
+                    </div>
+                    <div class="info-like">
+                        <i class="iconfont icon-xin"></i>
+                        <span>
+                            {{item.like_size}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/vue-lazyload.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app, dialogBox;
+    apiready = function () {
+        // if (api.systemType == 'android') {
+        //   api.setScreenSecure({
+        //     secure: true
+        //   });
+        // }
+        dialogBox = api.require('dialogBox');
+        Vue.use(VueLazyload);
+        app = new Vue({
+            el: '#app',
+            data: {
+                videoList: [{
+                    member: {
+                        avatar: ''
+                    },
+                    files: {
+                        filename: ''
+                    }
+                }],
+                info: {},
+                page: 1,
+                titleList: [],
+                imgShow: true,
+                list: []
+            },
+            created: function () {
+                var _this = this;
+                // api.closeFrameGroup({
+                //   name: 'group1'
+                // });
+                api.setRefreshHeaderInfo({
+                    bgColor: '#ccc',
+                    textColor: '#fff',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...'
+                }, function (ret, err) {
+                    _this.page = 1;
+                    setTimeout(function () {
+                        _this.getVideoIndex();
+                    }, 1000);
+                });
+                api.addEventListener({
+                    name: 'scrolltobottom',
+                    extra: {
+                        threshold: 500
+                    }
+                }, function (ret, err) {
+                    setTimeout(function () {
+                        _this.getVideoIndex();
+                    }, 800);
+                });
+                api.addEventListener({
+                    name: 'video_refresh'
+                }, function (ret, err) {
+                    _this.getVideoIndex();
+                });
+
+                api.addEventListener({
+                    name: 'videoPush'
+                }, function (ret, err) {
+                    _this.getVideoIndex();
+                });
+
+                api.addEventListener({
+                    name: 'refresh'
+                }, function (ret, err) {
+                    _this.page = 1
+                    _this.getVideoIndex();
+                });
+            },
+            mounted: function () {
+                var _this = this;
+                _this.getVideoIndex();
+                _this.getHomeImg();
+                api.addEventListener({
+                    name: 'scrollIndex'
+                }, function (ret, err) {
+                    document.body.scrollTop = ret.value.key1 * 330
+                });
+                setInterval(() => {
+                    this.imgShow = !this.imgShow
+                }, 500)
+            },
+            methods: {
+                hh() {
+                    alert(12)
+                },
+
+                getHomeImg() {
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    axios('home_index', 'get', '', '', (res, err) => {
+                        if (res) {
+                            console.log(JSON.stringify(res))
+                            this.titleList = res.data
+                            // console.log(JSON.stringify(res.data))
+                        }
+                    })
+                },
+                getVideoIndex: function () {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    let data = {
+                        paginate: 10,
+                        type: '',
+                        member_id: $api.getStorage('uid'),
+                        page: this.page
+                    }
+                    axios('dynamic_index', 'get', $api.getStorage('deviceToken'), data, (res, err) => {
+                        api.refreshHeaderLoadDone()
+                        api.hideProgress()
+                        if (res.code == 200) {
+                            if (this.page == 1) {
+                                this.page++
+                                this.videoList = res.data
+                                // console.log(JSON.stringify(this.videoList))
+                            } else if (this.page <= res.extend.last_page) {
+                                this.page++
+                                var pushList = [];
+                                for (var i = 0; i < res.data.length; i++) {
+                                    _this.videoList.push(res.data[i])
+                                    pushList.push(res.data[i]);
+                                }
+                                api.sendEvent({
+                                    name: 'pushList',
+                                    extra: {
+                                        key1: pushList,
+                                    }
+                                });
+                            } else {
+                                api.toast({
+                                    msg: "没有更多了"
+                                })
+                            }
+                        }
+
+                    })
+                    // api.ajax({
+                    //     url: baseUrl + 'video/index',
+                    //     method: 'get',
+                    //     headers: {
+                    //         token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //         values: {
+                    //             type: 'new',
+                    //             uid: $api.getStorage('uid'),
+                    //             page: _this.page
+                    //         },
+                    //     }
+                    // }, function (ret, err) {
+                    //     api.refreshHeaderLoadDone();
+                    //     api.hideProgress();
+                    //     if (ret.status == 200) {
+                    //         console.log(JSON.stringify(ret.data))
+                    //         if (_this.page == 1) {
+                    //             _this.page++;
+                    //             _this.info = ret.info;
+                    //             _this.videoList = ret.data;
+                    //             console.log(JSON.stringify(_this.videoList))
+                    //         } else if (_this.page <= ret.pagination.last_page) {
+                    //             _this.page++;
+                    //             var pushList = [];
+                    //             for (var i = 0; i < ret.data.length; i++) {
+                    //                 _this.videoList.push(ret.data[i])
+                    //                 pushList.push(ret.data[i]);
+                    //             }
+                    //             api.sendEvent({
+                    //                 name: 'pushList',
+                    //                 extra: {
+                    //                     key1: pushList,
+                    //                 }
+                    //             });
+
+                    //         } else {
+                    //             api.toast({
+                    //                 msg: '没有更多了'
+                    //             })
+                    //         }
+                    //     }
+                    // })
+                },
+
+                // 跳转视频详情页
+                openVideoDetail: function (index, item) {
+                    var _this = this;
+                    // if (_this.info.level == '0') {
+                    // _this.openDialogBox('开通VIP即可观看视频');
+                    // } else {
+                    // console.log(JSON.stringify(item))
+                    if (api.systemType == 'ios') {
+                        api.openWin({
+                            name: 'video_iso',
+                            url: 'video_iso.html',
+                            slidBackEnabled: false,
+                            pageParam: {
+                                // videoList: _this.videoList,
+                                // index: index,
+                                item: item
+                            }
+                        })
+                    } else {
+                        api.openWin({
+                            name: 'video_detail',
+                            url: 'video_detail.html',
+                            slidBackEnabled: false,
+                            pageParam: {
+                                videoList: _this.videoList,
+                                index: index
+                            }
+                        })
+                    }
+
+                    // }
+                },
+
+                getSearch(item) {
+                    if (item.title != '全部') {
+                        api.openWin({
+                            name: 'search_details',
+                            url: 'search_details.html',
+                            pageParam: {
+                                id: item.id,
+                                title: item.title,
+                                type: item.lx
+                            },
+                            animation: {
+                                type: "movein", //动画类型（详见动画类型常量）
+                                subType: "from_right", //动画子类型（详见动画子类型常量）
+                                duration: 300
+                            }
+                        })
+                    } else {
+                        api.openWin({
+                            name: 'search_all',
+                            url: 'search_all.html',
+                            pageParam: {
+                                titleList: this.titleList
+                            }
+                        })
+                    }
+                    // api.toast({
+                    //     msg: id,
+                    //     duration: 2000,
+                    //     location: 'bottom'
+                    // });
+                },
+                // 提示充值vip弹窗
+                openDialogBox: function (txt) {
+                    dialogBox.raffle({
+                        texts: {
+                            mainText: txt,
+                            subText: '',
+                            leftTitle: '开通会员'
+                        },
+                        styles: {
+                            bg: '#272320',
+                            w: 300,
+                            corner: 2,
+                            icon: {
+                                marginT: 20,
+                                w: 40,
+                                h: 40,
+                                corner: 20,
+                                iconPath: 'widget://image/icon_big_vip.png'
+                            },
+                            main: {
+                                marginT: 10,
+                                color: '#fff',
+                                size: 14,
+                            },
+                            sub: {
+                                marginT: 10
+                            },
+                            left: {
+                                w: 300,
+                                h: 50,
+                                marginL: 0,
+                                marginB: 0,
+                                corner: 2,
+                                bg: '#000',
+                                color: '#fff',
+                                size: 16
+                            }
+                        },
+                        tapClose: true
+                    }, function (ret, err) {
+                        if (ret.eventType == 'left') {
+                            dialogBox.close({
+                                dialogName: 'raffle'
+                            });
+                            api.openWin({
+                                name: 'vip',
+                                url: 'vip.html',
+                                slidBackEnabled: false
+                            });
+                        }
+                    });
+                },
+            }
+        })
+    }
+</script>

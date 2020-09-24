@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>箭头</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../css/call.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../css/video.css" />
+</head>
+
+<body style="background:rgba(0, 0, 0, 0)">
+    <div id="app" v-cloak style="background:rgba(0, 0, 0, 0)">
+        <div class="top-img">
+            <div class="pop"></div>
+            <div class="img-wrap">
+                <img src="../image/shang.png" alt="">
+                <p>向上滑动查看更多视频哦</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    var app, swiper;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+
+            },
+            created: function () {
+            },
+            mounted: function () {
+            },
+            methods: {
+
+            },
+        })
+    }
+</script>

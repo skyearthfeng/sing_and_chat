@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/common.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="adMain" @click="open()">
+            <span @click='close'>X</span>
+            <!-- <a :href=""> -->
+            <img :src="ad_file" alt="" style="width:100%;height:100%;">
+            <!-- </a> -->
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app, rong;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                adList: [],
+                ad_link:'',
+                ad_file:'',
+            },
+            created: function () {
+
+            },
+            mounted: function () {
+                this.adList = api.pageParam
+                // alert(JSON.stringify(api.pageParam[0].ad_file) )
+                this.ad_file=api.pageParam[0].ad_file
+                // console.log(this.adList[0].ad_link)
+                this.ad_link=this.adList[0].ad_link
+                // alert(this.ad_link)
+            },
+            methods: {
+                close: function () {
+                    api.closeFrame({
+                        name: 'login_tost'
+                    });
+                },
+                open: function () {
+                    api.openWin({
+                    name: 'ad',
+                    url: this.ad_link,
+                    // pageParam: {
+                    //     name: 'test'
+                    // }
+                });
+                    // setTimeout(function(){
+                    //     api.closeFrame({
+                    //     name: 'login_tost'
+                    // });
+                    // },500)
+                    // var _this=this
+                    // api.openFrame({
+                    //     name: 'ad',
+                    //     url: 'ad.html',
+                    //     rect: {
+                    //         x: 0,
+                    //         y: 100,
+                    //         w: 'auto',
+                    //         h: 'auto'
+                    //     },
+                    //     pageParam: {
+                    //         url: _this.adList[0].ad_link
+                    //     }
+                    //     // pageParam: _this.adList[0].ad_link
+                    // });
+                }
+            },
+        })
+    }
+</script>

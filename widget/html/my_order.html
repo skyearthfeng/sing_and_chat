@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的报价</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/my_order.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="payBox">
+      <div class="pay">
+        <h4>我的报价</h4>
+        <div class="form-item flex-wrap">
+          <input v-model="vedioPrice" class="flex-con" type="tel" placeholder="请输入视频报价">
+        </div>
+        <div class="form-item flex-wrap">
+          <input v-model="wechatPrice" class="flex-con" type="tel" placeholder="请输入微信报价">
+        </div>
+        <div class="pay-btn"><button @click="orderBtn" type="button">提交</button></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.addEvt($api.dom('body'), 'click', function (e) {
+      if (e.target == $api.dom('#app')) {
+        api.closeFrame();
+      } else {
+        e.stopPropagation();
+      }
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        vedioPrice: '',
+        wechatPrice: ''
+      },
+      created: function () {
+
+      },
+      mounted() {},
+      methods: {
+        orderBtn: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'user/price',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                price: Math.floor(this.vedioPrice),
+                wx_price: this.wechatPrice
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              alert(1);
+            }
+          })
+        }
+      }
+    })
+
+  }
+</script>

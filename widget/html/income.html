@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的收益</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/income.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-topbottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <h1 class="header-title">我的收益</h1>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div class="profit-title" class="border-top" >
+          <p>累计未提现</p>
+          <h2>{{profit.info.money}}<i>钻</i></h2>
+          <!-- <span @click="withdraw">提现</span> -->
+        </div>
+        <div class="profit-con">
+          <div class="profit-navbar">
+            <h2 class="profit-navbar-selected" @click="getComeList($event)">收入明细</h2>
+            <h2 @click="getWithdrawList($event)">提现明细</h2>
+          </div>
+          <div class="profit">
+            <div class="profit-income">
+              <div v-for="(item, i) in profit.list" :key="item.id" class="profit-list">
+                <div class="profit-list-l pl">
+                  <p>{{item.description}}</p>
+                  <span>{{item.updated_at}}</span>
+                </div>
+                <div class="profit-list-r pl">{{item.money}}钻</div>
+              </div>
+            </div>
+            <div class="profit-tixian">
+              <div v-for="(item, i) in profit.list" :key="item.id" class="profit-list">
+                <div class="profit-list-r pl">
+                  <p>{{item.created_at}}</p>
+                </div>
+                <div class="profit-list-r pl">提现{{item.price}}元</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        type: '',
+        profit: {
+          info: {
+            member_id: 1,
+            money: 10,
+            name: "谭婕雅",
+            scale: "0.10"
+          },
+          list: [{
+            id: 1,
+            member_id: 6,
+            gold: "10",
+            scale: "0.1",
+            actual_gold: "100",
+            name: "施奇策",
+            tel: "17638724376",
+            price: "58",
+            created_at: "2018-07-24 00:00:00"
+          }]
+        }
+      },
+      created: function () {},
+      mounted: function () {
+        this.profitAdd("income");
+      },
+      methods: {
+        profitAdd: function (type) {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'user/income',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: type
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              __this.profit = ret.data;
+            }
+          })
+        },
+        getComeList: function (event) {
+          var __this = this;
+          $api.removeCls($api.dom('.profit-navbar-selected'), 'profit-navbar-selected');
+          $api.addCls(event.currentTarget, 'profit-navbar-selected');
+          $api.dom('.profit-income').style.display = 'block';
+          $api.dom('.profit-tixian').style.display = 'none';
+          this.profitAdd('income');
+        },
+        getWithdrawList: function (event) {
+          var __this = this;
+          $api.removeCls($api.dom('.profit-navbar-selected'), 'profit-navbar-selected');
+          $api.addCls(event.currentTarget, 'profit-navbar-selected');
+          $api.dom('.profit-income').style.display = 'none';
+          $api.dom('.profit-tixian').style.display = 'block';
+          this.profitAdd();
+        },
+        withdraw: function () {
+          api.openWin({
+            name: 'withdraw',
+            url: 'withdraw.html',
+            bounces: false,
+          });
+        },
+        goback: function () {
+          api.closeWin();
+        },
+      },
+    })
+  }
+</script>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>随机匹配</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/random.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="random-avatar">
+        <img :src="avatar" :class="[avatar_animation ? 'animation' : '']" alt="">
+      </div>
+      <div class="random-text">正在随机匹配……</div>
+      <div class="random-cancel" @click="cancel">取消</div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    app = new Vue({
+      el: '#app',
+      data: {
+        toId: '',
+        toName: '',
+        toAvatar: '',
+        avatarList: [],
+        avatar: '',
+        avatarIndex: 0,
+        avatar_animation: true,
+        randomCall:true,
+        closeShow:false,
+      },
+      created: function () {
+        var _this = this;
+        _this.getHomeRandom();
+        if(api.pageParam.closeShow){
+          _this.closeShow=true
+        }
+        // api.addEventListener({
+        //   name: 'refreshRandom'
+        // }, function (ret, err) {
+        //   t=setTimeout(function () {
+        //     _this.randomCall1();
+        //   }, 5000);
+        // });
+        // api.addEventListener({
+        //   name: 'keyback'
+        // }, function (ret, err) {
+        //   api.sendEvent({
+        //     name: 'refreshVideoChat',
+        //     extra: {
+        //       key: 'value'
+        //     }
+        //   });
+        //   api.closeWin();
+        // });
+      },
+      mounted: function () {
+        var _this = this;
+        t=setTimeout(function () {
+          _this.randomCall1();
+        }, 5000);
+      },
+      methods: {
+        // 取消随机匹配
+        cancel: function () {
+          // api.sendEvent({
+          //   name: 'refreshVideoChat',
+          //   extra: {
+          //     key: 'value'
+          //   }
+          // });
+          // api.closeWin();
+          window.clearTimeout(t);
+          // randomCall=false;
+          api.setFrameGroupIndex({
+            name: 'group1',
+            index: 1
+          })
+          if(this.closeShow){
+            api.closeWin();
+          }
+        },
+        // 获取随机头像
+        getHomeRandom: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'home/random',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              _this.avatarList = ret.data;
+              _this.avatar = ret.data[0];
+              _this.avatarAnimation();
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+              // setTimeout(function () {
+              //   _this.cancel();
+              // }, 1000);
+            }
+          });
+        },
+
+        // 随机变换头像
+        avatarAnimation: function () {
+          var _this = this;
+          _this.avatar_animation = true;
+          if (_this.avatarIndex == _this.avatarList.length) {
+            _this.avatarIndex = 0;
+          }
+          _this.avatar = _this.avatarList[_this.avatarIndex];
+          setTimeout(function () {
+            _this.avatar_animation = false;
+            _this.avatarIndex++;
+            _this.avatarAnimation();
+          }, 2000);
+        },
+
+        // 随机呼叫
+        randomCall1: function () {
+          var _this = this;
+          // alert(_this.randomCall)
+          // if(_this.randomCall){
+            api.ajax({
+            url: baseUrl + 'message/videoCall',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                from_uid: $api.getStorage('uid'),
+                to_uid: '',
+                type: '1',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              api.openWin({
+                name: 'call1',
+                url: 'call1.html',
+                slidBackEnabled: false,
+                pageParam: {
+                  extra: {
+                    fromId: $api.getStorage('uid'),
+                    fromName: $api.getStorage('uname'),
+                    fromAvatar: $api.getStorage('uavatar'),
+                    toId: ret.to_uid.member_id,
+                    toName: ret.to_uid.name,
+                    toAvatar: ret.to_uid.avatar,
+                  },
+                  type: 'videoCall',
+                  time: ret.data.time,
+                }
+              });
+            } else {
+              api.toast({
+                msg: ret.message[0]
+              })
+              // setTimeout(function () {
+              //   _this.cancel();
+              // }, 1000);
+            }
+          })
+          }
+          
+        },
+      // },
+    })
+  }
+</script>

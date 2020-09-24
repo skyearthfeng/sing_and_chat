@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>支付</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/common.css" />
+  <style>
+    .tips {
+      padding: 100px 0;
+      text-align: center;
+    }
+    #formpay {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap flex-wrap flex-vertical">
+    <header id="header">
+      <div class="header-wrap">
+        <div @click="goback" class="header-left">
+          <i class="iconfont icon-pre"></i>
+        </div>
+        <h1 class="header-title">充值</h1>
+      </div>
+    </header>
+    <div id="payFrame" class="flex-con"></div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    api.openFrame({
+      name: 'pay_person_frame',
+      url: 'pay_person_frame.html',
+      bounces: true,
+      rect: {
+        x: 0,
+        y: $api.dom('#header').offsetHeight,
+        w: api.winWidth,
+        h: $api.dom('#payFrame').offsetHeight
+      },
+      pageParam: {
+        payData: api.pageParam.payData,
+        payUrl: api.pageParam.payUrl
+      }
+    });
+  }
+</script>

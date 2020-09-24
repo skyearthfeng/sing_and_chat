@@ -1,0 +1,345 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>约玩</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/common.css">
+    <link rel="stylesheet" type="text/css" href="../css/publishing_service.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header id="header" class="border-bottom">
+            <div class="header-wrap">
+                <div @click="goback" class="header-left">
+                    <i class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">创建邀约</div>
+                <p class="header-right" @click='establish'>创建</p>
+            </div>
+        </header>
+        <div class="establish-info">
+            <div class="establish-border">
+                <div class="establish-content">
+                    <span class="content-title">邀约内容</span>
+                    <span class="content-info" v-text='title'></span>
+                </div>
+            </div>
+            <div class="establish-border">
+                <div class="establish-content">
+                    <span class="content-title">邀约地点</span>
+                    <input type="text" v-model.trim='place' placeholder='请填写邀约地点' />
+                </div>
+                <div class="establish-content">
+                    <span class="content-title">邀约时间</span>
+                    <input type="text" v-model.trim='time' placeholder='请填写邀约时间' />
+                </div>
+                <div class="establish-content">
+                    <span class="content-title">邀约花费</span>
+                    <sapn class="content-info" @click='getSpend'>{{spend || isSpend}}<i class="iconfont icon-next"></i>
+                    </sapn>
+                </div>
+                <div class="establish-content">
+                    <span class="content-title">邀约性别</span>
+                    <sapn class="content-info" @click='getGender'>{{gender || isGender}}<i
+                            class="iconfont icon-next"></i></sapn>
+                </div>
+            </div>
+            <div class="explain">
+                <p class="explain-title">说明</p>
+                <textarea placeholder='令人心动的说明，才会让他报名哟' v-model.trim='explain'></textarea>
+            </div>
+            <div class="photo" @click='getPhoto'>
+                <img :src="image" class="image" v-if='image'>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    apiready = () => {
+        let app, UIMultiSelector;
+        UIActionSelector = api.require('UIActionSelector');
+        app = new Vue({
+            el: '#app',
+            data: {
+                title: undefined,
+                gender: undefined,
+                spend: undefined,
+                place: undefined,
+                time: undefined,
+                explain: undefined,
+                isSpend: '请选择邀约花费',
+                isGender: '请选择邀约性别',
+                qiniuToken: undefined,
+                image: '../image/camera.png'
+            },
+            mounted() {
+                this.title = api.pageParam.title;
+                this.getQiniuToken()
+            },
+            methods: {
+                // 返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                // 获取花费
+                getSpend() {
+                    UIActionSelector.open({
+                        datas: [{
+                            name: '你付款',
+                            id: 1
+                        }, {
+                            name: '我付款',
+                            id: 2
+                        }, {
+                            name: 'AA',
+                            id: 3
+                        }],
+                        layout: {
+                            row: 5,
+                            col: 1,
+                            height: 30,
+                            size: 14,
+                            sizeActive: 16,
+                            rowSpacing: 5,
+                            colSpacing: 10,
+                            maskBg: 'rgba(0,0,0,0.2)',
+                            bg: '#fff',
+                            color: '#888',
+                            colorActive: '#f00',
+                            colorSelected: '#f00'
+                        },
+                        animation: true,
+                        cancel: {
+                            text: '取消',
+                            size: 14,
+                            w: 60,
+                            h: 32,
+                            bg: '#6cd9b6',
+                            bgActive: '#ccc',
+                            color: '#fff',
+                            colorActive: '#fff'
+                        },
+                        ok: {
+                            text: '确定',
+                            size: 14,
+                            w: 60,
+                            h: 32,
+                            bg: '#6cd9b6',
+                            bgActive: '#ccc',
+                            color: '#fff',
+                            colorActive: '#fff'
+                        },
+                        title: {
+                            text: '请选择付款类型',
+                            size: 14,
+                            h: 44,
+                            bg: '#fff',
+                            color: '#888'
+                        }
+                    }, (res, err) => {
+                        if (res) {
+                            this.spend = res.selectedInfo[0].name;
+                        }
+                    })
+                },
+                // 获取性别
+                getGender() {
+                    UIActionSelector.open({
+                        datas: [{
+                            name: '男',
+                            id: 1
+                        }, {
+                            name: '女',
+                            id: 2
+                        }, {
+                            name: '不限',
+                            id: 3
+                        }],
+                        layout: {
+                            row: 5,
+                            col: 1,
+                            height: 30,
+                            size: 14,
+                            sizeActive: 16,
+                            rowSpacing: 5,
+                            colSpacing: 10,
+                            maskBg: 'rgba(0,0,0,0.2)',
+                            bg: '#fff',
+                            color: '#888',
+                            colorActive: '#f00',
+                            colorSelected: '#f00'
+                        },
+                        animation: true,
+                        cancel: {
+                            text: '取消',
+                            size: 14,
+                            w: 60,
+                            h: 32,
+                            bg: '#6cd9b6',
+                            bgActive: '#ccc',
+                            color: '#fff',
+                            colorActive: '#fff'
+                        },
+                        ok: {
+                            text: '确定',
+                            size: 14,
+                            w: 60,
+                            h: 32,
+                            bg: '#6cd9b6',
+                            bgActive: '#ccc',
+                            color: '#fff',
+                            colorActive: '#fff'
+                        },
+                        title: {
+                            text: '请选择邀约性别',
+                            size: 14,
+                            h: 44,
+                            bg: '#fff',
+                            color: '#888'
+                        }
+                    }, (res) => {
+                        if (res) {
+                            this.gender = res.selectedInfo[0].name;
+                        }
+                    })
+                },
+                // 获取照片
+                getPhoto() {
+                    api.actionSheet({
+                        title: '',
+                        cancelTitle: '取消',
+                        destructiveTitle: '',
+                        buttons: ['拍照', '相册']
+                    }, res => {
+                        if (res) {
+                            if (res.buttonIndex == 1) {
+                                this.getImageFile('camera');
+                            }
+                            if (res.buttonIndex == 2) {
+                                this.getImageFile('library');
+                            }
+                        }
+                    })
+                },
+                getQiniuToken: function () {
+                    var _this = this;
+                    axios('get_token', 'post', $api.getStorage('deviceToken'), {
+                        member_id: $api.getStorage('uid')
+                    }, (res, err) => {
+                        if (res.code == 200) {
+                            console.log(res.data)
+                            _this.qiniuToken = res.data;
+                        } else {
+                            api.toast({
+                                msg: '网络错误，请稍后再试'
+                            });
+                        }
+                    })
+                    // api.ajax({
+                    //     url: baseUrl + 'qiniu/token',
+                    //     method: 'get',
+                    //     headers: {
+                    //     token: $api.getStorage('deviceToken')
+                    //     },
+                    //     data: {
+                    //     values: {
+                    //         uid: $api.getStorage('uid')
+                    //     }
+                    //     }
+                    // }, function (ret, err) {
+                    //     if (ret.status == 200) {
+                    //     _this.qiniuToken = ret.data[0];
+                    //     }
+                    // })
+                },
+                getImageFile(val) {
+                    api.getPicture({
+                        sourceType: val,
+                        encodingType: 'png',
+                        mediaValue: 'pic',
+                        destinationType: 'url',
+                        allowEdit: true,
+                        // quality: 100,
+                        targetWidth: 500,
+                        targetHeight: 500,
+                        saveToPhotoAlbum: false
+                    }, res => {
+                        if (res) {
+                            this.uploadImg(res.data)
+                        }
+                    })
+                },
+                uploadImg(flie) {
+                    api.ajax({
+                        url: qiniuBaseUrl,
+                        method: 'post',
+                        data: {
+                            values: {
+                                token: this.qiniuToken
+                            },
+                            files: {
+                                file: flie
+                            }
+                        }
+                    }, (res, err) => {
+                        if (res) {
+                            this.image = qiniuImageUrl + res.key;
+                        } else {
+                            api.toast({
+                                msg: '网络错误，请稍后再试',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        }
+                    })
+                },
+                // 创建
+                establish() {
+                    if (this.place == undefined || this.spend == undefined || this.gender == undefined || this.explain == undefined || this.time == undefined) {
+                        api.toast({
+                            msg: '请填写把信息填写完整'
+                        });
+                        return false;
+                    }
+                    let data = {
+                        title: this.title,
+                        memberId: $api.getStorage('uid'),
+                        thumbnail: this.image,
+                        place: this.place,
+                        time: this.time,
+                        cost: this.spend,
+                        sex: this.gender,
+                        instructions: this.explain,
+                        name: $api.getStorage('uname'),
+                        touxiang: $api.getStorage('uavatar'),
+                        age: $api.getStorage('uage'),
+                    }
+                    axios('api/lmform', 'post', '', data, (res, err) => {
+                        if (res) {
+                            api.toast({ msg: '创建成功' });
+                            setTimeout(() => {
+                                api.openWin({
+                                    name: 'about_list',
+                                    url: 'about_list.html'
+                                })
+                            }, 2000)
+                        } else {
+                            api.toast({ msg: err.message })
+                        }
+                    })
+                }
+            }
+        })
+    }
+</script>

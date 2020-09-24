@@ -1,0 +1,171 @@
+// out: ../css/chat_ranking.css
+
+@import 'http://at.alicdn.com/t/font_578379_k03tx603kw.css';
+@import 'http://at.alicdn.com/t/font_1063748_0uguugnfolk.css';
+header{
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    position: relative;
+    .header-wrap{
+        width: 100%
+    }
+    .header-left{
+        position: absolute;
+        left: 10px;
+        // width: 25px;
+        // height: 25px;
+        // margin-left:10px;
+        i{
+            font-size: 20px;
+        }
+    }
+    .header-content{
+        margin: 0 auto;
+        width: 50%;
+        display: flex;
+        .content-item{
+            flex: 1;
+            text-align: center;
+        }
+        .active{
+            border-bottom:1px solid #FF6691;
+        }
+    }
+}
+    .ranking_title_wrap{
+            width: 50%;
+            height: 30px;
+            line-height: 30px;
+            border-radius:30px; 
+            margin: 0 auto;
+            display: flex;
+            border: 1px solid #FF6691;
+            margin-top: 20px;
+            .ranking_title{
+                flex: 1;
+                text-align: center;
+                span{
+                    width: 100%;
+                    text-align: center;
+                    border-radius:30px;
+                    color: #FF6691;
+                }
+                .active{
+                    background-color: #FF6691;
+                    color: #fff;
+                }
+            }
+        }
+.ranking_list{
+    li{
+        width: 100%;
+        height: 50px;
+        
+    }
+    .item_ranking{
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        padding-left: 10px;
+        display: inline-block;
+    }
+    .item_content{
+        display: flex;
+        flex-direction:column; 
+        display: inline-block;
+        width: 50%;
+        height: 50px;
+        background-color: #333;
+        .content_img{
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            img{
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+}
+.list-wrap {
+    width: 100%;
+    .list-item {
+      display: flex;
+      padding: 10px;
+      align-items: center;
+      .eq {
+        .icon {
+          width: 20px;
+          height: 20px;
+          &.icon-ranking0 {
+            background-position: -320px -40px;
+          }
+          &.icon-ranking1 {
+            background-position: -340px -40px;
+          }
+          &.icon-ranking2 {
+            background-position: -360px -40px;
+          }
+        }
+        .eq-text {
+          width: 20px;
+          text-align: center;
+          font-size: 14px;
+        }
+      }
+      .avatar {
+        line-height: 0;
+        margin: 0 10px;
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 40px;
+        }
+      }
+      .info-wrap {
+        flex: 1;
+        .name {
+          font-size: 14px;
+          margin-bottom: 2px;
+          .age1 {
+            height: 14px;
+            line-height: 14px;
+            margin-left: 10px;
+            padding: 0 6px;
+            background: #0000CD;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 12px;
+            text-align: center;
+            .iconfont {
+              font-size: 12px;
+            }
+          }
+          .age2 {
+            height: 14px;
+            line-height: 14px;
+            margin-left: 10px;
+            padding: 0 6px;
+            background: #fd85cc;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 12px;
+            text-align: center;
+            .iconfont {
+              font-size: 12px;
+            }
+          }
+        }
+        .info {
+          font-size: 12px;
+          color: #999;
+        }
+      }
+      .icon-next {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+  }

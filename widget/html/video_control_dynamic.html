@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>短视频</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="control-wrap">
+      <div @click="togglePlayStatus" class="playing">
+        <i v-if="player_pause" class="iconfont icon-bofang"></i>
+      </div>
+      <div @click="goback" class="goback">
+        <i class="iconfont icon-pre"></i>
+      </div>
+
+
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        player_pause: false,
+      },
+      created: function () {},
+      mounted: function () {},
+      methods: {
+        goback: function () {
+          api.closeWin();
+        },
+
+        togglePlayStatus: function () {
+          if (this.player_pause) {
+            api.sendEvent({
+              name: 'videoPlay',
+            });
+          } else {
+            api.sendEvent({
+              name: 'videoPause',
+            });
+          }
+          this.player_pause = !this.player_pause
+        },
+        
+      }
+    })
+  }
+</script>

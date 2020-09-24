@@ -1,0 +1,724 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>聊天室创建者</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_detail.css" />
+</head>
+
+<body>
+    <div id="app" @click.stop='hideMessage' v-cloak>
+        <header id="header">
+            <div class="header-wrap">
+                <div @click="goback" class="header-left">
+                    <i class="iconfont icon-pre"></i>
+                </div>
+                <h1 class="header-title">{{roomData.name}}</h1>
+                <span>房间ID {{roomData.roomid}} 在线 {{roomData.nums}}</span>
+                <div class="header-right" @click='typeShow=true'>
+                    <i class="iconfont icongengduo "></i>
+                </div>
+            </div>
+        </header>
+        <div class="room_title">
+            <div class="room_title_img">
+                <img :src="roomData.logo" alt="">
+            </div>
+            <div class="room_title_content">
+                <p class="title_content_name">{{roomData.creater}}</p>
+                <span class="title_content_notice" @click='noticeShow=true'>大厅公告
+                    <i class="iconfont icon-next"></i>
+                </span>
+            </div>
+            <div class="room_title_right" @click='openRanking()' v-if='roomData.hot.length>0'>
+                <div class="title_right_img">
+                    <img :src="roomData.hot[0].avatar" alt="" class="right_img_avatar">
+                    <img src="../image/one_position_contribution.png" alt="" class="right_img_ranking">
+                </div>
+                <div class="title_right_img">
+                    <img :src="roomData.hot[1].avatar" alt="" class="right_img_avatar" v-if='roomData.hot.length>1'>
+                    <img src="../image/two_position_contribution.png" alt="" class="right_img_ranking">
+                </div>
+                <div class="title_right_img">
+                    <img :src="roomData.hot[2].avatar" alt="" class="right_img_avatar" v-if='roomData.hot.length>2'>
+                    <img src="../image/three_position_contribution.png" alt="" class="right_img_ranking">
+                </div>
+            </div>
+        </div>
+        <div class="room_seat">
+            <ul class="room_seat_list">
+                <li class="room_seat_items" v-for='(item,i) in roomData.mic' v-if='item.mic!=0' :key='item.mic'
+                    @click='openMic(item.mic,item.user_id,item.disable)'>
+                    <div class="items_round">
+                        <img :src="item.avatar" alt="" v-if="item.avatar!=''">
+                        <i class="iconfont iconshafa" v-else-if='item.disable==0'></i>
+                        <i class="iconfont iconjinyong" v-else></i>
+                        <div class="span1" v-if='item.activeMic==1'></div>
+                    </div>
+                    <p class="room_seat_name" v-if="item.nickname==''">{{item.mic}}麦</p>
+                    <p class="room_seat_name" v-else>{{item.nickname}}</p>
+                    <p class="room_seat_name" >{{item.charm}}</p>
+                    <!-- <p class="room_seat_name" v-else>{{item.mic}}麦</p> -->
+                </li>
+            </ul>
+            <!-- <ul class="room_seat_list">
+                    <li class=" room_seat_items" v-for='item in activeMic'>
+                                <div class=" span1" v-show=item.bo></div>
+                    </li>
+                </ul> -->
+        </div>
+        <div class="room_chat" id="messageHeight">
+            <p class="room_chat_notice">
+                {{roomData.shortnotice}}
+            </p>
+            <ul class="room_chat_message">
+                <li class="message_list" v-for='item in chat'>
+                    <span class="message_items">
+                        {{item.name}}:{{item.message}}
+                    </span>
+                </li>
+            </ul>
+
+        </div>
+        <div class="room_footer">
+            <div class="footer_left">
+                <span class="footer_speak footer_round" v-if='micIconShow==1' @click='vociClose'>
+                    <img src="../image/ic_room_voice_open.png" alt="">
+                </span>
+                <span class="footer_speak footer_round" v-if='micIconShow==0' @click='vociClose'>
+                    <img src="../image/ic_room_voice_close.png" alt="">
+                </span>
+            </div>
+            <!-- <div class="footer_left">
+                <span class="footer_speak footer_round">
+                    上麦
+                </span>
+            </div> -->
+            <div class="footer_right">
+                <span class="footer_round footer_gift">
+                    <div class="footer_gift_img" @click='openGift()'>
+                        <img src="../image/gift_icon.png" alt="">
+                    </div>
+
+                </span>
+                <span class="footer_round footer_message" @click.stop='showMessage'>
+                    <i class="iconfont iconxiaoxi-"></i>
+                </span>
+            </div>
+        </div>
+        <div class="room_message" v-show='messageShow'>
+            <div class="room_message_input">
+                <input type="text" placeholder="请输入消息..." id="inputMessage" v-model='message'>
+            </div>
+            <div class="room_message_wrap">
+                <button class="room_message_send" @click='messagePush'>
+                    发送
+                </button>
+            </div>
+
+        </div>
+        <!-- <div class="room_mask" v-if='maskShow'>
+            <div class="mask_bg" @click='openUser'>
+
+            </div>
+            <div class="mask_content">
+                <i class="iconfont icon-close" @click='openUser'></i>
+                <div class="mask_img">
+                    <img :src="roomData.logo" alt="">
+                </div>
+                <p class="mask_name">{{roomData.creater}}</p>
+                <div class="mask_footer border-top">
+                    <div class="mask_gift mask_flex">
+                        <span class=" border-right">送礼物</span>
+                    </div>
+                    <div class="mask_user mask_flex ">
+                        <span>主页</span>
+                    </div>
+                    <div class="mask_follow mask_flex">
+                        <span>+关注</span>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="room_mask" v-if='noticeShow'>
+            <div class="mask_bg" @click='noticeShow=false'></div>
+            <div class="mask_notice">
+                <div class="mask_notice_content">
+                    <p>
+                        {{roomData.notice}}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="chat_type" v-if='typeShow'>
+            <div class="type_bg" @click='typeShow=false'></div>
+            <ul>
+                <li class="border-bottom" @click='openModify'>
+                    修改信息
+                </li>
+                <li class="border-bottom type_close" @click='typeShow=false'>取消</li>
+            </ul>
+        </div>
+        <div class="chat_type" v-if='micShow'>
+            <div class="type_bg" @click='micShow=false'></div>
+            <ul>
+                <li class="border-bottom" @click='closeMic' v-if='disable==0'>
+                    封禁此麦
+                </li>
+                <li class="border-bottom" @click='closeMic' v-else>
+                    解禁此麦
+                </li>
+                <li class="border-bottom" @click='opemPeople'>
+                    抱人上麦
+                </li>
+                <li class="border-bottom type_close" @click='micShow=false'>取消</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app, maplertc, rong ;
+    apiready = function () {
+        // if (api.systemType == 'android') {
+        //   api.setScreenSecure({
+        //     secure: true
+        //   });
+        // }
+        rong = api.require('rongCloud2');
+        maplertc = api.require('mapleRTC');
+        floatModule = api.require('floatModule');
+        $api.fixStatusBar($api.dom('#header'));
+        app = new Vue({
+            el: '#app',
+            data: {
+                roomName: '',
+                messageShow: false,
+                chat: [],
+                message: '',
+                maskShow: false,
+                noticeShow: false,
+                micIconShow:1,
+                roomData: {
+                    name: undefined,
+                    roomid: 0,
+                    nums: 0,
+                    hot: [
+                        {
+                            avatar: '',
+                        },
+                        {
+                            avatar: '',
+                        },
+                        {
+                            avatar: '',
+                        }
+                    ],
+                    mic: [
+                        {
+                            nickname: '',
+                            avatar: '',
+                            activeMic: 0,
+                        }
+                    ],
+                },
+                typeShow: false,
+                micShow: false,
+                chatType: [
+                    {
+                        title: '修改信息',
+                    }
+                ],
+                micSeat: undefined,
+                disable: -1,//点击的麦位是否禁止
+            },
+            created() {
+                var _this = this;
+                // rong.setOnReceiveMessageListener(function (ret, err) {
+                //     _this.chat.push({
+                //         name: ret.result.message.content.extra,
+                //         message: ret.result.message.content.text,
+                //     });
+                //     var ele = $api.dom('.room_chat');
+                //     ele.scrollTop = ele.scrollHeight;
+                // })
+                // ele.scrollTop = ele.scrollHeight;
+                // api.addEventListener({
+                //     name: 'keyback'
+                // },
+                //     function (ret, err) {
+                //         var _this = this
+                //         function quitChatRoom() {
+                //             rong.quitChatRoom({
+                //                 chatRoomId: '123'
+                //             }, function (ret, err) {
+
+                //             })
+                //         }
+                //     })
+            },
+            mounted() {
+                var _this = this;
+                // floatModule.close()
+                this.enter();
+                var text=ret.result.message.content.text
+                rong.setOnReceiveMessageListener(function (ret, err) {
+                    if (ret.result.message.content.text == "MICINFO") {
+                        _this.roomData.mic = JSON.parse(ret.result.message.content.extra);
+
+                    } else if (ret.result.message.content.text == "MICUSERENTER") {
+                        _this.chat.push({
+                            name: '欢迎',
+                            message: JSON.parse(ret.result.message.content.extra).enter.nickname + '加入',
+                        });
+                    } else if(ret.result.message.content.text == "CHATMESSAGE"){
+                        _this.chat.push({
+                            name: JSON.parse(ret.result.message.content.extra).name +":",
+                            message: JSON.parse(ret.result.message.content.extra).message,
+                        });
+                        var ele = $api.dom('.room_chat');
+                        ele.scrollTop = ele.scrollHeight;
+                    }
+                })
+                this.init();
+                this.joinChatRoom();
+                maplertc.addEventListener({
+                    name: 'joinChannelSuccessListener'
+                }, function (ret) {
+                    maplertc.adjustRecordingSignalVolume({
+                        volume: 0
+                    }, function (ret) {
+                    });
+                    maplertc.addEventListener({
+                        name: 'audioVolumeIndicationListener'
+                    }, function (ret) {
+                        var volumeId = [];
+                        var retVo = JSON.parse(ret.volumeInfo);
+                        for (let i = 0; i < retVo.length; i++) {
+                            if (retVo[i].volume > 5) {
+                                volumeId.push(retVo[i].uid)
+                            }
+                        }
+                        for (let i = 0; i < _this.roomData.mic.length; i++) {
+                            if (_this.roomData.mic[i].user_id != '') {
+                                var user_id = _this.roomData.mic[i].user_id
+                                for (let j = 0; j < volumeId.length; j++) {
+                                    if (volumeId[j] == user_id) {
+                                        _this.roomData.mic[i].activeMic = 1;
+                                        // console.log(_this.activeMic[i])
+                                        setTimeout(function () {
+                                            _this.roomData.mic[i].activeMic = 0;
+                                        }, 1000)
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    maplertc.enableAudioVolumeIndication({
+                        interval: 1000
+                    }, function (ret) {
+                        if (ret.status == true) {
+                            // for(){
+
+                            // }
+                            // for(var i=0;i<this.roomData.mic.length;i++){
+                            //     for(var j=0;j<ret.volumeInfo.length;i++){
+                            //         if(){
+
+                            //         }
+                            //     }
+                            // }
+                        }
+                    });
+                });
+                //加入频道失败监听
+                maplertc.addEventListener({
+                    name: 'joinChannelFailedListener'
+                }, function (ret) {
+                    api.alert({
+                        title: 'joinChannelFailedListener',
+                        msg: JSON.stringify(ret)
+                    })
+                });
+                api.addEventListener({
+                    name: 'keyback'
+                }, function (ret, err) {
+                    _this.goback()
+                });
+                api.addEventListener({
+                    name: "closeGif"
+                }, function (ret, err) {
+                    _this.closeGift()
+                })
+            },
+            methods: {
+                init() {
+                    // 设置频道属性(setChannelProfile)
+                    maplertc.setChannelProfile({
+                        profile: "voiceOnly"
+                    }, function (ret) {
+                        // api.toast({ msg: JSON.stringify(ret) });
+                    });
+                    //设置sfu模式
+                    maplertc.setVideoConferenceProfile({
+                        profile: 'sfu' //频道模式，"normal" 同时支持sfu和mcu，"sfu" 服务器端转发模式，"mcu" 服务器端混屏模式，当前只支持4路窗口混屏
+                    });
+                    // 设置媒体属性(setMediaProfile)
+                    maplertc.setMediaProfile({
+                        audioProfile: "voiceHighQuality",
+                        videoProfile: "480P"
+                    }, function (ret) {
+                        // api.toast({
+                        //  msg: JSON.stringify(ret) 
+                        // });
+                    });
+                    //加入
+                    maplertc.setJoinChannelUserId({
+                        userId: $api.getStorage('uid') + ''
+                    }, function (ret) {
+                        // api.alert({
+                        //   title: 'setJoinChannelUserId',
+                        //   msg: JSON.stringify(ret)
+                        // });
+                    });
+                    this.joinChannel_maplertc();
+
+                },
+                joinChannel_maplertc() {
+                    _this = this;
+                    maplertc.joinChannel({
+                        channelId: api.pageParam.roomid,
+                        userId: $api.getStorage('uid')
+                    }, function (ret) {
+                        // api.toast({ msg: JSON.stringify(ret) });
+                    });
+                },
+                joinChatRoom() {
+                    var _this = this
+                    rong.joinChatRoom({
+                        chatRoomId: api.pageParam.roomid,
+                        defMessageCount: 20
+                    }, function (ret, err) {
+                        // if (ret.status == 'success')
+                        //     api.toast({ msg: JSON.stringify(ret.status) });
+                        // else
+                        //     api.toast({ msg: err.code });
+                    })
+                },
+                enter() {
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    axios1('dlchat/api_chat/enter', 'post', {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid'),
+                        roomid: api.pageParam.roomid,
+                    },
+                        (res, err) => {
+                            if (res.code == 1) {
+                                this.roomData = res.data
+                                console.log(JSON.stringify(res.dat))
+                            } else {
+                                api.toast({
+                                    msg: '网络错误，请稍候重试'
+                                })
+                            }
+                            api.hideProgress();
+                        }
+                    )
+                },
+                //打开排行榜
+                openRanking() {
+                    api.openWin({
+                        name: 'chat_ranking',
+                        url: 'chat_ranking.html',
+                        pageParam: {
+                            roomid: this.roomData.roomid
+                        }
+                    })
+                },
+                //打开送礼物
+                openGift() {
+                    var _this = this;
+                    _this.bgShow = true;
+                    creater = {
+                        user_id: this.roomData.user_id,
+                        avatar: this.roomData.logo,
+                        nickname: this.roomData.creater
+                    }
+                    // datas=datas.unshift(
+                    //     shift
+                    // )
+                    api.openFrame({
+                        name: 'chat_gift_from',
+                        url: 'chat_gift_from.html',
+                        rect: {
+                            x: 0,
+                            y: 150,
+                            w: api.winWidth,
+                            h: 440,
+                            marginBottom: 0,
+                        },
+                        pageParam: {
+                            datas: this.roomData.mic,
+                            roomid: this.roomData.roomid,
+                            creater: creater
+                        }
+                    });
+                },
+                //打开送礼物
+                openGift() {
+                    var _this = this;
+                    _this.bgShow = true;
+                    creater = {
+                        user_id: this.roomData.user_id,
+                        avatar: this.roomData.logo,
+                        nickname: this.roomData.creater
+                    }
+                    // datas=datas.unshift(
+                    //     shift
+                    // )
+                    api.openFrame({
+                        name: 'chat_gift_from',
+                        url: 'chat_gift_from.html',
+                        rect: {
+                            x: 0,
+                            y: 150,
+                            w: api.winWidth,
+                            h: 440,
+                            marginBottom: 0,
+                        },
+                        pageParam: {
+                            datas: this.roomData.mic,
+                            roomid: this.roomData.roomid,
+                            creater: creater
+                        }
+                    });
+                },
+                    goback() {
+                    var _this = this;
+                    var url
+                    //房间封面图片下载
+                    api.download({
+                        url: _this.roomData.logo,
+                        savePath: 'fs://logo'+_this.roomData.roomid+'.png',
+                        report: false,
+                        cache: false,
+                        allowResume: true
+                    }, function (ret, err) {
+                        if (ret.state == 1) {
+                            //打开悬浮
+                            var params = {
+                                rect: { x: 0, y: 200, w: 100, h: 50 },
+                                avatar: 'fs://logo'+_this.roomData.roomid+'.png',
+                                margin: {
+                                    middleMargin: 200,
+                                    thridMargin: -200
+                                }
+                            }
+                    $api.setStorage('roomid', _this.roomid);
+                    floatModule.openFloat(params, function (ret) {
+                        if (ret.clickType == 1) {
+                            api.openWin({
+                                name: 'chat_main',
+                                url: 'chat_main.html',
+                                bgColor: 'widget://img/ic_bg_room_notice.png',
+                                singleInstance: true,
+                                pageParam: {
+                                    roomid: this.roomid
+                                }
+                            })
+                            // floatModule.close()
+                        } else if (ret.clickType == 4) {
+                            $api.setStorage('roomid', -1);
+                            let data = {
+                                token: $api.getStorage('deviceToken'),
+                                roomid: _this.roomid,
+                                user_id: $api.getStorage('uid'),
+                            }
+                            axios1('dlchat/api_chat/out', 'post', data,
+                                (res, err) => {
+                                    if (res.code == 1) {
+                                        api.toast({
+                                            msg: res.msg
+                                        })
+                                    } else {
+                                        api.toast({
+                                            msg: res.msg
+                                        })
+                                    }
+                                }
+                            )
+                            maplertc.leaveChannel(function (ret) {
+                                alert(JSON.stringify(ret))
+                            });
+                            rong.quitChatRoom({
+                                chatRoomId: _this.roomid
+                            }, function (ret, err) {
+                            })
+                        }
+                    });
+                        } else {
+
+                        }
+                    });
+                    api.closeWin();
+                },
+                showMessage() {
+                    this.messageShow = true;
+                    //input获取焦点
+                    if (this.messageShow) {
+                        setTimeout(
+                            function () {
+                                var ele = $api.byId('inputMessage')
+                                ele.focus()
+                            }, 100
+                        )
+                    }
+                },
+                //点击别处隐藏输入框
+                hideMessage() {
+                    this.messageShow = false;
+                },
+                //发送消息
+                messagePush() {
+                    let _this = this;
+                    if (this.message == '') {
+                        api.toast({
+                            msg: '请输入消息'
+                        })
+                    } else {
+                        _this.chat.push({
+                            name: $api.getStorage('uname'),
+                            message: this.message
+                        });
+                        rong.sendTextMessage({
+                            conversationType: 'CHATROOM',
+                            targetId: _this.roomData.roomid,
+                            text:'CHATMESSAGE',
+                            senderUserId: $api.getStorage('uid'),
+                            extra: {
+                                message:_this.message,
+                                name:$api.getStorage('uname')
+                            },
+                        }, function (ret, err) {
+                            _this.message = '';
+                            // if (ret.status == 'prepare') {
+                            // } else if (ret.status == 'success') {
+                            //     api.toast({ msg: ret.result.message.messageId + '**msaage' });
+                            // } else if (ret.status == 'error') {
+                            // }
+                            var ele = $api.dom('.room_chat');
+                            ele.scrollTop = ele.scrollHeight;
+                        });
+
+                    }
+                },
+                //打开用户
+                // openUser(){
+                //     this.maskShow=!this.maskShow
+                // },
+                //打开Mic
+                openMic(micSeat, user_id, disable) {
+                    this.micSeat = micSeat;
+                    this.micShow = true;
+                    if (disable == 0) {
+                        this.disable = 0
+                    } else {
+                        this.disable = 1
+                    }
+                    // this.closeMic()
+                },
+                vociClose() {
+                    var _this = this;
+                    if (this.micIconShow == 0) {
+                        maplertc.adjustRecordingSignalVolume({
+                            volume: 100
+                        }, function (ret) {
+                            if (ret.status == true) {
+                                _this.micIconShow = 1
+                            }
+                        });
+                    } else if (this.micIconShow == 1) {
+                        maplertc.adjustRecordingSignalVolume({
+                            volume: 0
+                        }, function (ret) {
+                            if (ret.status == true) {
+                                _this.micIconShow = 0
+                            }
+                        });
+                    }
+                },
+                //关闭麦位
+                closeMic() {
+                    let action = this.disable == 0 ? 1 : 0
+                    let data = {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid'),
+                        roomid: this.roomData.roomid,
+                        mic: this.micSeat,
+                        action: action
+                    }
+                    axios1('dlchat/api_chat/micdisable', 'post', data,
+                        (res, err) => {
+                            if (res.code == 1) {
+                                this.roomData.mic[this.micSeat].disable = action;
+                                // api.toast({
+                                //     msg: ret.msg
+                                // })
+                            } else {
+                                api.toast({
+                                    msg: res.msg
+                                })
+                            }
+                        }
+                    )
+                },
+                opemPeople() {
+                    var _this = this;
+                    this.typeShow = false;
+                    api.openWin({
+                        name: 'chatPeople',
+                        url: 'chat_people.html',
+                        pageParam: {
+                            roomid1: _this.roomData.roomid,
+                            mic: _this.micSeat,
+                        }
+                    })
+                },
+                //修改房间
+                openModify() {
+                    this.typeShow = false;
+                    api.openWin({
+                        name: 'chatRoomModify',
+                        url: 'chat_room_modify.html',
+                        pageParam: {
+                            infor: {
+                                token: $api.getStorage('deviceToken'),
+                                user_id: $api.getStorage('uid'),
+                                bgpic: this.roomData.bgpic,
+                                roomid: this.roomData.roomid,
+                                name: this.roomData.name,
+                                catename: this.roomData.catename,
+                                notice: this.roomData.notice,
+                                room_cate_id: this.roomData.room_cate_id,
+                                shortnotice: this.roomData.shortnotice
+                            }
+                        }
+                    })
+                }
+            },
+
+        })
+    }
+</script>

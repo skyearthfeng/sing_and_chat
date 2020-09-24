@@ -1,0 +1,328 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>赠送礼物列表</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/gift_box.css" />
+</head>
+
+<body>
+  <div id="app" >
+    <div class="wrap flex-wrap flex-vertical">
+      <div @click="closeGiftBox" class="flex-con"></div>
+      <div class="giftBox">
+        <div class="gift-title">
+          <p>送礼物更能搭讪成功呦</p>
+          <span @click='reward'>{{rewardInfo}}
+            <i class="iconfont iconshangla"></i>
+          </span>
+        </div>
+        <div class="giftList">
+          <div v-for="(item, index) in giftList"  :class="['gift-item', isGiftIndex == index ? 'gift-selected' : '']"
+            @click="selectGift(item,index)">
+            <div v-if="item.type == 1" class="gift-item-vip">
+              <img src="../image/gift_vip.png" alt="">
+            </div>
+            <img class="gift-item-img" :src="imgList[index]" alt="">
+            <span>{{item.gold}} 聊币</span>
+          </div>
+        </div>
+        <div class="gift-bottom">
+          <div class="gift-recharge">
+            <p>{{userInfo.info.gold}} 聊币</p>
+            <p @click="openRecharge">充值
+              <i class="iconfont icon-next"></i>
+            </p>
+          </div>
+          <div class="gift-btn">
+            <input value="1" type="number" @focus="$api.css($api.dom('.giftBox'), 'position: static;')" /><span @click="giveGift">赠送</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong;
+  apiready = function () {
+    rong = api.require('rongCloud2');
+    app = new Vue({
+      el: '#app',
+      data: {
+        to_uid: '',
+        to_uname: '',
+        to_uavatar: '',
+        userInfo: {
+          // gold: '100',
+          info:{
+            gold:0
+          }
+        },
+        giftList: [],
+        isGiftIndex: 0,
+        giftId: '',
+        giftName: '',
+        giftType: '',
+        giftGold: '',
+        giftSvga: '',
+        giveGiftFlag: true,
+        imgList:[],
+        rewardInfo: '打赏',
+        rewardDatas: [{
+          title: '所有上麦嘉宾'
+        },{
+          title: '卓文'
+        },{
+          title: '昵称'
+        }]
+      },
+      created: function () {
+        var _this = this;
+      
+      },
+      mounted: function () {
+        var _this = this;
+        _this.to_uid = api.pageParam.to_uid;
+        _this.to_uname = api.pageParam.to_uname;
+        _this.to_uavatar = api.pageParam.to_uavatar;
+        _this.getUserIndex();
+        _this.getGiftIndex();
+      },
+      methods: {
+        reward() {
+          let MNPopups = api.require('MNPopups');
+          MNPopups.open({
+            datas: this.rewardDatas,
+            styles: {
+              corner: 5,
+              cell: {
+                h: 30,
+                title: {
+                  marginL: 30
+                },
+                icon: {
+                  marginL: 0,
+                  w: 0,
+                  h: 0, 
+                },
+                separateLine: {
+                  width: 0,
+                }
+              }
+            },
+            position: {
+              x: api.winWidth-30,
+              y: 210
+            }
+          }, (res, err) => {
+            if(res) {
+              if(typeof res.index === 'number'){
+                this.rewardInfo = this.rewardDatas[res.index].title;
+              }
+            }
+          })
+        },
+        // 获取账户信息
+        getUserIndex: function () {
+          var _this = this;
+          
+          api.ajax({
+            url: baseUrl + 'user/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              _this.userInfo = ret.data;
+            }
+          })
+        },
+
+        // 获取礼物列表
+        getGiftIndex: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'gift/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              _this.isGiftIndex = 0;
+              _this.giftList = ret.data;
+              _this.giftId = _this.giftList[0].id;
+              _this.giftName = _this.giftList[0].name;
+              _this.giftType = _this.giftList[0].type;
+              _this.giftGold = _this.giftList[0].gold;
+              _this.giftFile = _this.giftList[0].file;
+              _this.giftSvga = _this.giftList[0].source;
+              //礼物缓存
+              console.log(JSON.stringify(ret))
+              for (var i = 0; i < _this.giftList.length; i++) {
+                api.imageCache({
+                  url: _this.giftList[i].file
+                }, function (ret, err) {
+                  _this.imgList.push(ret.url)
+                });
+              }
+            }
+          })
+        },
+
+        // 选择礼物
+        selectGift: function (item, index) {
+          var _this = this;
+          _this.isGiftIndex = index;
+          _this.giftId = item.id;
+          _this.giftName = item.name;
+          _this.giftType = item.type;
+          _this.giftGold = item.gold;
+          _this.giftFile = item.file;
+          _this.giftSvga = item.source;
+        },
+
+        // 赠送礼物
+        giveGift: function () {
+          var _this = this;
+          if (_this.giveGiftFlag) {
+            _this.giveGiftFlag = false;
+            api.showProgress({
+              title: '',
+              text: ''
+            });
+            api.ajax({
+              url: baseUrl + 'message/givgift',
+              method: 'post',
+              headers: {
+                token: $api.getStorage('deviceToken')
+              },
+              data: {
+                values: {
+                  uid: $api.getStorage('uid'),
+                  to_uid: _this.to_uid,
+                  gid: _this.giftId
+                },
+              }
+            }, function (ret, err) {
+              _this.giveGiftFlag = true;
+              api.hideProgress();
+              api.toast({
+                msg: ret.message[0]
+              });
+              if (ret.status == 200) {
+                // _this.userInfo.info.gold=_this.userInfo.info.gold-_this.giftGold;
+                var giveGiftExtra = {
+                  fromId: $api.getStorage('uid'),
+                  fromName: $api.getStorage('uname'),
+                  fromAvatar: $api.getStorage('uavatar'),
+                  toId: _this.to_uid,
+                  toName: _this.to_uname,
+                  toAvatar: _this.to_uavatar,
+                  GiftId: _this.giftId,
+                  GiftName: _this.giftName,
+                  GiftImg: _this.giftFile,
+                  GiftGold: _this.giftGold,
+                  GiftSvga: _this.giftSvga
+                }
+                rong.sendCommandMessage({
+                  conversationType: 'PRIVATE',
+                  targetId: _this.to_uid + '',
+                  name: 'give_gift_notice_private',
+                  data: JSON.stringify(giveGiftExtra)
+                }, function (ret, err) {});
+                rong.sendRichContentMessage({
+                  conversationType: 'PRIVATE',
+                  targetId: _this.to_uid + '',
+                  title: 'give_gift_message',
+                  description: '送你一份精美礼物',
+                  imageUrl: _this.giftFile,
+                  extra: JSON.stringify(giveGiftExtra)
+                }, function (ret, err) {});
+                api.sendEvent({
+                  name: 'refreshIM',
+                  extra: {
+                    type: 'RC:ImgTextMsg',
+                    title: 'give_gift_message',
+                    con: '送你一份精美礼物',
+                    imageUrl: _this.giftFile,
+                    mode: 'SEND',
+                    id: $api.getStorage('uid'),
+                    name: $api.getStorage('uname'),
+                    avatar: $api.getStorage('uavatar')
+                  }
+                });
+                if (_this.giftSvga != '') {
+                  // api.openFrame({
+                  //   name: 'svga',
+                  //   url: 'svga.html',
+                  //   rect: {
+                  //     x: 0,
+                  //     y: 0,
+                  //     w: api.winWidth,
+                  //     h: api.winHeight
+                  //   },
+                  //   bounces: false,
+                  //   pageParam: giveGiftExtra
+                  // });
+                }
+                api.sendEvent({
+                  name: 'refreshUserHome',
+                });
+                setTimeout(function () {
+                  api.closeFrame({
+                    name: 'gift_box'
+                  });
+                }, 1000);
+              }
+              if (ret.status == 401) {
+                api.sendEvent({
+                  name: 'giveGift_showRechargeDialog',
+                });
+              }
+              if (ret.status == 400) {
+                api.sendEvent({
+                  name: 'giveGift_showVipDialog',
+                });
+              }
+            })
+          }
+        },
+
+        openRecharge: function () {
+          api.openWin({
+            name: 'recharge',
+            url: 'recharge.html',
+            slidBackEnabled: false
+          });
+        },
+
+        closeGiftBox: function () {
+          api.closeFrame({
+            name: 'gift_box'
+          });
+        }
+      },
+    })
+  }
+</script>

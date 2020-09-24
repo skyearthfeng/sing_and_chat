@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+        <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+        <title>约玩</title>
+        <link rel="stylesheet" type="text/css" href="../css/api.css" />
+        <link rel="stylesheet" type="text/css" href="../css/common.css">
+        <link rel="stylesheet" type="text/css" href="../css/publishing_details.css" />
+    </head>
+    <body>
+        <div id="app" v-cloak>
+            <header id="header" class="border-bottom">
+                <div class="header-wrap">
+                    <div @click="goback" class="header-left">
+                        <i class="iconfont icon-pre"></i>
+                    </div>
+                    <div class="header-title">邀约详情</div>
+                </div>
+            </header>
+            <div class="user-info">
+                <img :src="detail.touxiang" />
+                <div class="info">
+                    <p>用户<span>{{detail.name}}</span></p>
+                    <p><img src="../image/nan.png" /><span>{{detail.age}}</span></p>
+                    <p>1小时前</p>
+                </div>
+            </div>
+            <div class="content">
+                <p class="content-title">{{detail.title}}</p>
+                <div class="content-info">
+                    <div>
+                        <img src="../image/circular-QQ.png" />
+                        <span>费用：<span>{{detail.cost}}</span></span>
+                    </div>
+                    <div>
+                        <img src="../image/circular-QQ.png" />
+                        <span>对象：<span>{{detail.sex}}</span></span>
+                    </div>
+                    <div>
+                        <img src="../image/circular-QQ.png" />
+                        <span>时间：<span>{{detail.time}}</span></span>
+                    </div>
+                    <div>
+                        <img src="../image/circular-QQ.png" />
+                        <span>地点：<span>{{detail.place}}</span></span>
+                    </div>
+                    <div>
+                        <img src="../image/circular-QQ.png" />
+                        <span>说明：<span>{{detail.instructions}}</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="btn">
+                <button>我要报名</button>
+            </div>
+        </div>
+    </body>
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    apiready = () => {
+        let app;
+        app = new Vue({
+            el: '#app',
+            data: {
+                detail:{}
+            },
+            mounted() {
+                this.detail=api.pageParam.detail
+            },
+            methods: {
+
+                // 返回上一页
+                goback() {
+                    api.closeWin();
+                }
+            }
+        })
+    }
+</script>

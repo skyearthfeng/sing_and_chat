@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>聊天室</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="swiper-container banner swiper-no-swiping">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="item in bannerList" :key="item.id" @click="openBnaer(item.ad_link)">
+                    <img :src="item.ad_file" alt="">
+                </div>
+            </div>
+        </div>
+        <div class="history_chat" @click.stop="" v-show="roomid!=-1" @click="openDetail(roomid)">轻触返回房间</div>
+        <div class="chat_charm" @click='openRanking'>
+            <div class="chat_charm_right" v-if='hotList.length>0'>
+                <div class="right_one right_item">
+                    <img src="../image/icon_ranklist_frist.png" alt="" class="ranklist">
+                    <img :src="hotList[0].avatar" alt="" class="avatar">
+                </div>
+                <div class="right_two right_item" v-if='hotList.length>1'>
+                    <img src="../image/icon_ranklist_seconde.png" alt="" class="ranklist">
+                    <img :src="hotList[1].avatar" alt="" class="avatar">
+                </div>
+                <div class="right_three right_item" v-if='hotList.length>2'>
+                    <img src="../image/icon_ranklist_three.png" alt="" class="ranklist">
+                    <img :src="hotList[2].avatar" alt="" class="avatar">
+                </div>
+                <i class="iconfont icon-next"></i>
+            </div>
+        </div>
+        <header>
+            <div class="nav">
+                <a href="javascript:;" v-bind:class="tabIndex==0?'active':''" @click=slideTo(0)>
+                    <img :src="tabIndex==0?'../image/icon_amusement_hot_select.png':'../image/icon_amusement_hot_normal.png'"
+                        alt="">
+                    <p>热门</p>
+                </a>
+                <a href="javascript:;" v-bind:class="tabIndex==1?'active':''" @click=slideTo(1)>
+                    <img :src="tabIndex==1?'../image/icon_amusement_sprouting_select.png':'../image/icon_amusement_sprouting_normal.png'"
+                        alt="">
+                    <p>交友</p>
+                </a>
+                <a href="javascript:;" v-bind:class="tabIndex==2?'active':''" @click=slideTo(2)>
+                    <img :src="tabIndex==2?'../image/icon_amusement_amusement_select.png':'../image/icon_amusement_amusement_normal.png'"
+                        alt="">
+                    <p>点歌</p>
+                </a>
+                <a href="javascript:;" v-bind:class="tabIndex==3?'active':''" @click=slideTo(3)>
+                    <img :src="tabIndex==3?'../image/icon_amusement_love_select.png':'../image/icon_amusement_love_normal.png'"
+                        alt="">
+                    <p>情感</p>
+                </a>
+                <a href="javascript:;" v-bind:class="tabIndex==4?'active':''" @click=slideTo(4)>
+                    <img :src="tabIndex==4?'../image/icon_amusement_game_select.png':'../image/icon_amusement_game_normal.png'"
+                        alt="">
+                    <p>陪练</p>
+                </a>
+                <a href="javascript:;" v-bind:class="tabIndex==5?'active':''" @click=slideTo(5)>
+                    <img :src="tabIndex==5?'../image/icon_amusement_audio_select.png':'../image/icon_amusement_audio_normal.png'"
+                        alt="">
+                    <p>电台</p>
+                </a>
+            </div>
+        </header>
+        <div class="swiper-container banner1">
+            <div class="swiper-scrollbar"></div>
+            <div class="swiper-wrapper">
+                <div class="swiper-slide slidepage">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.virtual_people}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- <div class="swiper-container scroll">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide slidescroll">
+                                <ul class="chat_list">
+                                    <li class="chat_items " @click='openDetail(item.roomid,item.user_id)'
+                                        v-for='item in roomData' :key='item.roomid'>
+                                        <div class="chat_items_img">
+                                            <img :src="item.logo" alt="">
+                                            <span class="img_label">{{item.catename}}</span>
+                                            <div class="chat_items_img_num">
+                                                <img src="../image/chat.png" alt="">
+                                                <span>{{item.nums}}人</span>
+                                            </div>
+                                        </div>
+                                        <div class="chat_items_info">
+                                            <h4>{{item.name}}</h4>
+                                            <p>{{item.creater}}</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+                <div class="swiper-slide">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid' v-if='item.room_cate_id==9'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="swiper-slide">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid' v-if='item.room_cate_id==8'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="swiper-slide">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid' v-if='item.room_cate_id==2'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="swiper-slide">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid' v-if='item.room_cate_id==10'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="swiper-slide">
+                    <ul class="chat_list">
+                        <li class="chat_items " @click='openDetail(item.roomid,item.user_id,item.type)'
+                            v-for='item in roomData' :key='item.roomid' v-if='item.room_cate_id==7'>
+                            <div class="chat_items_img">
+                                <img v-lazy="item.logo" alt="">
+                                <span class="img_label">{{item.catename}}</span>
+                                <div class="chat_items_img_num">
+                                    <img src="../image/chat.png" alt="">
+                                    <span>{{item.nums}}人</span>
+                                </div>
+                            </div>
+                            <div class="chat_items_info">
+                                <h4>{{item.name}}</h4>
+                                <p>{{item.creater}}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- <div class="swiper-scrollbar"></div> -->
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/vue-lazyload.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script>
+    apiready = function () {
+        let app, mySwiper, mySwiper1, mySwiper2, floatModule;
+        // $api.fixStatusBar($api.dom('#header'));
+        // floatModule = api.require('floatModule')
+        Vue.use(VueLazyload);
+        app = new Vue({
+            el: '#app',
+            data: {
+                tabIndex: 0,
+                clientX: 0,
+                roomData: [],
+                hotList: [],
+                chatShow: $api.getStorage('chatShow'),
+                roomid: $api.getStorage('roomid'),
+                bannerList: []
+            },
+            created() {
+                window.addEventListener('touchstart', function (e) {
+                    this.clientX = event.touches[0].clientX;
+                })
+                window.addEventListener('touchmove', function (event) {
+                    if (this.clientX - event.touches[0].clientX > 10) {
+                        api.setFrameAttr({
+                            name: api.frameName,
+                            bounces: true
+                        });
+                    }
+                })
+                // window.addEventListener('touchend', function (event) {
+                //     console.log(event.touches[0].clientX);
+                // })
+            },
+            mounted() {
+                var _this = this;
+                api.setRefreshHeaderInfo({
+                    bgColor: '#ccc',
+                    textColor: '#fff',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...'
+                }, function (ret, err) {
+                    _this.getRoom()
+                    setTimeout(function () {
+                        api.refreshHeaderLoadDone()
+                    }, 1000)
+                })
+                // $api.setStorage('roomid', -1)
+                this.getRoom()
+                this.getRanking()
+                this.getBnaer()
+                    mySwiper = new Swiper('.banner1', {
+                    // autoHeight: true,
+                    // scrollbar: {
+                    //         el: '.swiper-scrollbar',
+                    //         // dragSize: 10,
+                    //     },
+                    // resistanceRatio: 1,
+                    on: {
+                        touchStart: function (swiper) {
+                            api.setFrameAttr({
+                                name: api.frameName,
+                                bounces: false
+                            })
+                        },
+                        touchEnd: function (swiper) {
+                            api.setFrameAttr({
+                                name: api.frameName,
+                                bounces: true
+                            });
+
+                        },
+                        transitionEnd: function (event) {
+                            //你的事件
+                            _this.tabIndex = this.activeIndex
+                        },
+                    },
+                })
+
+                mySwiper2 = new Swiper('.scroll', {
+                    direction: 'vertical',
+                    freeMode: true,
+                    slidesPerView: 'auto',
+                })
+                //创建房间成功监听打开
+                api.addEventListener({
+                    name: 'refreshChat'
+                }, function (ret, err) {
+                    _this.getRoom()
+                })
+                //设置缓存房间id
+                api.addEventListener({
+                    name: 'setRoomid'
+                }, function (ret, err) {
+                    _this.roomid = ret.value.roomid
+                })
+
+                //搜索打开
+                api.addEventListener({
+                    name: 'searchChat'
+                }, function (ret, err) {
+                    var value=ret.value
+                    _this.openDetail(value.roomid,0,value.type)
+                })
+
+            },
+            methods: {
+                getRanking() {
+                    let data = {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid'),
+                        roomid: 0,
+                        type: 0,
+                        nums: 3,
+                    }
+                    axios1('dlchat/api_gift/devotelist', 'post', data,
+                        (res, err) => {
+                            if (res.code == 1) {
+                                this.hotList = res.data;
+                                // console.log(JSON.stringify(ret.data))
+                            } else {
+                                // api.toast({
+                                //     msg: ret.msg
+                                // })
+                            }
+                        }
+                    )
+                },
+                getRoom() {
+                    api.showProgress()
+                    let _this = this
+                    axios1('dlchat/api_room/retrieve', 'post', {
+                            token: $api.getStorage('deviceToken'),
+                            user_id: $api.getStorage('uid')
+                        },
+                        function (res, err) {
+                            console.log(JSON.stringify(res))
+                            if (res.code == 1) {
+                                _this.roomData = res.data;
+                            } else {
+                                // api.toast({
+                                //     msg: ret.msg
+                                // })
+                            }
+                            api.hideProgress()
+                        }
+                    )
+                },
+                //返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                openAuth() {
+                    api.openWin({
+                        name: 'auth',
+                        url: 'auth.html',
+                        bounces: false,
+                        pageParam: this.userInfo
+                    });
+                },
+                //点击跳转
+                slideTo(index) {
+                    mySwiper.slideToLoop(index)
+                    // axios1('dlchat/api_room/retrieve','post',{
+                    //     token:$api.getStorage('deviceToken'),
+                    //     user_id:$api.getStorage('uid')
+                    // },
+                    // (ret,err)=>{
+                    //     if(ret){
+                    //         alert(JSON.stringify(ret))
+                    //     }else{
+                    //         api.toast({
+                    //             msg:err
+                    //         })
+                    //     }
+                    // }
+                    // )
+                },
+                //跳转到聊天室内部
+                openDetail(roomid, userID, type) {
+                    $api.setStorage('chatShow', 1)
+                    if ($api.getStorage('roomid') == roomid) {
+                        api.sendEvent({
+                            name: 'showNavBar',
+                            extra: {
+                                index: 0
+                            }
+                        })
+                        api.setFrameAttr({
+                            name: 'chat_detail',
+                            hidden: false,
+                            rect: {
+                                x: 0, //左上角x坐标
+                                y: 0, //左上角y坐标
+                                w: api.winWidth, //宽度，若传'auto'，页面从x位置开始自动充满父页面宽度
+                                h: api.winHeight //高度，若传'auto'，页面从y位置开始自动充满父页面高
+                            }
+                        })
+                        api.setFrameAttr({
+                            name: 'chat_music_frm',
+                            hidden: false
+                        })
+                    } else {
+                        if (type == 1) {
+                            this.showPassword(roomid, type)
+                        } else {
+                            this.openChat(roomid, type)
+                        }
+                    }
+                    return false
+                    if (userID == $api.getStorage('uid')) {
+                        if ($api.getStorage('roomid') == roomid) {
+                            api.openWin({
+                                name: 'chat_main',
+                                url: 'chat_main.html',
+                                bgColor: 'widget://img/ic_bg_room_notice.png',
+                                // singleInstance: true,
+                                // reload:true,
+                                pageParam: {
+                                    roomid: roomid
+                                }
+                            })
+                        } else {
+                            api.openWin({
+                                name: 'chat_main',
+                                url: 'chat_main.html',
+                                bgColor: 'widget://img/ic_bg_room_notice.png',
+                                // singleInstance: true,
+                                // reload: true,
+                                pageParam: {
+                                    roomid: roomid
+                                }
+                            })
+                        }
+
+                    } else if ($api.getStorage('roomid') == roomid) {
+                        api.openWin({
+                            name: 'chat_detail',
+                            url: 'chat_detail.html',
+                            bgColor: 'widget://img/ic_bg_room_notice.png',
+                            // singleInstance: true,
+                            // reload:true,
+                            pageParam: {
+                                roomid: roomid
+                            }
+                        })
+                    } else {
+                        if ($api.getStorage('roomid') != -1) {
+                            let data = {
+                                token: $api.getStorage('deviceToken'),
+                                roomid: $api.getStorage('roomid'),
+                                user_id: $api.getStorage('uid'),
+                            }
+                            axios1('dlchat/api_chat/out', 'post', data,
+                                (res, err) => {
+                                    if (res.code == 1) {
+                                        // api.toast({
+                                        //     msg: ret.msg
+                                        // })
+                                    } else {
+                                        // api.toast({
+                                        //     msg: ret.msg
+                                        // })
+                                    }
+                                }
+                            )
+                        }
+                        api.openWin({
+                            name: 'chat_detail',
+                            url: 'chat_detail.html',
+                            bgColor: 'widget://img/ic_bg_room_notice.png',
+                            // singleInstance: true,
+                            // reload: true,
+                            pageParam: {
+                                roomid: roomid
+                            }
+                        })
+                    }
+
+                },
+
+                showPassword(roomid, userID, type) {
+                    var _this = this
+                    var dialogBox = api.require('dialogBox')
+                    dialogBox.input({
+                        keyboardType: 'default',
+                        texts: {
+                            title: '本房间已加密',
+                            placeholder: '输入密码',
+                            leftBtnTitle: '取消',
+                            rightBtnTitle: '确定'
+                        },
+                        styles: {
+                            bg: '#fff',
+                            corner: 2,
+                            w: 300,
+                            h: 240,
+                            title: {
+                                h: 60,
+                                alignment: 'center',
+                                size: 14,
+                                color: '#000',
+                                marginT: 30,
+                            },
+                            input: {
+                                h: 60,
+                                y: 30,
+                                marginT: 15,
+                                marginLeft: 10,
+                                marginRight: 10,
+                                textSize: 14,
+                                textColor: '#000'
+                            },
+                            dividingLine: {
+                                width: 0.5,
+                                color: '#696969'
+                            },
+                            left: {
+                                bg: 'rgba(0,0,0,0)',
+                                color: '#007FFF',
+                                size: 12
+                            },
+                            right: {
+                                bg: 'rgba(0,0,0,0)',
+                                color: '#007FFF',
+                                size: 12
+                            }
+                        }
+                    }, function (ret) {
+                        if (ret.eventType == 'left') {
+                            dialogBox.close({
+                                dialogName: 'input'
+                            })
+                        } else {
+                            var password = ret.text
+                            axios1('dlchat/api_chat/enter', 'post', {
+                                    token: $api.getStorage('deviceToken'),
+                                    user_id: $api.getStorage('uid'),
+                                    roomid: roomid,
+                                    // type: 1,
+                                    key: password
+                                },
+                                function (res, err) {
+                                    console.log(JSON.stringify(res))
+                                    dialogBox.close({
+                                        dialogName: 'input'
+                                    })
+                                    if (res.code == 1) {
+                                        _this.openChat(roomid, type, password)
+                                    } else if (res.code == 3001) {
+                                        api.toast({
+                                            msg: '密码错误'
+                                        })
+                                    } else {
+                                        api.toast({
+                                            msg: '网络错误，请稍候重试'
+                                        })
+                                    }
+                                    api.hideProgress()
+                                }
+                            )
+                        }
+                    })
+                },
+
+                openChat(roomid, type, password) {
+                    api.sendEvent({
+                        name: 'chatClose'
+                    })
+                    console.log(JSON.stringify({
+                        roomid: roomid,
+                        type: type,
+                        key: password
+                    }))
+                    setTimeout(() => {
+                        // var creater = userID == $api.getStorage('uid')
+                        api.openFrame({
+                            name: 'chat_detail',
+                            url: 'chat_detail.html',
+                            bgColor: 'widget://img/ic_bg_room_notice.png',
+                            // singleInstance:true,
+                            // singleInstance: true,
+                            // reload:true,
+                            pageParam: {
+                                roomid: roomid,
+                                // creater: creater,
+                                type: type,
+                                key: password
+                            }
+                        })
+                    }, 500)
+                },
+
+                openRanking() {
+                    api.openTabLayout({
+                        name: 'rankingList',
+                        url: 'ranking_list.html',
+                        title: '排行榜',
+                        hideNavigationBar: false,
+                        navigationBar: {
+                            background: '#fff',
+                            color: '#000',
+                            leftButtons: [{
+                                iconPath: 'widget://image/back.png'
+                            }]
+                        }
+                    })
+                    // api.openWin({
+                    //     name: 'rankingList',
+                    //     url: 'ranking_list.html',
+                    // })
+                },
+
+                getBnaer() {
+                    var _this = this
+                    api.ajax({
+                        url: lotteryUrl + 'banner',
+                        method: 'get',
+                    }, function (ret, err) {
+                        if (ret.code == 200) {
+                            _this.bannerList = ret.data
+                            setTimeout(function () {
+                                mySwiper1 = new Swiper('.banner', {
+                                    slidesPerView: 'auto',
+                                    autoplay: true,
+                                    loop: true,
+                                    pagination: {
+                                        el: '.swiper-pagination',
+                                        clickable: true,
+                                    },
+                                })
+                            }, 200)
+                        }
+                    });
+                },
+
+                openBnaer(link){
+                    if(link!='#'){
+                        api.openWin({
+                            name:'banner',
+                            url:link
+                        })
+                    }
+                }
+            }
+        })
+    }
+</script>

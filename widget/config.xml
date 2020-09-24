@@ -1,0 +1,96 @@
+ <widget id="A6155128821907"  version="0.0.1">
+
+	<name>sweetu</name>
+
+	<description>
+
+			聊天室唱聊
+
+	</description>
+
+	<author email="developer@apicloud.com" href="http://www.apicloud.com">
+
+			Developer
+
+	</author>
+
+	<content src="./html/login.html" />
+
+	<access origin="*" />
+
+	<preference name="pageBounce" value="false"/>
+
+	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="hScrollBarEnabled" value="false"/>
+
+	<preference name="vScrollBarEnabled" value="false"/>
+
+	<preference name="autoLaunch" value="true"/>
+
+	<preference name="fullScreen" value="false"/>
+
+	<preference name="autoUpdate" value="true" />
+
+	<preference name="smartUpdate" value="true" />
+
+	<preference name="debug" value="true"/>
+
+	<preference name="statusBarAppearance" value="true"/>
+
+	<preference name="appCertificateVerify" value="false" />
+	
+	<permission name="readPhoneState" />
+
+	<permission name="camera" />
+
+	<permission name="record" />
+
+	<permission name="location" />
+
+	<permission name="fileSystem" />
+
+	<permission name="internet" />
+
+	<permission name="bootCompleted" />
+
+	<permission name="hardware" />
+	
+	<preference name="backgroundMode" value="audio | voip"/>
+
+	<preference name="querySchemes" value="weixin,wechat" />
+
+	<preference name="softInputMode" value="auto"/>
+
+	<preference name="urlScheme" value="dakf8301" />
+	<feature name="shareInstall">
+    	<param name="com.shareinstall.APP_KEY" value="***" />
+	</feature>
+	<intent-filter>
+		<action name="android.intent.action.VIEW"/>
+		<category name="android.intent.category.DEFAULT"/>
+		<data scheme="rong" host="com.zhenxinyue.sweetu" pathPrefix="/conversation/"/>
+	</intent-filter>
+	<feature name="rongCloud2">
+		<param name="appKey" value="**" />
+	</feature>
+	<feature name="mapleRTC">
+    <param name="appId" value="**" />
+  </feature>
+	<feature name="QQPlus">
+		<param name="urlScheme" value="**" />
+		<param name="apiKey" value="****" />
+	</feature>
+	<feature name="wx">
+		<param name="urlScheme" value="***"/>
+		<param name="apiKey" value="***"/>
+		<param name="apiSecret" value="***"/>
+	</feature>
+	<feature name="aliPayPlus">
+      <param name="urlScheme" value="AliPayPlusA6012022735925" />
+  </feature>
+</widget>

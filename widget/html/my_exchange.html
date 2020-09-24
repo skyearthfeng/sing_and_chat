@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>提现</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/edit.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <h1 class="header-title">兑换聊币</h1>
+        </div>
+      </header>
+      <div class="edit-info">
+        <div class="input-wrap">
+          <div class="label">兑换金额</div>
+          <input v-model="price" type="text" placeholder="请输入兑换金额 1钻石可兑换1聊币">
+        </div>
+      </div>
+      <div class="btn-wrap">
+        <button @click="withdraw" type="button" class="btn">兑换</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        price:'',
+        form: {
+          uid: $api.getStorage('uid'),
+          price: '',
+          name: '',
+          tel: '',
+          type: '',
+          description: ''
+        },
+        Paytype: '请选择提现方式',
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+
+      },
+      methods: {
+        //提现方式
+        showActionSheet: function () {
+          var _this = this;
+          api.actionSheet({
+            title: '',
+            cancelTitle: '取消',
+            destructiveTitle: '',
+            buttons: ['支付宝', '微信', '银行卡']
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.buttonIndex == 1) {
+                _this.Paytype = '支付宝';
+                _this.form.type = '1';
+              }
+              if (ret.buttonIndex == 2) {
+                _this.Paytype = '微信';
+                _this.form.type = '2';
+              }
+              if (ret.buttonIndex == 3) {
+                _this.Paytype = '银行卡';
+                _this.form.type = '3';
+              }
+            }
+          });
+        },
+        //提现提交
+        withdraw: function () {
+            var _this=this
+          if (this.price == '') {
+            api.toast({
+              msg: '请填写兑换金额'
+            })
+            return false;
+          }
+          console.log(JSON.stringify({
+                member_id:$api.getStorage('uid'),
+                money:_this.price
+              }))
+          api.ajax({
+            url: lotteryUrl + 'exchange_index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                member_id:$api.getStorage('uid'),
+                money:_this.price
+              }
+            }
+          }, function (ret, err) {
+              console.log(JSON.stringify(ret))
+              console.log(JSON.stringify(err))
+            api.toast({
+              msg: ret.msg
+            })
+            api.sendEvent({
+                name:'refreshMy'
+            })
+            if (ret.code == 200) {
+              setTimeout(() => {
+                api.closeWin();
+              }, 1000);
+            }
+          })
+        },
+        // 后退
+        goback: function () {
+          api.closeWin();
+        }
+      },
+
+    })
+  }
+</script>

@@ -1,0 +1,198 @@
+﻿/* body
+{
+  margin-top:2%;
+  margin-bottom:2%;
+} */
+/*进度条1*/
+.Progressone {
+  width:50%;
+  margin:auto;
+}
+.Progress {
+  width: 100%;
+  border: 0;
+  height: 5px;
+}
+.Progress-bar {
+  background: #95CA0D;
+  float: left;
+  height: 100%;
+  text-align: center;
+  line-height: 150%;
+  background: linear-gradient(to right,#8E1209,#4E0607,#BC544B,#D21404);
+}
+.Progress-total {
+  font-size: 22px;
+  color: red;
+}
+/*进度条2*/
+.Progresstwo {
+  width: 50%;
+  margin: auto;
+  margin-top: 20px;
+}
+.Progress-two-bar {
+  width: 100%;
+  height: 30px;
+  background-color: #ccc;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.Progress-two {
+  width: 0;
+  height: 30px;
+  /* background: linear-gradient(to right,#FE6700,#FB930F,#EC704A,#E55F66); */
+  background-color: #fff;
+  border-radius: 10px;
+}
+/*进度条3*/
+.progressthree {
+  width: 50%;
+  margin-right: 10px;
+  /* margin: auto; */
+  /* margin-top: 20px;
+  display: flex;
+  align-items: center; */
+}
+
+.threeDiv {
+  position: relative;
+  height: 5px;
+  /* top: 18px; */
+  background: #D2D2D2;
+  width: 100%;
+  /* margin: 50px auto; */
+}
+
+.minthree {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  /* background: #ECB400; */
+  background-color: #fff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.vals {
+  position: absolute;
+  font-size: 20px;
+  top: -45px;
+  left: -7px;
+  width: 35px;
+  height: 35px;
+  color: white;
+  line-height: 35px;
+  text-align: center;
+  background: #AF9AB2;
+}
+  .vals:after {
+    content: "";
+    width: 0px;
+    height: 0px;
+    border-top: 6px solid #AF9AB2;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    display: block;
+    margin-left: 11px;
+  }
+.threebg {
+  width:0px;
+  height: 5px;
+  background-color: #fff;
+  /* background: linear-gradient(to right,#FCE000,#F3AB01,#F07400,#F2C601); */
+}
+/*进度条4*/
+.progress-four {
+  width: 50%;
+  height: 72px;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.four {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  background: #999999;
+  border-radius: 8px;
+  margin: auto;
+  top: 32px;
+}
+
+.headfour {
+  width: 0px;
+  height: 100%;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  background: linear-gradient(to right,#2E8111,#5DA810,#B0D526,#BEDD65,#115606);
+}
+
+.spanfour {
+  position: absolute;
+  width: 13px;
+  height: 26px;
+  background: #35AA75;
+  top: -11px;
+  left: 0px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.percentagefour {
+  position: absolute;
+  line-height: 4px;
+  text-align: center;
+  right: -55px;
+  top: 0;
+  color: #024E30;
+  font-weight: 600;
+}
+/*进度条5*/
+.progress-five {
+  width: 50%;
+  margin: auto;
+  margin-top: 20px;
+  height: 50px;
+}
+
+.five {
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  background-color: #e8e8e8;
+  position: relative;
+  margin: 0 auto;
+}
+
+.color-five {
+  height: 100%;
+  width: 0px;
+  background: #34D89B;
+}
+
+.five-font {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  user-select: none;
+  top: -50px;
+}
+
+.five-btn {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  border: 1px solid #ccc;
+  cursor: move;
+  font-family: "宋体";
+  text-align: center;
+  background-color: #fff;
+  user-select: none;
+  top: -101px;
+  color: #666;
+}

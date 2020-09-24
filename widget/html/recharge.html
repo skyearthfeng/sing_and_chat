@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>充值</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/recharge.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" >
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">充值</div>
+        </div>
+      </header>
+      <ul class="recharge-item border-bottom border-top" >
+        <!-- <li @click='rechargeClick(0)' v-bind:class="[index==0?'active':'']" class="border-bottom">充值聊币</li> -->
+        <!-- <li @click='rechargeClick(1)'v-bind:class="[index==1?'active':'']" class="border-bottom">充值U钻</li> -->
+      </ul>
+      <div class="recharge-title"  v-if='index == 0'>
+        <div class="recharge-title-t">
+          <i class="recharge-icon"></i>
+          <span>我的聊币</span>
+        </div>
+        <div class="recharge-title-b">{{recharge.info.gold}}</div>
+      </div>
+      <div class="recharge-con"  v-if='index == 0'>
+        <div class="flex-item rechargeList" v-for="(item, i) in recharge.list" :key="item.id">
+          <div class="rechargeList-l">
+            <div class="rechargeList-title">{{item.name}}</div>
+            <!-- <div class="rechargeList-info">赠送{{item.give}}聊币+{{item.give_vip}}天VIP</div> -->
+          </div>
+          <div class="rechargeList-r">
+            <span :id="item.id" v-on:click="rechargeBtn($event,item.id,item.price)">￥{{item.price}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    // $api.addEvt($api.dom('.payBox'), 'click', function (e) {
+    //   alert(11)
+    //   if (e.target == $api.dom('.payBox-bg')) {
+    //     $api.dom('.payBox-bg').style.display = 'none';
+    //     $api.dom('.payBox').style.display = 'none';
+    //   } else {
+    //     e.stopPropagation();
+    //   }
+    // });
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        activeIndex: '',
+        activePrice: '',
+        option: 'wechat',
+        channel: 0,
+        data: 0,
+        partnerid: '',
+        prepayid: '',
+        package: '',
+        noncestr: '',
+        timestamp: '',
+        sign: '',
+        orderInfo: '',
+        payBox: false,
+        index:0,
+        recharge: {
+          info: {
+            gold: "0",
+            member_id: "6"
+          },
+          list: []
+        },
+      },
+      created: function () {},
+      mounted: function () {
+        var _this=this;
+        api.addEventListener({
+          name: 'vip_refresh'
+        }, function (ret, err) {
+          _this.rechargeAdd();
+        });
+        _this.rechargeAdd();
+        // this.rechargeU();
+      },
+      methods: {
+        rechargeClick:function(index){
+            this.index=index
+        },
+        rechargeAdd: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'pay/goods',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type:'1',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              __this.recharge = ret.data;
+              console.log(JSON.stringify( __this.recharge))
+            }
+          })
+        },
+        // rechargeU:function(){
+        //   var __this = this;
+        //   api.ajax({
+        //     url: baseUrl + 'pay/goods',
+        //     method: 'get',
+        //     headers: {
+        //       token: $api.getStorage('deviceToken')
+        //     },
+        //     data: {
+        //       values: {
+        //         uid: $api.getStorage('uid'),
+        //         type:'u',
+        //       },
+        //     }
+        //   }, function (ret, err) {
+        //     if (ret.status == '200') {
+        //       //alert(1);
+        //       console.log(ret.data)
+        //       __this.rechargeU = ret.data;
+        //     }
+        //   })
+        // },
+        rechargeBtn: function (event, id, activePrice) {
+          var __this = this;
+          __this.activeIndex = id;
+          __this.activePrice = activePrice;
+          __this.pay();
+        },
+        selectPayType: function (type, event) {
+          var __this = this;
+          $api.removeCls($api.dom('.payTypeSelected'), 'payTypeSelected');
+          $api.addCls(event.currentTarget, 'payTypeSelected');
+          __this.option = type;
+        },
+        pay: function () {
+          var __this = this;
+          // api.showProgress({
+          //   title: '',
+          //   text: '',
+          // });
+          if ($api.getStorage('pay') == 1) {
+            // 官方支付
+            api.openFrame({
+              name: 'pay_frame',
+              url: 'pay_frame.html',
+              rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.winHeight
+              },
+              pageParam: {
+                title: '充值',
+                type: 'defaullt',
+                activeIndex: __this.activeIndex,
+                activePrice: __this.activePrice,
+              }
+            });
+          } else if ($api.getStorage('pay') == 2) {
+            // 个人支付
+            api.openFrame({
+              name: 'pay_frame2',
+              url: 'pay_frame2.html',
+              rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.winHeight
+              },
+              pageParam: {
+                title: '充值',
+                type: 'defaullt',
+                tid: __this.activeIndex,
+                price: __this.activePrice,
+              }
+            });
+          } else {
+            //官方
+            api.openFrame({
+						name: 'pay_frame',
+						url: 'pay_frame.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							title: 'vip充值',
+							type: 'vip',
+              activeIndex: __this.activeIndex ,
+              activePrice:__this.activePrice ,
+						}
+					});
+          }
+
+
+
+        },
+        goback: function () {
+          api.closeWin();
+        },
+      },
+    })
+  }
+</script>

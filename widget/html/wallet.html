@@ -1,0 +1,410 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>U钻管理</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/edit.css" />
+  <link rel="stylesheet" type="text/css" href="../css/recharge.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="wallet-pop" v-show='copyShow'>
+        <div class="bg" @click='copyShow=false'>
+
+        </div>
+        <div class="copy">
+          <p class="border-bottom" @click='copy'>复制</p>
+          <p @click='paste'>粘贴</p>
+        </div>
+      </div>
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的钱包</div>
+        </div>
+      </header>
+      <ul class="wallet-item border-topbottom">
+        <li :class="[index == 0?'active':'']" @click='walletClick(0)'>充币</li>
+        <li :class="[index == 1?'active':'']" @click='walletClick(1)'>提币</li>
+        <li :class="[index == 2?'active':'']" @click='walletClick(2)'>转币</li>
+        <li :class="[index == 3?'active':'']" @click='walletClick(3)'>换票</li>
+      </ul>
+      <div class="recharge-title" v-if='index == 0'>
+        <div class="recharge-title-t">
+          <i class="recharge-icon"></i>
+          <span>我的U钻</span>
+        </div>
+        <div class="recharge-title-b">{{rechargeU.info.u}}</div>
+      </div>
+      <div class="recharge-con" v-if='index == 0'>
+        <div class="flex-item rechargeList" v-for="(item, i) in rechargeU.list" :key="item.id">
+          <div class="rechargeList-l">
+            <div class="rechargeList-title">{{item.name}}</div>
+            <div class="rechargeList-info">赠送{{item.give}}聊币+{{item.give_vip}}天VIP</div>
+          </div>
+          <div class="rechargeList-r">
+            <span :id="item.id" v-on:click="rechargeBtn($event,item.id,item.price)">￥{{item.price}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="edit-info" v-if='index == 1'>
+        <div class="input-wrap">
+          <div class="label">提币金额</div>
+          <input v-model="form.price" type="text" placeholder="请输入提币金额">
+        </div>
+        <div class="input-wrap" @touchstart='copyShow1' @touchend='clearLoop'>
+          <div class="label">钱包地址</div>
+          <input v-model="form.name" type="text" placeholder="请输入钱包地址">
+        </div>
+      </div>
+      <div class="btn-wrap" v-if='index == 1'>
+        <button @click="withdraw" type="button" class="btn">提交</button>
+      </div>
+
+      <div class="edit-info" v-if='index == 2'>
+        <div class="input-wrap">
+          <div class="label">转币金额</div>
+          <input v-model="currency" type="text" placeholder="请输入转币金额">
+        </div>
+        <div class="input-wrap">
+          <div class="label">转币ID</div>
+          <input v-model="to_uid" type="text" placeholder="请输入转币ID">
+        </div>
+
+      </div>
+      <div class="btn-wrap" v-if='index == 2'>
+        <button @click="change" type="button" class="btn">提交</button>
+      </div>
+      <div class="edit-info" v-if='index == 3'>
+        <div class="input-wrap">
+          <div class="label">转票金额</div>
+          <input v-model="form.utransfer" type="text" placeholder="请输入U钻">
+        </div>
+        <!-- <div class="input-wrap">
+            <div class="label">钱包地址</div>
+            <input v-model="form.name" type="text" placeholder="请输入钱包地址">
+          </div> -->
+        <p>*U钻转换为聊币比例为1:100</p>
+      </div>
+      <div class="btn-wrap" v-if='index == 3'>
+        <button @click="utransfer" type="button" class="btn">提交</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, clipBoard;
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    clipBoard = api.require('clipBoard');
+    app = new Vue({
+      el: '#app',
+      data: {
+        activeIndex: '',
+        activePrice: '',
+        form: {
+          uid: $api.getStorage('uid'),
+          price: '',
+          name: '',
+          tel: '',
+          type: '',
+          description: '',
+          utransfer: '',
+        },
+        index: 0,
+        currency: '',
+        to_uid: '',
+        copyShow: false,
+        rechargeU: {
+          info: {
+            gold: "0",
+            member_id: "0"
+          },
+
+        },
+      },
+      created: function () {
+        // this.rechargeU();
+      },
+      mounted: function () {
+        var _this = this;
+        _this.recharge();
+        api.addEventListener({
+          name: 'recharge_u'
+        }, function (ret, err) {
+          _this.recharge();
+        });
+
+      },
+      methods: {
+        //复制
+        copy: function () {
+          var _this = this;
+          clipBoard.set({
+            value: _this.form.name
+          }, function (ret, err) {
+            if (ret) {
+              api.toast({
+                msg:'复制成功'
+              })
+              _this.copyShow = false
+            } else {
+              api.toast({
+                msg:'复制失败'
+              })
+              _this.copyShow = false
+            }
+          });
+        },
+        //粘贴
+        paste: function () {
+          var _this = this
+          clipBoard.get(function (ret, err) {
+            if (ret) {
+              _this.form.name = ret.value
+              _this.copyShow = false
+            }
+          });
+        },
+        //长按复制粘贴
+        copyShow1: function () {
+          var _this = this;
+          clearTimeout(this.loop1);
+          this.loop1 = setTimeout(function () {
+            _this.copyShow = true;
+          }.bind(this), 1000)
+        },
+        //停止长按
+        clearLoop: function () {
+          clearTimeout(this.loop1);
+        },
+        rechargeBtn: function (event, id, activePrice) {
+          var __this = this;
+          __this.activeIndex = id;
+          __this.activePrice = activePrice;
+          __this.pay();
+        },
+        pay: function () {
+          var __this = this;
+          api.showProgress({
+            title: '',
+            text: '',
+          });
+          if ($api.getStorage('pay') == 1) {
+            // 官方支付
+            api.openFrame({
+              name: 'pay_frame',
+              url: 'pay_frame.html',
+              rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.winHeight
+              },
+              pageParam: {
+                title: '充值',
+                type: 'defaullt',
+                activeIndex: __this.activeIndex,
+                activePrice: __this.activePrice,
+              }
+            });
+          } else if ($api.getStorage('pay') == 2) {
+            // 个人支付
+            api.openFrame({
+              name: 'pay_frame2',
+              url: 'pay_frame2.html',
+              rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.winHeight
+              },
+              pageParam: {
+                title: '充值',
+                type: 'defaullt',
+                tid: __this.activeIndex,
+                price: __this.activePrice,
+              }
+            });
+          } else {
+            //  苹果支付
+          }
+        },
+        // U钻兑换票
+        utransfer: function () {
+          if (this.form.utransfer == '') {
+            api.toast({
+              msg: '请输入提币金额',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (this.form.utransfer % 1 == 0) {
+            // api.toast('转币金额请为整数')
+            api.toast({
+              msg: '提币金额请为整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          api.ajax({
+            url: baseUrl + 'u/utransfer',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                u: this.form.utransfer
+              }
+            }
+          }, function (ret, err) {
+            api.toast({
+              msg: ret.message[0]
+            })
+          })
+
+        },
+        walletClick: function (index) {
+          this.index = index
+        },
+        recharge: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'pay/goods',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type: 'u',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              //alert(1);
+              console.log(JSON.stringify(ret.data))
+              __this.rechargeU = ret.data;
+            }
+          })
+        },
+        withdraw: function () {
+          // alert(this.from.price == '')
+          if (this.form.price == '') {
+            api.toast({
+              msg: '请输入提币金额',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (this.form.price % 1 == 0) {
+            // api.toast('转币金额请为整数')
+            api.toast({
+              msg: '提币金额请为整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (this.form.name == '') {
+            api.toast({
+              msg: '请输入钱包地址',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          api.ajax({
+            url: baseUrl + 'u/give',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                url: this.form.name,
+                uid: $api.getStorage('uid'),
+                u: this.form.price
+              }
+            }
+          }, function (ret, err) {
+            api.toast({
+              msg: ret.message[0]
+            })
+
+          })
+        },
+        change: function () {
+          if (this.currency == '') {
+            // api.toast('请输入转币金额')
+            api.toast({
+              msg: '请输入转币金额',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (this.currency % 1 == 0) {
+            // api.toast('转币金额请为整数')
+            api.toast({
+              msg: '转币金额请为整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          if (this.to_uid == '') {
+            // api.toast('请输入转币ID')
+            api.toast({
+              msg: '请输入转币ID',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          };
+          api.ajax({
+            url: baseUrl + 'u/transfer',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                to_uid: this.to_uid,
+                uid: $api.getStorage('uid'),
+                u: this.currency,
+              }
+            }
+          }, function (ret, err) {
+            // api.toast({
+            //   msg: ret.message[0]
+            // })
+
+          })
+
+        }
+
+      },
+
+    })
+  }
+</script>

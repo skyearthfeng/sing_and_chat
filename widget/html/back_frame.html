@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>首页</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/home.css" />
+  <style>
+    .userCenter-close-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      left: 0;
+      top: 24px;
+      z-index: 101;
+      width: 60px;
+      height: 50px;
+      text-align: center;
+      line-height: 50px;
+      color: #fff
+    }
+    .userCenter-close {
+      width: 30px;
+      height: 30px;
+      background: #2e1b0d;
+      text-align: center;
+      line-height: 30px;
+      border-radius: 50%;
+    }
+    body,html{
+      background: rgba(0, 0, 0, 0);
+    }
+    #app{
+      background: rgba(0, 0, 0, 0);
+    }
+    /* body,html{
+        background:red
+    } */
+    .complain {
+      position: fixed;
+      top: 23px;
+      right: 20px;
+      z-index: 3000;
+      font-size: 30px;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="userCenter-close-icon" tapmode @click="goback">
+      <div class="userCenter-close">
+        <i class="iconfont icon-pre"></i>
+      </div>
+    </div>
+    <div class="complain" tapmode @click="showActionSheet">
+      ...
+    </div>
+
+  </div>
+
+
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    app = new Vue({
+      el: '#app',
+      data: {},
+      created: function () { },
+      mounted: function () { },
+      methods: {
+        showActionSheet: function (index) {
+          var _this = this;
+          _this.imgIndex = index;
+          api.actionSheet({
+            title: '',
+            cancelTitle: '取消',
+            destructiveTitle: '',
+            buttons: ['投诉', '建议']
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.buttonIndex == 1) {
+                // alert("投诉")
+                // alert($api.getStorage('uid'))
+                var tempExtra = {
+                  fromId: $api.getStorage('uid'),
+                  fromName: $api.getStorage('uname'),
+                  fromAvatar: $api.getStorage('uavatar'),
+                  toId: 2,
+                  toName: "官方客服",
+                  toAvatar: '../image/message.png',
+                }
+                api.openWin({
+                  name: 'im',
+                  url: 'im.html',
+                  pageParam: tempExtra
+                });
+              }
+              if (ret.buttonIndex == 2) {
+                var tempExtra = {
+                  fromId: $api.getStorage('uid'),
+                  fromName: $api.getStorage('uname'),
+                  fromAvatar: $api.getStorage('uavatar'),
+                  toId: 2,
+                  toName: "官方客服",
+                  toAvatar: '../image/message.png',
+                }
+                api.openWin({
+                  name: 'im',
+                  url: 'im.html',
+                  pageParam: tempExtra
+                });
+              }
+            }
+          });
+        },
+        goback: function () {
+          api.sendEvent({
+            name: 'backRefreshHome',
+          });
+          api.closeWin();
+        },
+      },
+    })
+  }
+</script>

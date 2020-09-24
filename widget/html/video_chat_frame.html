@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+  />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视频聊</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video_chat.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="wrap flex-wrap flex-vertical">
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, videoPlayer;
+  apiready = function () {
+    videoPlayer = api.require('videoPlayer');
+    app = new Vue({
+      el: '#app',
+      data: {
+        index: 0,
+      },
+      created: function () {
+      },
+      mounted: function () {
+        this.initVideoPlayer();
+      },
+      methods: {
+        initVideoPlayer: function () {
+          var pathList = api.pageParam.pathList;
+          var frameName = api.pageParam.frameName;
+          var _this = this;
+          videoPlayer.open({
+            rect: {
+              x: 0,
+              y: 0,
+              w: api.frameWidth,
+              h: api.frameHeight
+            },
+            path: '',
+            scalingMode: 'scaleAspectFit',
+            fixedOn: frameName,
+            fiexd: false,
+          }, function (ret, err) {
+            if (ret) {
+              // api.alert({
+              //   title: 'videoPlayer',
+              //   msg: JSON.stringify(ret)
+              // });
+            }
+          });
+          videoPlayer.setVolume({
+            volume: 0
+          });
+
+          _this.videoLoading(frameName, 3000);
+
+          videoPlayer.addEventListener({
+            name: 'click'
+          }, function (ret, err) {
+            if (ret) {
+              if (Number(api.pageParam.random) > Number(api.pageParam.info.gold)) {
+                api.sendEvent({
+                  name: 'openDialogBoxRecharge',
+                });
+              } else {
+                api.sendEvent({
+                  name: 'closeChatFrame',
+                  extra: {
+                    key: 'value'
+                  }
+                });
+              api.openWin({
+                  name: 'random',
+                  url: 'random.html',
+                  slidBackEnabled: false,
+                  pageParam: {
+                    closeShow:true
+                  }
+                });
+              }
+            }
+          });
+
+          videoPlayer.addEventListener({
+            name: 'play'
+          }, function (ret, err) {
+            if (ret && ret.eventType == 'complete') {
+              _this.videoLoading(frameName, 2000);
+              _this.index = _this.index + 1;
+              if (_this.index >= pathList.length) {
+                _this.index = 0;
+              }
+              videoPlayer.setPath({
+                path: pathList[_this.index].file.replace('-compressed', ''),
+              });
+              videoPlayer.start();
+            }
+          });
+
+          videoPlayer.setPath({
+            path: pathList[_this.index].file.replace('-compressed', ''),
+          });
+
+          videoPlayer.start();
+        },
+        videoLoading: function (name, time) {
+          api.openFrame({
+            name: name + '_loading',
+            url: 'video_loading.html',
+            rect: {
+              x: api.pageParam.rect_x,
+              y: api.pageParam.rect_y,
+              w: api.frameWidth,
+              h: api.frameHeight
+            },
+          });
+
+          setTimeout(function () {
+            api.closeFrame({
+              name: name + '_loading',
+            })
+          }, time);
+        }
+      },
+      
+    });
+  }
+</script>

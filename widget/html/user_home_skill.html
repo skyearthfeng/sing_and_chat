@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>他人下单</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/user_home.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="skill-wrap">
+            <div class="skill-item-wrap" v-for="item in my_skills" @click="selectSkill(item)">
+                <div class="skill-item ">
+                    <div class="img-wrap">
+                        <img :src="item.picture">
+                    </div>
+                    <div class="skill-bottom">
+                        <div class="bottom-name">
+                            <div class="name">{{item.yy.title}}</div>
+                            <div class="price">{{item.price}}/一局</div>
+                        </div>
+                        <div class="bottom-pay">下单</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="my_skills==''" class="empty-wrap">
+            <img class="empty-img" src="../image/empty.png">
+            <div class="empty-text">TA还没有认证技能~</div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                my_skills: [],
+                id: undefined
+
+            },
+            created: function () {
+                var _this = this;
+            },
+            mounted() {
+                this.getSkil()
+                api.addEventListener({
+                    name: 'navitembtn'
+                }, function (ret, err) {
+                    if (ret.type == 'left') {
+                        api.sendEvent({
+                            name: 'videoPlay',
+                        });
+                        api.closeWin();
+                    }
+                })
+                api.addEventListener({
+                    name: 'keyback'
+                }, function (ret, err) {
+                    api.sendEvent({
+                        name: 'videoPlay',
+                    });
+                    api.closeWin()
+                });
+                // this.id=api.pageParam.id
+            },
+            methods: {
+                selectSkill(item) {
+                    console.log(JSON.stringify(item))
+                    api.openWin({
+                        name: 'play_around',
+                        url: 'play_around.html',
+                        pageParam: {
+                            item: item,
+                            //   to_id:this.userList.info.member_id
+                        }
+                    })
+                    console.log(JSON.stringify(item))
+                    // api.sendEvent({
+                    //     name:"mySkill",
+                    //     extra:{
+                    //         item:item
+                    //     }
+                    // })
+                },
+
+                getSkil() {
+                    let data = {
+                        member_id: $api.getStorage('uid'),
+                        id: api.pageParam.id
+                    }
+                    console.log(JSON.stringify({
+                        member_id: $api.getStorage('uid'),
+                        id: api.pageParam.id
+                    }))
+                    axios('my_skills', 'get', $api.getStorage('deviceToken'), data,
+                        (res, err) => {
+                            console.log(JSON.stringify(res))
+                            if (res.code == 200) {
+                                this.my_skills = res.data
+                            }
+                        })
+                }
+            },
+            filters: {}
+        })
+    }
+</script>

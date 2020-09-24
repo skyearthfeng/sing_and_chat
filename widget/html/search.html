@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+  />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>搜索</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/search.css" />
+  <style>
+     #header{position: fixed;width: 100%}
+     /* .searchBox{margin-top: 65px;position: fixed;} */
+     .flex-con{margin-top:110px}
+  </style>
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin()">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">搜索</div>
+        </div>
+        <div class="searchBox">
+          <i class="searchImg iconfont icon-search"></i>
+          <input class="search-input" v-model="Keyword" placeholder="请输入用户ID" @keyup.enter="search" />
+          <button @click="search" id="search-btn" type="button">搜索</button>
+        </div>
+      </header>
+      <div class="flex-con">
+        <div class="searchResult">
+          <div v-if="searchResult" class="searchResult-title">搜索结果</div>
+          <div v-else class="searchResult-title">你有可能喜欢</div>
+          <div class="searchResult-list">
+            <div @click="openDetail(item.member_id)" v-for="(item, i) in list" :key="item.member_id" class="searchResult-item">
+              <div class="avatar">
+                <img :src="item.avatar" alt="">
+              </div>
+              <div class="info-wrap">
+                <div class="name">{{item.name}}
+                  <span class="age" :class="['age' + item.sex]">
+                    <i  :class="['icon-sex' + item.sex, 'iconfont']"></i>{{item.age}}</span>
+                </div>
+                <div class="info">{{item.signature}}</div>
+              </div>
+              <i class="iconfont icon-next"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        searchResult: false,
+        Keyword: '',
+        list: [],
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+        this.showSearchDate();
+      },
+      methods: {
+        search: function () {
+          if (this.Keyword == '') {
+            api.toast({
+              msg: '请输入搜索内容',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          this.searchResult = true;
+          this.showSearchDate();
+        },
+        openDetail: function (id) {
+          api.openWin({
+            name: 'user_home',
+            url: 'user_home.html',
+            slidBackEnabled: false,
+            pageParam: {
+              member_id: id
+            }
+          });
+        },
+        showSearchDate: function () {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'search/index',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                Keyword: _this.Keyword,
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            console.log(JSON.stringify(ret))
+            console.log(JSON.stringify(err))
+            if (ret.status == 200) {
+              _this.list = ret.data;
+            }
+          })
+        }
+      },
+    })
+  }
+</script>

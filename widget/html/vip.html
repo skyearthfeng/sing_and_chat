@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>会员中心</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/vip.css" />
+  <style>
+       #header{position: fixed;top: 0;z-index: 3000;width: 100%}
+       marquee span{margin-right:400px;}
+        marquee{color: #fff}
+        .tequanlist{margin-bottom: 50px}
+        .vipCenter {margin-top: 40px}
+  </style>
+</head>
+
+<body>
+  <div id="app"  v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">会员中心</div>
+        </div>
+      </header>
+      <div class="vipCenter flex-con">
+        <div class="vipCenter-info">
+          <img class="vipCenter-info-bg" src="../image/bg_vip.png" alt="">
+          <div class="vipCenter-infoTxt">
+            <img class="box2" src="../image/icon_big_vip.png" alt="">
+            <p>{{hyList.info.level | getStatus}}</p>
+               <marquee direction="left" ><span v-for="item in hyList.scroller">{{item}}</span></marquee>
+          </div>
+        </div>
+        <ul class="money">
+          <li :id="item.id" :class="[item.id == 2 ? 'money-active' : '']" v-on:click="selectPrice($event,item.id,item.price)" v-for="(item, i) in hyList.list"
+            :key="item.id">
+            <div class="money-txt">
+              <h4>{{item.name}}</h4>
+              <span>￥{{item.price}}</span>
+              <p>原价{{item.original}}</p>
+            </div>
+          </li>
+        </ul>
+        <div class="tequan">
+          <div class="box3">
+            <img src="../image/vip_recharge_title.png" alt="">
+          </div>
+          <div class="tequanlist">
+            <ul>
+              <li>
+                <div class="righticon">
+                  <img src="../image/icon_vip_logo.png" alt="">
+                </div>
+                <div class="text">
+                  <p class="label">至尊VIP标志</p>
+                  <p class="info">会员专属身份标志</p>
+                </div>
+              </li>
+              <li>
+                <div class="righticon">
+                  <img src="../image/icon_vip_localtion.png" alt="">
+                </div>
+                <div class="text">
+                  <p class="label">附近人功能</p>
+                  <p class="info">附近主播任性撩</p>
+                </div>
+              </li>
+              <li>
+                <div class="righticon">
+                  <img src="../image/icon_vip_gift.png" alt="">
+                </div>
+                <div class="text">
+                  <p class="label">专属礼物</p>
+                  <p class="info">VIP贵宾专属礼物</p>
+                </div>
+              </li>
+              <li>
+                <div class="righticon">
+                  <img src="../image/icon_vip_video.png" alt="">
+                </div>
+                <div class="text">
+                  <p class="label">免费查看短视频</p>
+                  <p class="info">可以无限制查看短视频区</p>
+                </div>
+              </li>
+              <li>
+                <div class="righticon">
+                  <img src="../image/icon_vip_chat.png" alt="">
+                </div>
+                <div class="text">
+                  <p class="label">无限畅聊</p>
+                  <p class="info">免费和主播文字聊天</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <footer>
+          <button @click="pay" type="button">开通会员</button>
+        </footer>
+      </div>
+    </div>
+  </div>  
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        activeIndex: 2,
+        activePrice: '68',
+        option: 'wechat',
+        channel: 0,
+        data: 0,
+        partnerid: '',
+        prepayid: '',
+        package: '',
+        noncestr: '',
+        timestamp: '',
+        sign: '',
+        orderInfo: '',
+        hyList: {
+          info: {
+            member_id: 6,
+            level: 0
+          },
+          list: [],
+          scroller: [
+          // bug勿删
+          '1',
+          '1',
+          '1',
+          '1',
+          ]
+        }
+      },
+      created: function () {
+        var _this=this
+        api.addEventListener({
+          name: 'vip_refresh'
+        }, function (ret, err) {
+          // _this.refresh()
+          _this.huiyuanAdd();
+        });
+      },
+      mounted: function () {
+        this.huiyuanAdd();
+        //this.scrollerText();
+      },
+      methods: {
+        huiyuanAdd: function () {
+          var __this = this;
+          api.ajax({
+            url: baseUrl + 'pay/vip',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              __this.hyList = ret.data;
+              __this.scroll = ret.data.scroller
+            }
+          })
+        },
+        selectPrice: function (event, activeIndex, activePrice) {
+          var __this = this;
+          $api.removeCls($api.dom('.money-active'), 'money-active');
+          $api.addCls(event.currentTarget, 'money-active');
+          __this.activeIndex = activeIndex;
+          __this.activePrice = activePrice;
+        },
+       
+        selectPayType: function (event) {
+          var __this = this;
+          $api.removeCls($api.dom('.payTypeSelected'), 'payTypeSelected');
+          $api.addCls(event.currentTarget, 'payTypeSelected');
+          // __this.option = event.target.id;
+          __this.option = event;
+          // alert( __this.option)
+        },
+        pay: function () {
+          var __this = this;
+         if($api.getStorage('pay')==1){
+          //  alert("官方支付")
+            // 官方支付
+            api.openFrame({
+						name: 'pay_frame',
+						url: 'pay_frame.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							title: 'vip充值',
+							type: 'vip',
+              activeIndex: __this.activeIndex ,
+              activePrice:__this.activePrice ,
+						}
+					});
+         }else if($api.getStorage('pay')==2){
+            //  个人支付
+            api.openFrame({
+						name: 'pay_frame2',
+						url: 'pay_frame2.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							title: 'vip充值',
+							type: 'vip',
+              tid: __this.activeIndex ,
+              price:__this.activePrice ,
+						}
+					});
+         }else{
+            // 官方
+            api.openFrame({
+						name: 'pay_frame',
+						url: 'pay_frame.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							title: 'vip充值',
+							type: 'vip',
+              activeIndex: __this.activeIndex ,
+              activePrice:__this.activePrice ,
+						}
+					});
+         }
+
+         
+       
+        },    
+        // 后退
+        goback: function () {
+          api.closeWin();
+          api.sendEvent({
+            name: 'vip_back',
+            });
+        },
+      },
+      filters: {
+        getStatus: function (value) {
+          if (value == '0') {
+            return '暂未开通VIP';
+          }
+          if (value == '1') {
+            return '已开通VIP';
+          }
+        },
+      }
+    })
+  }
+</script>

@@ -1,0 +1,411 @@
+@import 'http://at.alicdn.com/t/font_578379_k03tx603kw.css';
+@import 'http://at.alicdn.com/t/font_1007068_wnx9go79ctl.css';
+@import 'http://at.alicdn.com/t/font_1063748_ancee4whmgs.css';
+html,
+body {
+  font-size: 14px;
+  height: 100%;
+}
+#app,
+.wrap,
+.main {
+  height: 100%;
+  background-color: #fff;
+}
+.flex-wrap {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  background-color: #fff;
+}
+.flex-wrap.flex-vertical {
+  -webkit-box-orient: vertical;
+  -webkit-flex-flow: column;
+  flex-flow: column;
+}
+.flex-wrap .flex-con {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+}
+.main {
+  width: 100%;
+  height: 100%;
+}
+.icon {
+  display: inline-block;
+  background: url(../image/icons.png) no-repeat;
+  background-size: 400px 400px;
+}
+.status-bar {
+  width: 100%;
+  background: transparent;
+}
+#header {
+  height: 40px;
+  line-height: 40px;
+  background-color: #fff;
+}
+#header .header-home {
+  display: flex;
+}
+#header .header-home .search-wrap {
+  width: 40px;
+  line-height: 40px;
+  text-align: center;
+  margin-right: 20px;
+}
+#header .header-home .search-wrap .iconfont {
+  font-size: 20px;
+  color: #000;
+}
+#header .header-home .nav {
+  width: 100%;
+  text-align: center;
+  display: flex;
+}
+#header .header-home .nav a {
+  flex: 1;
+  padding: 0 5px;
+  line-height: 38px;
+  color: #000;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#header .header-home .nav a.active {
+  border-bottom: 2px solid #000;
+  color: #e12e85;
+}
+#header .header-home .search-home {
+  width: 100%;
+  height: 30px;
+  display: flex;
+}
+#header .header-home .search-home i {
+  font-size: 20px;
+  line-height: 30px;
+  margin-right: 20px;
+  padding-left: 10px;
+  color: #999;
+}
+#header .header-home .search-home div {
+  flex: 1;
+  height: 100%;
+  line-height: 30px;
+  color: #999;
+}
+#header .header-message {
+  width: 100%;
+  display: flex;
+  text-align: center;
+}
+#header .header-message .header-title {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: #000;
+}
+#header .header-message .header-title .header-right {
+  float: right;
+  margin-right: 10px;
+  font-size: 14px;
+}
+#header .header-message .header-title .header-left {
+  float: left;
+  margin-left: 10px;
+  font-size: 14px;
+}
+#header .header-wrap {
+  position: relative;
+}
+#header .header-wrap .header-biaoji {
+  position: absolute;
+  float: right;
+  top: 0;
+  right: 0;
+  color: #fff;
+  display: inline-block;
+}
+#header .header-wrap .header-left,
+#header .header-wrap .header-right {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+}
+#header .header-wrap .header-left .iconfont,
+#header .header-wrap .header-right .iconfont {
+  font-size: 20px;
+  color: #000;
+}
+#header .header-wrap .header-right {
+  left: auto;
+  right: 0;
+}
+#header .header-wrap .header-title {
+  text-align: center;
+  font-size: 16px;
+  color: #000;
+}
+.adMain {
+  width: 100%;
+  height: 95%;
+  position: relative;
+}
+.adMain span {
+  width: 30px ;
+  height: 30px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+.adMain a {
+  width: 100%;
+  height: 100%;
+}
+.adMain a img {
+  width: 100%;
+  height: 100%;
+}
+#footer {
+  border-top: 1px solid #efefef;
+  background-color: #fff;
+  height: 50px;
+  line-height: 50px;
+  padding-top: 5px;
+}
+#footer ul li {
+  padding: 5px 0;
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  min-width: 20%;
+  position: relative;
+}
+#footer ul li .messageBadge {
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background: #f00;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+#footer ul li i.icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  margin: 0 auto;
+  line-height: 50px;
+}
+#footer ul li.active {
+  color: #e12e85;
+}
+#footer ul li.active .icon-tab0 {
+  background-position: 0 0;
+}
+#footer ul li.active .icon-tab1 {
+  background-position: 0 -80px;
+}
+#footer ul li.active .icon-tab2 {
+  background-position: 0 -120px;
+}
+#footer ul li.active .icon-tab3 {
+  background-position: 0 -160px;
+}
+#footer ul li.active .icon-tab4 {
+  background-position: 0 -160px;
+}
+#footer ul li .icon-tab0 {
+  background-position: -40px 0;
+}
+#footer ul li .icon-tab1 {
+  background-position: -40px -80px;
+}
+#footer ul li .icon-tab2 {
+  background-position: -40px -120px;
+}
+#footer ul li .icon-tab3 {
+  background-position: -40px -160px;
+}
+#footer ul li .icon-tab4 {
+  background-position: -40px -160px;
+}
+#footer ul li .title {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+input,
+button {
+  appearance: none;
+  outline: medium;
+}
+.empty-img {
+  width: 150px;
+  margin: 80px auto 10px;
+  display: block;
+}
+.empty-text {
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+}
+.see_detail {
+  width: 22px;
+  height: 22px;
+  margin-right: 15px;
+  margin-top: 8px;
+}
+.header-video {
+  display: flex;
+}
+.header-video .nav .nav-left {
+  float: right;
+}
+.header-video .nav .nav-right {
+  float: left;
+  color: #fff;
+}
+textarea {
+  outline: none;
+  width: 100%;
+}
+.upload {
+  padding: 0 10px;
+  background-color: #fff;
+}
+.upload p {
+  line-height: 40px;
+}
+.upload .upload-addBox .img-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+.upload .upload-addBox .img-wrap .delete {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 30px;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.upload .upload-addBox .img-wrap .delete .iconfont {
+  font-size: 14px;
+  color: #fff;
+}
+.upload .upload-info {
+  width: 100%;
+  margin: 10px 0;
+  background-color: #fff;
+}
+.upload .upload-info textarea {
+  width: 100%;
+  line-height: 1.8;
+  height: 200px;
+  box-sizing: border-box;
+  background: #efefef;
+  padding: 10px;
+  font-size: 14px;
+}
+.btn-wrap {
+  display: flex;
+  height: 80px;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #efefef;
+}
+.btn-wrap .btn-item {
+  flex: 1;
+  text-align: center;
+}
+.btn-wrap .btn-item + .btn-item {
+  border-left: 1px solid #ddd;
+}
+.btn-wrap .btn-item + .btn-item i {
+  color: #555;
+  font-size: 16px;
+}
+.btn-wrap .btn-item + .btn-item div {
+  margin-top: 6px;
+}
+.post-wrap {
+  padding: 10px;
+}
+.post-wrap .post-img {
+  width: 100px;
+  height: 100px;
+}
+.post-wrap .post-img img {
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+}
+.post-wrap .post-li .post-items {
+  height: 50px;
+  line-height: 50px;
+  font-size: 16px;
+  margin: 10px 0;
+}
+.post-wrap .post-li .post-items .icon-next {
+  float: right;
+}
+.chat_type {
+  text-align: center;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: 20px ;
+}
+.chat_type .type_bg {
+  background-color: rgba(0, 0, 0, 0.2);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.chat_type ul {
+  margin-left: 5%;
+  width: 90%;
+  border-radius: 20px;
+  background-color: #fff;
+  z-index: 1;
+  height: 100px;
+  position: fixed;
+  top: 50%;
+  margin-top: -50px;
+  left: 50%;
+  margin-left: -45%;
+  margin-bottom: 60px;
+  border-radius: 5px;
+}
+.chat_type ul li {
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  background-color: #fff;
+  color: #333;
+}
+.chat_type .type_close {
+  margin-top: 10px;
+  width: 100%;
+  height: 60px;
+  line-height: 60px;
+  color: #e12e85;
+  background-color: #fff;
+  z-index: 1;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}

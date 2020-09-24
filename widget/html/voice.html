@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>语音</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/voice.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="wrap flex-wrap flex-vertical">
+			<div class="random-avatar">
+				<img :src="avatar" alt="">
+			</div>
+			<div class="random-text">{{name}}</div>
+			<div class="random-cancel iconfont icon-guaduan" @click=api.closeWin();></div>
+			<div class="random-answer iconfont icon-call" @click="recharge"></div>
+
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+	// 	if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+		app = new Vue({
+			el: '#app',
+			data: {
+				avatarList: [],
+				avatar: '',
+				gold: 0,
+				info: {},
+				names: [{
+						name: '兮兮'
+					},
+					{
+						name: '执画素颜'
+					},
+					{
+						name: '转眼逝'
+					},
+					{
+						name: '宁负天下不负你'
+					},
+					{
+						name: '待姐长发及腰一把勒死你'
+					},
+					{
+						name: '干物女ノ'
+					},
+					{
+						name: '许你春秋'
+					},
+					{
+						name: '小诗人'
+					},
+					{
+						name: '心悦君兮'
+					},
+					{
+						name: '黑夜亦亮丽'
+					},
+					{
+						name: '阙歌'
+					},
+					{
+						name: '公主息怒'
+					},
+				],
+				name: '',
+			},
+			created() {
+				this.get();
+				this.name = this.names[parseInt(10 * Math.random())].name;
+				this.call();
+			},
+			mounted() {
+				api.addEventListener({
+					name: 'black'
+				}, function (ret, err) {
+					//  alert("an")
+					//  var abc= $api.domAll("wrap ");
+					var abc = $api.byId('app')
+					$api.css(abc, "background: #333");
+
+					// _this.closeVideoPlayer()
+				});
+
+			},
+			methods: {
+				get: function () {
+					var _this = this;
+					api.ajax({
+						url: baseUrl + 'home/random',
+						method: 'get',
+						headers: {
+							token: $api.getStorage('deviceToken')
+						},
+						data: {
+							values: {
+								uid: $api.getStorage('uid'),
+							},
+						}
+					}, function (ret, err) {
+						if (ret.status == 200) {
+							_this.avatarList = ret.data;
+							_this.avatar = ret.data[0];
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试'
+							});
+							// setTimeout(function () {
+							//     _this.cancel();
+							// }, 1000);
+						}
+					});
+				},
+				call: function () {
+					var _this = this;
+					api.ajax({
+						url: baseUrl + 'home/index',
+						method: 'get',
+						headers: {
+							token: $api.getStorage('deviceToken')
+						},
+						data: {
+							values: {
+								uid: $api.getStorage('uid'),
+								page: _this.page,
+							},
+						}
+					}, function (ret, err) {
+						if (ret.status == 200) {
+							_this.info = ret.info;
+							_this.gold = ret.info.gold;
+						}
+					})
+				},
+				recharge: function () {
+					var _this = this;
+					api.openWin({
+						name: 'vip',
+						url: 'vip.html',
+						pageParam: {
+							member_id: api.getStorage('uid')
+						}
+					})
+					api.sendEvent({
+						name: 'open',
+					});
+					// if (Number(_this.info.gold) <= 0) {
+					//      api.openWin({
+					//         name: 'vip',
+					//         url: 'vip.html',
+					//         pageParam: {
+					//             member_id: id
+					//         }
+					//     })
+					//     api.sendEvent({
+					//                 name: 'open',
+					//                });
+					// }
+					// if (Number(_this.info.gold) > 0&&Number(_this.info.gold)<10){
+					//     api.openWin({
+					//         name: 'vip',
+					//         url: 'vip.html',
+					//         pageParam: {
+					//             member_id: id
+					//         }
+					//     })
+					//     api.sendEvent({
+					//                 name: 'open',
+					//                });
+					//     // api.openWin({
+					//     //     name: 'random',
+					//     //     url: 'random.html',
+					//     //     slidBackEnabled: false,
+					//     //     pageParam: _this.info
+					//     // });
+					//     // setTimeout("api.closeWin({})", 500);
+					// }
+					// if(Number(_this.info.gold) > 10){
+					//     api.toast({
+					//         msg: '主播结束了会话',
+					//         duration: 2000,
+					//         location: 'bottom'
+					//     });
+					//     setTimeout("api.closeWin({})", 500);
+					// }
+					//
+
+
+				},
+			}
+		})
+
+	}
+</script>

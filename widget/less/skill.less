@@ -1,0 +1,45 @@
+// out: ../css/skill.css
+@import 'common';
+#app{
+    height: 100%;
+    background-color: #f8f8f8;
+}
+.skill_title{
+    // padding-left: 10px;
+    margin: 10px 10px 0px 10px;
+    color: #9b9b9b;
+}
+.skill_items{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction:row; 
+    padding-right: 10px;
+    box-sizing: border-box;
+    background-color: #f8f8f8;
+    // li:last-child{
+    //     border-right:10px solid  #f8f8f8;
+    // }
+    li{
+        width: 33.3%;
+        height: 100%;;
+        background-color: #fff;
+        text-align: center;
+        border-radius: 3px;
+        border-left:10px solid  #f8f8f8;
+        box-sizing: border-box;
+        margin-top: 10px;
+        .skill_items_img{
+            padding-top: 15px;
+            width: 50%;
+            margin: auto;
+            img{
+                width: 100%;
+                height: 100%;
+            }
+        }
+        p{
+           margin: 10px auto; 
+        }
+        
+    }
+}

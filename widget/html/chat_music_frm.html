@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>播放</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_music.css" />
+    <link rel="stylesheet" type="text/css" href="../css/MIprogress.css" />
+</head>
+
+<body>
+    <style>
+        html,
+        body,
+        #app {
+            background-color: rgba(0, 0, 0, .2);
+        }
+    </style>
+    <div id="app">
+        <div class="player">
+            <p>{{title}}-{{artist}}</p>
+            <div class="menu-wrap">
+                <i class="iconfont iconshengyinyinliangmianxing" @click=""></i>
+                <div class="progressthree">
+                    <div id="threeDiv" class="threeDiv">
+                        <div id="threebg" class="threebg"></div>
+                        <div id="minthree" class="minthree">
+                            <!-- <div id="vals" class="vals">0</div> -->
+                        </div>
+                    </div>
+                </div>
+                <i class="iconfont icon-bofang" @click="pause()" v-if="playStatus"></i>
+                <i class="iconfont iconzantingtingzhi" @click="pause()" v-if="!playStatus"></i>
+            </div>
+            <div class="i-wrap" @click="close">
+                <i class="iconfont icon-close"></i>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/MIprogress.js"></script>
+<script type="text/javascript">
+    var app, audioPlayer, rong;
+    apiready = function () {
+        audioPlayer = api.require('audioPlayer')
+        rong = api.require('rongCloud2')
+        app = new Vue({
+            el: '#app',
+            data: {
+                title: api.pageParam.title,
+                artist: api.pageParam.artist,
+                playStatus: true,
+                progressValue: 1
+            },
+            created() {},
+            mounted() {
+                var _this = this
+                this.progressthree()
+                audioPlayer.initPlayer({
+                    path: api.pageParam.url,
+                    cache: false
+                }, function (ret) {
+                    if (ret.status) {
+
+                    }
+                })
+                api.addEventListener({
+                    name: 'closeMusic'
+                }, function (ret, err) {
+                    _this.close()
+                })
+
+            },
+            methods: {
+                pause() {
+                    var _this = this
+                    rong.sendCommandNotificationMessage({
+                        conversationType: 'CHATROOM',
+                        targetId: api.pageParam.roomid,
+                        name: 'MUSIC',
+                        data: JSON.stringify({
+                            playStatus: _this.playStatus
+                        })
+                    }, function (ret, err) {})
+                    if (this.playStatus) {
+                        audioPlayer.pause()
+                        this.playStatus = false
+                    } else {
+                        audioPlayer.play()
+                        this.playStatus = true
+                    }
+                },
+
+                close() {
+                    rong.sendCommandNotificationMessage({
+                        conversationType: 'CHATROOM',
+                        targetId: api.pageParam.roomid,
+                        name: 'MUSIC',
+                        data: JSON.stringify({
+                            stop: true
+                        })
+                    }, function (ret, err) {})
+                    audioPlayer.stop()
+                    api.closeFrame()
+                },
+
+                progressthree() {
+                    var _this = this
+                    //进度条3
+                    var threeDiv = document.getElementById('threeDiv') //长线条
+                    var minthree = document.getElementById('minthree') //小方块
+                    var three = document.getElementById("three")
+                    var vals = document.getElementById("vals")
+                    var threebg = document.getElementById('threebg')
+                    var ifBool = false; //判断鼠标是否按下
+                    //事件
+                    var start = function (e) {
+                        e.stopPropagation();
+                        ifBool = true;
+                    }
+                    var move = function (e) {
+                        if (ifBool) {
+                            if (!e.touches) { //兼容移动端
+                                var x = e.clientX;
+                            } else { //兼容PC端
+                                var x = e.touches[0].pageX;
+                            }
+                            //var x = e.touches[0].pageX || e.clientX; //鼠标横坐标var x
+                            var threeDiv_left = getPosition(threeDiv).left; //长线条的横坐标
+                            var minthree_left = x - threeDiv_left; //小方块相对于父元素（长线条）的left值
+                            if (minthree_left >= threeDiv.offsetWidth - 15) {
+                                minthree_left = threeDiv.offsetWidth - 15;
+                            }
+                            if (minthree_left < 0) {
+                                minthree_left = 0;
+                            }
+                            //设置拖动后小方块的left值
+                            minthree.style.left = minthree_left + "px";
+                            threebg.style.width = minthree_left + 'px';
+                            var progress = parseInt((minthree_left / (threeDiv.offsetWidth - 15)) * 10)
+                            if (_this.progressValue != progress) {
+                                _this.progressValue = progress
+                                audioPlayer.setVolume({
+                                    volume: _this.progressValue * 0.1
+                                })
+                                rong.sendCommandNotificationMessage({
+                                    conversationType: 'CHATROOM',
+                                    targetId: api.pageParam.roomid,
+                                    name: 'MUSIC',
+                                    data: JSON.stringify({
+                                        progress: _this.progressValue * 0.1
+                                    })
+                                }, function (ret, err) {})
+                            }
+                            console.log(JSON.stringify(_this.progressValue))
+                            // three.innerText = parseInt((minthree_left / (threeDiv.offsetWidth - 15)) * 10);
+                            // vals.innerText = parseInt((minthree_left / (threeDiv.offsetWidth - 15)) * 10);
+
+                        }
+                    }
+                    var end = function (e) {
+                        ifBool = false;
+                    }
+                    //鼠标按下方块
+                    minthree.addEventListener("touchstart", start);
+                    minthree.addEventListener("mousedown", start);
+                    //拖动
+                    window.addEventListener("touchmove", move);
+                    window.addEventListener("mousemove", move);
+                    //鼠标松开
+                    window.addEventListener("touchend", end);
+                    window.addEventListener("mouseup", end);
+                    //获取元素的绝对位置
+                    function getPosition(node) {
+                        var left = node.offsetLeft; //获取元素相对于其父元素的left值var left
+                        var top = node.offsetTop;
+                        current = node.offsetParent; // 取得元素的offsetParent
+                        // 一直循环直到根元素
+                        while (current != null) {
+                            left += current.offsetLeft;
+                            top += current.offsetTop;
+                            current = current.offsetParent;
+                        }
+                        return {
+                            "left": left,
+                            "top": top
+                        }
+                    }
+                }
+            },
+        })
+    }
+</script>

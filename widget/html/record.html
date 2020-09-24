@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>充值</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/recharge.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" >
+        <div class="header-wrap">
+          <div @click="api.closeWin();" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的记录</div>
+        </div>
+      </header>
+      <ul class="recharge-item border-bottom border-top" >
+        <li @click='rechargeClick(0)' v-bind:class="[index==0?'active':'']" class="border-bottom">充值记录</li>
+        <li @click='rechargeClick(1)'v-bind:class="[index==1?'active':'']" class="border-bottom">消费记录</li>
+      </ul>
+      <div  v-show='index==0'>
+          <ul class="record-item">
+            <li class="border-bottom" v-for='item in recordRe'>
+              <p>充值类型：<span>{{item.description}}</span></p>
+              <p>充值金额: <span>{{item.price}}</span></p>
+              <p>充值时间: <span>{{item.created_at}}</span> </p>
+            </li>
+          </ul>
+      </div>
+      <div  v-else class="empty-wrap">
+        <img class="empty-img" src="../image/empty.png">
+        <div class="empty-text">😔暂无充值记录</div>
+      </div>
+      <div  v-show='index==1'>
+        <ul class="record-item">
+          <li class="border-bottom" v-for='item1 in recordCon'>
+            <p>消费类型：<span>{{item1.description}}</span></p>
+            <p>消费金额: <span>{{item1.gold}}</span></p>
+            <p>消费时间: <span>{{item1.created_at}}</span> </p>
+          </li>
+        </ul>
+      </div>
+      <div v-else class="empty-wrap">
+        <img class="empty-img" src="../image/empty.png">
+        <div class="empty-text">😔暂无消费记录</div>
+      </div>
+   </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    // $api.addEvt($api.dom('.payBox'), 'click', function (e) {
+    //   alert(11)
+    //   if (e.target == $api.dom('.payBox-bg')) {
+    //     $api.dom('.payBox-bg').style.display = 'none';
+    //     $api.dom('.payBox').style.display = 'none';
+    //   } else {
+    //     e.stopPropagation();
+    //   }
+    // });
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        index:0,
+        recordRe:[],
+        recordCon:[],
+      },
+      created: function () {},
+      mounted: function () {
+        this.record();
+        this.consume();
+      },
+      methods: {
+        rechargeClick:function(index){
+                this.index=index
+        },
+        record:function(){
+          var __this=this;
+          api.ajax({
+            url: baseUrl + 'pay/logs',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type:'pay',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              //alert(1);
+              console.log(JSON.stringify(ret.data))
+              __this.recordRe = ret.data.list;
+              // alert(__this.recordRe[0].description)
+              // alert(__this.recordRe.length)
+            }
+          })
+        },
+        consume:function(){
+          var __this=this;
+          api.ajax({
+            url: baseUrl + 'pay/logs',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                type:'default',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == '200') {
+              //alert(1);
+              console.log(JSON.stringify(ret.data))
+              __this.recordCon = ret.data.list;
+            }
+          })
+        }
+        
+      },
+    })
+  }
+</script>

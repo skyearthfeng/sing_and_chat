@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>技能认证</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/skill.css" /> 
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header id="header" class="border-bottom">
+            <div class="header-wrap">
+                <div @click="goback" class="header-left">
+                    <i class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">技能认证</div>
+            </div>
+        </header>
+        <div>
+            <p class="skill_title">热门</p>
+            <ul class="skill_items">
+                <li @click='getSkillStatus(1,item.id)' v-for='item in titleList' v-if='item.title!="全部"&&item.lx==3' :key='item.id'>
+                    <div class="skill_items_img">
+                        <img :src="item.img" alt="">
+                    </div>
+                    <p>{{item.title}}</p>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <p class="skill_title">游戏</p>
+            <ul class="skill_items">
+                <li v-for='item in titleList' @click='getSkillStatus(1,item.id)' :key='item.id' v-if='item.lx==1'>
+                    <div class="skill_items_img">
+                        <img :src="item.img" alt="">
+                    </div>
+                    <p>{{item.title}}</p>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <p class="skill_title">娱乐</p>
+            <ul class="skill_items">
+                <li v-for='item in titleList' @click='getSkillStatus(2,item.id)' :key='item.id' v-if='item.lx==2'>
+                    <div class="skill_items_img">
+                        <img :src="item.img" alt="">
+                    </div>
+                    <p>{{item.title}}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    apiready = () => {
+        let app;
+        $api.fixStatusBar($api.dom('#header'));
+        app = new Vue({
+            el: '#app',
+            data: {
+                titleList: [],
+            },
+            mounted () {
+                //获取列表接口
+                this.skillInfo();
+            },
+            methods: {
+                //返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                getSkillStatus(id,yy_id) {
+                    let data={
+                        member_id:$api.getStorage('uid'),
+                        yy_id:yy_id
+                    }
+                    axios('home_destructioncertification','get',$api.getStorage('deviceToken'),data,
+                    (res,err)=>{
+                        if(res.code == 100){
+                            this.openAuth(id,yy_id)
+                        }else if(res.code == 200){
+                            api.toast({
+                                msg:res.msg
+                            })
+                            return false
+                        }else{
+                            api.toast({
+                                msg:res.msg
+                            })
+                            this.openAuth(id,yy_id)
+                        }
+                        console.log(JSON.stringify(res))
+                    })
+                    return false
+                },
+                openAuth(id,yy_Id) {
+                    api.openWin({
+                        name: 'auth',
+                        url: 'auth.html',
+                        bounces: false,
+                        pageParam:{
+                            type:id,
+                            yy_id:yy_Id
+                        },
+                    });
+                },
+                skillInfo() {
+                    api.showProgress();
+                    axios('home_all', 'get', '', '', (res, err) => {
+                        if (res) {
+                            this.titleList = res.data
+                        }
+                        api.hideProgress();
+                    })
+                }
+
+            }
+        })
+    }
+</script>
+
+</html>

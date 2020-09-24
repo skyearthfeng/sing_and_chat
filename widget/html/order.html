@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>我的订单</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/order.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="order_list" v-if="orderList!=''">
+            <!-- <div class="order_title">
+                进行中
+            </div> -->
+            <div class="order_items" @click='orderDetailed(item.order_status,item.id)' v-for="item in orderList" >
+                <p class="order_items_state">{{item.order_status | orderStatus}}</p>
+                <div class="order_items_content border-top">
+                    <div class="content_img">
+                        <img :src="item.anchor.member.avatar" alt="">
+                    </div>
+                    <p class="content_info">
+                        {{item.created_at}} {{item.num}}*局
+                    </p>
+                    <div class="content_icont">
+                        <img :src="item.yy.img" alt="">
+                    </div>
+                </div>
+                <p class="order_items_state border-top" v-if="item.order_status == 0">
+                    待支付: {{item.price*item.num}}
+                </p>
+            </div>
+            <!-- <div class="order_title">
+                历史订单
+            </div> -->
+        </div>
+        <div  class="empty-wrap" v-if="orderList">
+            <img class="empty-img" src="../image/empty.png">
+            <div class="empty-text">😔暂无订单</div>
+          </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        let app;
+        $api.fixStatusBar($api.dom('#header'));
+        app = new Vue({
+            el: '#app',
+            data: {
+                page: 1,
+                orderList: []
+            },
+            mounted() {
+                this.getOrder()
+                api.addEventListener({
+                    name: 'scrolltobottom',
+                    extra: {
+                        threshold: 0
+                    }
+                }, (ret, err) => {
+                    this.getOrder()
+                });
+                api.addEventListener({
+                    name: 'navitembtn'
+                }, function (ret, err) {
+                    if(ret.type == 'left'){
+                        api.closeWin()
+                    }
+                });
+                api.addEventListener({
+                    name: 'refreshOrder'
+                },  (ret, err)=> {
+                    this.page=1
+                    this.getOrder()
+                });
+            },
+            methods: {
+                getOrder() {
+                    axios('order_list', 'get', $api.getStorage('deviceToken'), {
+                        member_id: $api.getStorage('uid'),
+                        page: this.page
+                    }, (res, err) => {
+                        console.log(JSON.stringify(res))
+                        if (res.code == 200) {
+                            if (res.data.current_page == 1) {
+                                this.orderList = res.data.data
+                                this.page++
+                            } else if (this.page < res.data.last_page) {
+                                this.orderList.concat(res.data.data)
+                                this.page++
+                            } else {
+                                api.toast({
+                                    msg: "没有更多了"
+                                })
+                            }
+                            console.log(JSON.stringify(this.orderList))
+                        } else {
+                            api.toast({
+                                msg: '网络错误'
+                            })
+                        }
+                    })
+                },
+                // 后退
+                goback: function () {
+                    api.closeWin();
+                },
+                orderDetailed(status, id) {
+                    api.openTabLayout({
+                        name: 'order_detailed',
+                        url: 'order_detailed.html',
+                        title: '订单详情',
+                        hideNavigationBar: false,
+                        navigationBar: {
+                            background: '#fff',
+                            color: '#333',
+                            leftButtons: [{
+                                iconPath: 'widget://image/back.png',
+                            }],
+                            rightButtons:[{
+                                iconPath: 'widget://image/list.png',
+                            }]
+                        },
+                        pageParam: {
+                            status: status,
+                            id: id
+                        }
+                    });
+                    // api.openWin({
+                    //     name: 'orderDetailed',
+                    //     url: 'order_detailed.html',
+                    //     bounces: false,
+                    //     pageParam: {
+                    //         status: status,
+                    //         id: id
+                    //     }
+                    // });
+                }
+            },
+            filters: {
+                orderStatus(val) {
+                    return (val == 0 ? "进行中" : (val == 1 ? "已支付" : "已取消"))
+                }
+            }
+        })
+
+    }
+
+</script>

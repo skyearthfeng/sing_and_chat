@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>我的报价</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/my.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical offer-page">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">我的报价</div>
+        </div>
+      </header>
+      <div id="main" class="flex-con">
+        <div class="form-wrap">
+          <p>*如需修改报价请联系客服进行修改</p>
+          <div class="input-wrap">
+            <div class="label">我的视频报价：</div>
+            <input v-model="price" type="number" disabled>
+          </div>
+          <div class="input-wrap">
+            <div class="label">我的微信报价：</div>
+            <input v-model="wx_price" type="number" disabled>
+          </div>
+          <div class="input-wrap">
+            <div class="label">我的手机报价：</div>
+            <input v-model="phone_price" type="number" disabled>
+          </div>
+        </div>
+        <p class="prompt">亲，以上报价均是聊币价格哦！</p>
+        <!-- <div class="btn-wrap " id="btn-offer">
+          <button @click="submit" type="button">提交</button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        price: '0',
+        wx_price: '0',
+        phone_price: '0'
+      },
+      created: function () {
+        this.price = api.pageParam.price;
+        this.wx_price = api.pageParam.wx_price;
+        this.phone_price = api.pageParam.phone_price;
+      },
+      mounted: function () {
+
+      },
+      methods: {
+        // 后退
+        goback: function () {
+          api.closeWin();
+        },
+
+        submit: function () {
+          var reg = /^\d+$/;
+          if (!reg.test(this.price)) {
+            api.toast({
+              msg: '视频报价请填写整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          if (!reg.test(this.wx_price)) {
+            api.toast({
+              msg: '微信报价请填写整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          if (!reg.test(this.phone_price)) {
+            api.toast({
+              msg: '手机报价请填写整数',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          api.ajax({
+            url: baseUrl + 'user/price',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                price: this.price,
+                wx_price: this.wx_price,
+                phone_price: this.phone_price
+              },
+            }
+          }, function (ret, err) {
+            if (ret) {
+              api.toast({
+                msg: ret.message[0]
+              });
+              if (ret.status == 200) {
+                setTimeout(function () {
+                  api.closeWin();
+                }, 1000);
+              }
+              
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        }
+      },
+    })
+  }
+</script>

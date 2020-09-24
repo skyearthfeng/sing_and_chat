@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>附近的人</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/nearby.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <!-- <header id="header">
+        <div class="header-wrap">
+          <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">附近的人</div>
+        </div>
+      </header> -->
+      <div class="flex-con"></div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    // $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    dialogBox = api.require('dialogBox');
+    app = new Vue({
+      el: '#app',
+      data: {},
+      created: function () {
+        var _this = this;
+        api.addEventListener({
+          name: 'openDialogBox'
+        }, function (ret, err) {
+          _this.openDialogBox('开通VIP查看附近的人');
+        });
+        api.openFrame({
+          name: 'nearby_frame',
+          url: 'nearby_frame.html',
+          bounces: true,
+          rect: {
+            x: 0,
+            y: $api.dom('#header').offsetHeight,
+            w: api.winWidth,
+            h: $api.dom('.flex-con').offsetHeight
+          }
+        });
+      },
+      mounted: function () {},
+      methods: {
+        // 提示充值vip弹窗
+        openDialogBox: function (txt) {
+          dialogBox.raffle({
+            texts: {
+              mainText: txt,
+              subText: '',
+              leftTitle: '开通会员'
+            },
+            styles: {
+              bg: '#272320',
+              w: 300,
+              corner: 2,
+              icon: {
+                marginT: 20,
+                w: 40,
+                h: 40,
+                corner: 20,
+                iconPath: 'widget://image/icon_big_vip.png'
+              },
+              main: {
+                marginT: 10,
+                color: '#fff',
+                size: 14,
+              },
+              sub: {
+                marginT: 10
+              },
+              left: {
+                w: 300,
+                h: 50,
+                marginL: 0,
+                marginB: 0,
+                corner: 2,
+                bg: '#000',
+                color: '#fff',
+                size: 16
+              }
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret.eventType == 'left') {
+              dialogBox.close({
+                dialogName: 'raffle'
+              });
+              api.openWin({
+                name: 'vip',
+                url: 'vip.html',
+                slidBackEnabled: false
+              });
+            }
+          });
+        },
+
+      },
+    })
+  }
+</script>

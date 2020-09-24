@@ -1,0 +1,148 @@
+// out: ../css/dynamic_post.css
+@import 'common';
+textarea{
+	outline: none;
+	width: 100%;
+}
+
+.upload {
+	padding: 0 10px;
+	background-color: #fff;
+	p {
+		line-height: 40px;
+	}
+	.upload-addBox {
+		.img-wrap {
+			position: relative;
+			width: 200px;
+			height: 200px;
+			.delete {
+				width: 30px;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				background-color: rgba(0, 0, 0, 0.7);
+				border-radius: 30px;
+				position: absolute;
+				right: 5px;
+				top: 5px;
+				.iconfont {
+					font-size: 14px;
+					color: #fff;
+				}
+			}
+		}
+	}
+	.upload-info {
+		width: 100%;
+		margin: 10px 0;
+		background-color: #fff;
+		textarea {
+			width: 100%;
+			line-height: 1.8;
+			height: 200px;
+			box-sizing: border-box;
+			background: #efefef;
+			padding: 10px;
+			font-size: 14px;
+		}
+	}
+}
+
+.btn-wrap {
+	display: flex;
+	height: 80px;
+	justify-content: space-around;
+	align-items: center;
+	background-color: #efefef;
+	.btn-item {
+		flex: 1;
+		text-align: center;
+		&+.btn-item {
+			border-left: 1px solid #ddd;
+			i {
+				color: #555;
+				font-size: 16px;
+			}
+			div {
+				margin-top: 6px;
+			}
+		}
+	}
+}
+.post-wrap{
+	padding: 10px;
+	.post-img{
+		width:100px;
+		height: 100px;
+		img{
+			width: 100%;
+			height: 100%;
+			border-radius: 5px;
+		}
+	}
+	.post-li{
+		.post-items{
+			height: 50px;
+			line-height: 50px;
+			font-size: 16px;
+			margin: 10px 0; 
+			.icon-next{
+				float: right;
+			}
+		}
+	}
+}
+.chat_type{
+	text-align: center;
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding-bottom:20px ;
+	.type_bg{
+		background-color: rgba(0, 0, 0, 0.2);
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+	}
+	ul{
+		margin-left: 5%;
+		width: 90%;
+		border-radius:20px;
+		background-color: #fff;
+		z-index: 1;
+		height: 100px;
+		position: fixed;
+		top:50%;
+		margin-top: -50px;
+		left:50%;
+		margin-left: -45%;
+		margin-bottom: 60px;
+		border-radius:5px; 
+		li{
+			height: 50px;
+			width: 100%;
+			line-height: 50px;
+            background-color: #fff;
+            color:#333;
+        }
+        li:first-child{
+            // border-top-left-radius:5px;
+            // border-top-right-radius:5px;
+        }
+	}
+	.type_close{
+		margin-top: 10px;
+		width: 100%;
+		height: 60px;
+		line-height: 60px;
+		color: #e12e85;
+		background-color: #fff;
+		z-index: 1;
+        border-bottom-left-radius:5px;
+        border-bottom-right-radius:5px;
+	}
+}

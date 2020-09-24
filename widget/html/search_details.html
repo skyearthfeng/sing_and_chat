@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>搜索title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/search_details.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header id="header" class="border-bottom">
+            <div class="im-header header-wrap">
+                <div class="header-left">
+                    <i @click="goback" class="iconfont icon-pre"></i>
+                </div>
+                <div class="header-title">{{title}}</div>
+            </div>
+        </header>
+        <div class="screen_info">
+            <div class="screen_content" v-for='item in datailsList' :key='item.id' v-if='datailsList!=[]'
+                @click='openUser(item.member_id)'>
+                <img :src='item.member.avatar' />
+                <div>
+                    <div class="user_info">
+                        <div class="user_name">
+                            <p>{{item.member.name}}</p>
+                            <p></p>
+                        </div>
+                        <div class="user_stars">
+                            <p><i class="iconfont icon-xingxing"></i>{{item.score}}</p>
+                            <!-- <p>接单量<span>{{item.pickupvolume}}</span></p> -->
+                        </div>
+                        <p class="state">{{item.member.status | status}}</p>
+                        <div class="user_label">
+                            <span v-if="item.level">{{item.level}}</span>
+                            <!-- <span>标签</span> -->
+                            <span v-if="item.regional">{{item.regional}}</span>
+                        </div>
+                    </div>
+                    <!-- <div class='money'>{{item.price}}币/局</div> -->
+                </div>
+            </div>
+            <div v-if='empty' class="empty-wrap">
+                <img class="empty-img" src="../image/empty.png">
+                <div class="empty-text">😔暂无认证的主播</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    var app;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                id: undefined,
+                title: undefined,
+                datailsList: [],
+                empty: false
+                // {
+                //     name:'',
+                //     dq:'QQ',
+                //     pingfen:5,
+                //     num:0,
+                //     price:0,
+                //     jn:'',
+                //     member:{
+                //         avatar:''
+                //     }
+                // }
+
+
+
+            },
+            created() {
+                // api.setRefreshHeaderInfo({
+                //     bgColor: '#ccc',
+                //     textColor: '#fff',
+                //     textDown: '下拉刷新...',
+                //     textUp: '松开刷新...'
+                // },(res, err) => {
+
+                // })
+            },
+            mounted() {
+                $api.fixStatusBar($api.dom('#header'));
+                this.getUrlVal()
+                this.getDetails()
+            },
+            methods: {
+                // 获取页面传参
+                getUrlVal() {
+                    let getVal = api.pageParam;
+                    this.id = getVal.id;
+                    this.title = getVal.title;
+                },
+                // 返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                openParound(item) {
+                    console.log(JSON.stringify(item))
+                    api.openWin({
+                        name: 'play_around',
+                        url: 'play_around.html',
+                        pageParam: {
+                            item: item,
+                            title: api.pageParam.title,
+                        }
+                    })
+                },
+                getDetails() {
+                    let data = {
+                        yy_id: api.pageParam.id,
+                        member_id: $api.getStorage('uid'),
+                    }
+                    console.log(JSON.stringify(data))
+                    axios('home_getcertified_anchor', 'get', $api.getStorage('deviceToken'), data, (res,
+                        err) => {
+                        console.log(JSON.stringify(res))
+                        if (res) {
+                            this.datailsList = res.data
+                        }
+                        if (this.datailsList.length < 1) {
+                            this.empty = true
+                        }
+                    })
+                },
+
+                openUser(id) {
+                    api.openWin({
+                        name: 'user_home',
+                        url: 'user_home.html',
+                        slidBackEnabled: false,
+                        pageParam: {
+                            member_id: id
+                        }
+                    });
+                }
+            },
+            filters: {
+                status(val) {
+                    return val == 1 ? '在线' : '离线'
+                }
+            }
+        })
+    }
+</script>

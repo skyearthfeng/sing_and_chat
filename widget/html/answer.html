@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>接听</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/call.css" />
+</head>
+
+<body> 
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div :class="['call-wrap', 'flex-con', 'sex' + sex]">
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, rong, agoraRtc;
+  apiready = function () {
+    rong = api.require('rongCloud2');
+    agoraRtc = api.require('agoraRtc');
+    app = new Vue({
+      el: '#app',
+      data: {
+        sex: '',
+        age: '',
+        signature: '',
+        extra: {},
+        type: '',
+        isConnect: false,
+      },
+      created: function () {
+        api.closeFrame({
+          name: 'videoChatFrame1'
+        });
+        api.closeFrame({
+          name: 'videoChatFrame2'
+        });
+        api.closeFrame({
+          name: 'videoChatFrame3'
+        });
+        var _this = this;
+        _this.playRing();
+        agoraRtc.init({
+          appId: agoraRtcAppId
+        });
+        agoraRtc.setChannelProfile({
+          profile: 0
+        }, function (ret) {
+          if (ret.code == 0) {
+            //success
+          }
+        });
+        $api.setStorage('myStatus', 2);
+        api.addEventListener({
+          name: 'keyback'
+        }, function (ret, err) {
+          api.confirm({
+            title: '提醒',
+            msg: '确定要退出吗？',
+            buttons: ['确定', '取消']
+          }, function (ret, err) {
+            if (ret.buttonIndex == 1) {
+              _this.hangUp();
+            }
+          });
+        });
+        api.addEventListener({
+          name: 'videoAnswerHangUp'
+        }, function (ret, err) {
+          _this.hangUp();
+        });
+        api.addEventListener({
+          name: 'closeWin'
+        }, function (ret, err) {
+          api.closeWin();
+        });
+        api.addEventListener({
+          name: 'videoAnswer'
+        }, function (ret, err) {
+          _this.isConnect = true;
+          api.stopPlay();
+          _this.joinChannel_agoraRtc();
+        });
+        api.addEventListener({
+          name: 'hangUp'
+        }, function (ret, err) {
+          if (ret) {
+            $api.setStorage('myStatus', 1);
+            agoraRtc.destroy();
+            api.closeFrame({
+              name: 'video_answer_control'
+            });
+            api.toast({
+              msg: '对方已挂断',
+              duration: 2000,
+              location: 'bottom'
+            });
+            if (!_this.isConnect) {
+              setTimeout(function () {
+                api.closeWin();
+              }, 1000);
+            } else {
+              if (_this.sex == '1') {
+                setTimeout(function () {
+                  api.closeWin();
+                }, 1000);
+              } else {
+                api.openFrame({
+                  name: 'score_frame',
+                  url: 'score_frame.html',
+                  rect: {
+                    x: 0,
+                    y: 0,
+                    w: api.winWidth,
+                    h: api.winHeight
+                  },
+                  pageParam: {
+                    id: _this.extra.fromId,
+                    name: _this.extra.fromName,
+                    avatar: _this.extra.fromAvatar,
+                    sex: _this.sex,
+                    age: _this.age,
+                    signature: _this.signature,
+                  }
+                });
+              }
+            }
+          }
+        });
+      },
+      mounted: function () {
+        this.videoAnswerControl();
+      },
+      methods: {
+        // 视频聊天控制frame
+        videoAnswerControl: function () {
+          var _this = this;
+          _this.extra = JSON.parse(api.pageParam.data);
+          _this.type = api.pageParam.name;
+          // 获取对方信息
+          api.ajax({
+            url: baseUrl + 'user/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                see_uid: _this.extra.fromId
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              _this.sex = ret.data.sex;
+              _this.age = ret.data.age;
+              _this.signature = ret.data.signature;
+              // 打开视频聊天控制frame
+              api.openFrame({
+                name: 'video_answer_control',
+                url: 'video_answer_control.html',
+                rect: {
+                  x: 0,
+                  y: 0,
+                  w: api.winWidth,
+                  h: api.winHeight
+                },
+                pageParam: {
+                  sex: ret.data.sex,
+                  age: ret.data.age,
+                  signature: ret.data.signature,
+                  extra: _this.extra,
+                  type: _this.type
+                }
+              });
+            }
+          })
+        },
+
+        // 振铃
+        playRing: function () {
+          var _this = this;
+          api.startPlay({
+            path: 'widget://res/ring.mp3'
+          }, function (ret, err) {
+            if (ret) {
+              _this.playRing();
+            }
+          });
+        },
+
+        // 声网加入频道
+        joinChannel_agoraRtc: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: _this.extra.toId,
+            fromName: _this.extra.toName,
+            fromAvatar: _this.extra.toAvatar,
+            toId: _this.extra.fromId,
+            toName: _this.extra.fromName,
+            toAvatar: _this.extra.fromAvatar,
+          }
+          if (_this.type == 'videoCall') {
+            agoraRtc.enableVideo(function (ret) {
+              if (ret.code == 0) {
+                //success
+              }
+            });
+            if (api.systemType == 'android' && Number(api.systemVersion.slice(0, 1)) < 8) {
+              agoraRtc.setupLocalVideo({
+                rect: {
+                  x: api.winWidth - 120,
+                  y: api.safeArea.top + 20,
+                  w: 100,
+                  h: 180
+                },
+                fixed: false,
+                renderMode: 1
+              }, function (ret) {
+                if (ret.code == 0) {
+                  //success
+                }
+              });
+              agoraRtc.setupRemoteVideo({
+                uid: _this.extra.fromId,
+                rect: {
+                  x: 0,
+                  y: 0,
+                  w: api.winWidth,
+                  h: api.winHeight
+                },
+                fixed: false,
+                renderMode: 1
+              }, function (ret) {
+                if (ret.code == 0) {
+                  //success
+                }
+              });
+            } else {
+              agoraRtc.setupRemoteVideo({
+                uid: _this.extra.fromId,
+                rect: {
+                  x: 0,
+                  y: 0,
+                  w: api.winWidth,
+                  h: api.winHeight
+                },
+                fixed: false,
+                renderMode: 1
+              }, function (ret) {
+                if (ret.code == 0) {
+                  //success
+                }
+              });
+              agoraRtc.setupLocalVideo({
+                rect: {
+                  x: api.winWidth - 120,
+                  y: api.safeArea.top + 20,
+                  w: 100,
+                  h: 180
+                },
+                fixed: false,
+                renderMode: 1
+              }, function (ret) {
+                if (ret.code == 0) {
+                  //success
+                }
+              });
+            }
+            agoraRtc.startPreview(function (ret) {
+              if (ret.code == 0) {
+                //success
+              }
+            });
+          }
+          agoraRtc.joinChannel({
+            channel: 'channel' + _this.extra.fromId + '&' + $api.getStorage('uid'),
+            uid: $api.getStorage('uid')
+          }, function (ret) {
+            // api.alert({
+            //   title: 'joinChannel',
+            //   msg: JSON.stringify(ret)
+            // })
+            if (ret.code == 0) {
+              rong.sendCommandMessage({
+                conversationType: 'PRIVATE',
+                targetId: _this.extra.fromId,
+                name: 'answer',
+                data: JSON.stringify(tempExtra)
+              }, function (ret, err) {
+                if (ret && ret.status != 'error') {}
+                if (err) {
+                  // api.alert({
+                  //   title: 'answer-err',
+                  //   msg: JSON.stringify(err)
+                  // });
+                }
+              });
+            }
+          });
+        },
+
+        // 挂断
+        hangUp: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: _this.extra.toId,
+            fromName: _this.extra.toName,
+            fromAvatar: _this.extra.toAvatar,
+            toId: _this.extra.fromId,
+            toName: _this.extra.fromName,
+            toAvatar: _this.extra.fromAvatar,
+          }
+          // 挂断视频
+          api.ajax({
+            url: baseUrl + 'message/callstop',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid'),
+                from_uid: _this.extra.fromId,
+                to_uid: $api.getStorage('uid'),
+                type: '0',
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              agoraRtc.leaveChannel(function (ret) {
+                if (ret.code == 0) {
+                  agoraRtc.stopPreview(function (ret) {
+                    if (ret.code == 0) {
+                      //success
+                    }
+                  });
+                  rong.sendCommandMessage({
+                    conversationType: 'PRIVATE',
+                    targetId: _this.extra.fromId,
+                    name: 'hangUp',
+                    data: JSON.stringify(tempExtra)
+                  }, function (ret, err) {
+                    if (ret && ret.status == 'success') {
+                      $api.setStorage('myStatus', 1);
+                      agoraRtc.destroy();
+                      api.closeFrame({
+                        name: 'video_answer_control'
+                      });
+                      if (!_this.isConnect) {
+                        setTimeout(function () {
+                          api.closeWin();
+                        }, 1000);
+                      } else {
+                        if (_this.sex == '1') {
+                          setTimeout(function () {
+                            api.closeWin();
+                          }, 1000);
+                        } else {
+                          api.openFrame({
+                            name: 'score_frame',
+                            url: 'score_frame.html',
+                            rect: {
+                              x: 0,
+                              y: 0,
+                              w: api.winWidth,
+                              h: api.winHeight
+                            },
+                            pageParam: {
+                              id: _this.extra.fromId,
+                              name: _this.extra.fromName,
+                              avatar: _this.extra.fromAvatar,
+                              sex: _this.sex,
+                              age: _this.age,
+                              signature: _this.signature,
+                            }
+                          });
+                        }
+                      }
+                    }
+                  });
+                }
+              });
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

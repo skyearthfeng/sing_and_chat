@@ -1,0 +1,323 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+  />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视频聊</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video_chat.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="videoChat-main">
+        <div class="myPage-header">
+          <div class="MyUserImg">
+            <img :src="avatar" alt="">
+          </div>
+          <div class="MyUserTxt">
+            <h4 class="header-title">视频聊</h4>
+            <p class="header-info">随时随地想连就连。</p>
+          </div>
+        </div>
+        <div class="videoChat-line">
+          <img class="videoChat-lineImg" src="../image/videoChat_img1.png">
+        </div>
+        <div class="video-con">
+          <div class="videoList">
+            <div id="videoPlayer1" class="video"></div>
+            <div id="videoPlayer2" class="video"></div>
+            <div id="videoPlayer3" class="video"></div>
+          </div>
+        </div>
+        <div class="laber-con">
+          <span :class="[videoChatTag_index == 0 ? 'laberSelected' : '']" v-on:click="selectVideo('', 0)">全部({{videoChatAll.videos.length}}) </span>
+          <span v-for="(item, index) in videoChatAll.tags" :key="item.id" v-on:click="selectVideo(item.id, (index+1))" :class="[videoChatTag_index == (index+1) ? 'laberSelected' : '']">{{item.tag}}({{item.videos_count}})</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app, dialogBox;
+  apiready = function () {
+    dialogBox = api.require('dialogBox');
+    app = new Vue({
+      el: '#app',
+      data: {
+        avatar: $api.getStorage('uavatar'),
+        videoChatAll: {
+          videos: [],
+          tags: [],
+          random: '',
+          info: {}
+        },
+        videoChat: {
+          videos: [],
+          tags: [],
+          random: '',
+          info: {}
+        },
+        videoPlay1: '',
+        videoPlay2: '',
+        videoPlay3: '',
+        videoChatTag_index: 0
+      },
+      created: function () {
+        var _this = this;
+        api.addEventListener({
+          name: 'closeChatFrame'
+        }, function(ret, err) {
+          api.closeFrame({
+            name: 'videoChatFrame1'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame2'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame3'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame1_loading'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame2_loading'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame3_loading'
+          });
+        })
+        api.addEventListener({
+          name: 'refreshVideoChat'
+        }, function(ret, err) {
+          _this.showVideoList();
+        })
+        api.addEventListener({
+          name: 'openDialogBoxRecharge'
+        }, function(ret, err) {
+          _this.getDialogBoxRecharge('聊币不够了');
+        })
+      },
+      mounted: function () {
+        this.showVideoList();
+      },
+      methods: {
+        showVideoList: function () {
+          var _this = this;
+          // api.showProgress({
+          //   title: '',
+          //   text: ''
+          // });
+          api.ajax({
+            url: baseUrl + 'home/video',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            api.refreshHeaderLoadDone();
+            // api.hideProgress();
+            if (ret.status == '200') {
+              var temp_videoPathList0 = [];
+              var temp_videoPathList1 = [];
+              var temp_videoPathList2 = [];
+              _this.videoChat = ret.data;
+              _this.videoChatAll = ret.data;
+              for(var i = 0; i < _this.videoChatAll.videos.length; i++){
+                if(i == 0 || i == 3*parseInt(i/3)){
+                  temp_videoPathList0.push({
+                    file: _this.videoChatAll.videos[i].file
+                  })
+                }
+                if(i == 1 || i == 1 + 3*parseInt(i/3)){
+                  temp_videoPathList1.push({
+                    file: _this.videoChatAll.videos[i].file
+                  })
+                }
+                if(i == 2 || i == 2 + 3*parseInt(i/3)){
+                  temp_videoPathList2.push({
+                    file: _this.videoChatAll.videos[i].file
+                  })
+                }
+              }
+              _this.initVideoPlayer(temp_videoPathList0, 'videoPlayer1', 'videoChatFrame1')
+              _this.initVideoPlayer(temp_videoPathList1, 'videoPlayer2', 'videoChatFrame2')
+              _this.initVideoPlayer(temp_videoPathList2, 'videoPlayer3', 'videoChatFrame3')
+            }
+          })
+        },
+        selectVideo: function (id, index) {
+          var _this = this;
+          _this.videoChatTag_index = index;
+          api.closeFrame({
+            name: 'videoChatFrame1'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame2'
+          });
+          api.closeFrame({
+            name: 'videoChatFrame3'
+          });
+          if (id == '') {
+            _this.showVideoList();
+          } else {
+            var temp_videoChatList = [];
+            var temp_videoPathList0 = [];
+            var temp_videoPathList1 = [];
+            var temp_videoPathList2 = [];
+            for(var i = 0; i < _this.videoChatAll.videos.length; i++){
+              for(var j = 0; j < _this.videoChatAll.videos[i].tags.length; j++){
+                if(id == _this.videoChatAll.videos[i].tags[j].id){
+                  temp_videoChatList.push(_this.videoChatAll.videos[i]);
+                }
+              }
+            }
+            for(var i = 0; i < temp_videoChatList.length; i++){
+              if(i == 0 || i == 3*parseInt(i/3)){
+                temp_videoPathList0.push({
+                  file: temp_videoChatList[i].file
+                })
+              }
+              if(i == 1 || i == 1 + 3*parseInt(i/3)){
+                temp_videoPathList1.push({
+                  file: temp_videoChatList[i].file
+                })
+              }
+              if(i == 2 || i == 2 + 3*parseInt(i/3)){
+                temp_videoPathList2.push({
+                  file: temp_videoChatList[i].file
+                })
+              }
+            }
+            if(temp_videoPathList0.length > 0){
+              _this.initVideoPlayer(temp_videoPathList0, 'videoPlayer1', 'videoChatFrame1')
+            }
+            if(temp_videoPathList1.length > 0){
+              _this.initVideoPlayer(temp_videoPathList1, 'videoPlayer2', 'videoChatFrame2')
+            }
+            if(temp_videoPathList2.length > 0){
+              _this.initVideoPlayer(temp_videoPathList2, 'videoPlayer3', 'videoChatFrame3')
+            }
+          }
+        },
+
+        initVideoPlayer: function (pathList, domId, frameName) {
+          var _this = this;
+          var player_offset = $api.offset($api.byId(domId));
+          var rect_x = player_offset.l + 1;
+          var rect_y = player_offset.t + 41 + api.pageParam.statusBarHeight;
+          api.openFrame({
+            name: frameName,
+            url: 'video_chat_frame.html',
+            rect: {
+              x: rect_x,
+              y: rect_y,
+              w: player_offset.w - 2,
+              h: player_offset.h - 2
+            },
+            pageParam: {
+              pathList: pathList,
+              frameName: frameName,
+              random: _this.videoChatAll.random,
+              info: _this.videoChatAll.info,
+              rect_x: rect_x,
+              rect_y: rect_y,
+            }
+          });
+        },
+
+        getDialogBoxRecharge: function (txt) {
+          dialogBox.evaluation({
+            styles: {
+              bg: '#fff',
+              corner: 2,
+              w: 300,
+              title: {
+                marginT: 20,
+                size: 14,
+                h: 50,
+                color: '#000',
+                bold: true,
+                borderColor: '#eee',
+                borderWidth: 1
+              },
+              buttons: [{
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#0077ff',
+                size: 14,
+                borderColor: '#eee',
+                borderWidth: 1
+              }, {
+                w: 300,
+                h: 50,
+                color: '#000',
+                size: 14
+              }]
+            },
+            texts: {
+              title: txt,
+              buttons: [{
+                text: '去赚钱'
+              }, {
+                text: '去充值'
+              }, {
+                text: '取消'
+              }]
+            },
+            tapClose: true
+          }, function (ret, err) {
+            if (ret) {
+              if (ret.index == 0) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'share',
+                  url: 'share.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 1) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+                api.openWin({
+                  name: 'recharge',
+                  url: 'recharge.html',
+                  slidBackEnabled: false
+                });
+              }
+              if (ret.index == 2) {
+                dialogBox.close({
+                  dialogName: 'evaluation'
+                });
+              }
+            }
+          });
+        },
+      }
+    });
+  }
+</script>

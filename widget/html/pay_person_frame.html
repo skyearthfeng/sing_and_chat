@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>支付</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/common.css" />
+  <style>
+    .tips {
+      padding: 100px 0;
+      text-align: center;
+    }
+    #formpay {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap flex-wrap flex-vertical">
+    <div class="flex-con">
+      <div class="tips">支付中……</div>
+    </div>
+    <form id="formpay" name="formpay" method="post" action="">
+      <input name="order_no" id="order_no" type="text" value="" />
+      <input name="subject" id="subject" type="text" value="" />
+      <input name="pay_type" id="pay_type" type="text" value="" />
+      <input name="money" id="money" type="text" value="" />
+      <input name="app_id" id="app_id" type="text" value="" />
+      <input name="extra" id="extra" type="text" value="" />
+      <input name="sign" id="sign" type="text" value="" />
+      <input type="submit" id="submit">
+    </form>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.val($api.byId('order_no'), api.pageParam.payData.order_no);
+    $api.val($api.byId('subject'), api.pageParam.payData.subject);
+    $api.val($api.byId('pay_type'), api.pageParam.payData.pay_type);
+    $api.val($api.byId('money'), api.pageParam.payData.money);
+    $api.val($api.byId('app_id'), api.pageParam.payData.app_id);
+    $api.val($api.byId('extra'), api.pageParam.payData.extra);
+    $api.val($api.byId('sign'), api.pageParam.payData.sign);
+    $api.attr($api.byId('formpay'), 'action', api.pageParam.payUrl);
+    $api.byId('submit').click();
+  }
+</script>

@@ -1,0 +1,109 @@
+// out: ../css/nearby.css
+@import 'common';
+.list-wrap {
+  .list-item {
+    display: flex;
+    padding: 10px;
+    align-items: center;
+    .eq {
+      .icon {
+        width: 20px;
+        height: 20px;
+        &.icon-ranking0 {
+          background-position: -320px -40px;
+        }
+        &.icon-ranking1 {
+          background-position: -340px -40px;
+        }
+        &.icon-ranking2 {
+          background-position: -360px -40px;
+        }
+      }
+      .eq-text {
+        width: 20px;
+        text-align: center;
+        font-size: 14px;
+      }
+    }
+    .avatar {
+      line-height: 0;
+      margin: 0 10px;
+      img {
+        width: 70px;
+        height: 70px;
+        border-radius: 5px;
+      }
+    }
+    .info-wrap {
+      flex: 1;
+      height: 100%;
+      .name {
+        font-size: 14px;
+        margin-bottom: 2px;
+        .age1 {
+          height: 14px;
+          line-height: 14px;
+          margin-left: 10px;
+          padding: 0 6px;
+          background: #0000CD;
+          color: #fff;
+          border-radius: 20px;
+          font-size: 12px;
+          text-align: center;
+          .iconfont {
+            font-size: 12px;
+          }
+        }
+        .age2 {
+          height: 14px;
+          line-height: 14px;
+          margin-left: 10px;
+          padding: 0 6px;
+          background: #fd85cc;
+          color: #fff;
+          border-radius: 20px;
+          font-size: 12px;
+          text-align: center;
+          .iconfont {
+            font-size: 12px;
+          }
+        }
+      }
+      .info {
+        font-size: 12px;
+        color: #999;
+      }
+      .time{
+       margin-top: 20px;
+       font-size: 12px;
+       color: #999;
+      }
+    }
+    .close-manage,
+    .manage{
+      padding:5px 10px;
+      background-color: #0000CD;
+      border-radius: 5px;
+      color: #fff;
+    }
+    
+    .close-manage{
+      background-color: #b0b0b0;
+    }
+    .icon-video{
+      width: 30px;
+      height: 30px;
+      background: url('../image/video.png') no-repeat ;
+      background-size:30px 30px;
+    }
+  }
+  .list-item-top {
+    border: 0;
+    line-height: 30px;
+    font-size: 14px;
+    .item.pay_way {
+      text-align: right;
+      flex: 1;
+    }
+  }
+}

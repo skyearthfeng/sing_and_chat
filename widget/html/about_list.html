@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>聊天室</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat.css" />
+    <link rel="stylesheet" type="text/css" href="../css/about_list.css">
+    <!-- <link rel="stylesheet" type="text/css" href="../css/swiper.min.css"> -->
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header>
+            <div class="nav">
+                <a href="javascript:;" v-bind:class="tabIndex==0?'active':''" @click="slideTo(0,'')">全部</a>
+                <a href="javascript:;" v-bind:class="tabIndex==index+1?'active':''" v-for='(item, index) in found' @click='slideTo(index+1, item.title)'>{{item.title}}</a>
+            </div>
+        </header>
+        <!-- <div class="swiper-container"> -->
+        <!-- <div class="swiper-scrollbar"></div> -->
+        <!-- <div class="swiper-wrapper"> -->
+        <!-- <div class="swiper-slide"> -->
+        <div>
+            <ul class="about_list" v-show='ulShow === 0'>
+                <li class="about_items" @click='aboutDetail(items)' v-for='items in listData'>
+                    <div class="about_items_plan" v-text='items.title'></div>
+                    <div class="about_items_cost" v-text='items.cost'></div>
+                    <div class="about_items_content">
+                        <div class="content_info">
+                            <p class="content_info_explain" v-text='items.sex'></p>
+                            <p class="content_info_time" v-text='items.time'></p>
+                            <p class="content_info_" v-text='items.place'></p>
+                        </div>
+                            <div class="content_img" @click='imageBrowser '>
+                             <img :src="items.thumbnail" alt="">
+                        </div>
+                    </div>
+                    <div class="about_items_user">
+                        <div class="user_img">
+                            <img :src="items.touxiang" alt="">
+                        </div>
+                        <div class="user_info">
+                            <p class="user_info_name">{{items.name}}</p>
+                            <p class="user_info_age">{{items.age}}岁</p>
+                        </div>
+                         <div class="user_button">
+                            <span>报名</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="about_list" v-show='ulShow === index+1' v-for='(iten, index) in found' :key='found.id'>
+                <li class="about_items" @click='aboutDetail(items)' v-for='item in listData'>
+                    <div class="about_items_plan" v-text='item.title'></div>
+                    <div class="about_items_cost" v-text='item.cost'></div>
+                    <div class="about_items_content">
+                        <div class="content_info">
+                            <p class="content_info_explain" v-text='item.sex'></p>
+                            <p class="content_info_time" v-text='item.time'></p>
+                            <p class="content_info_" v-text='item.place'></p>
+                        </div>
+                        <div class="content_img" @click='imageBrowser '>
+                            <img :src="item.thumbnail" alt="">
+                        </div>
+                    </div>
+                    <div class="about_items_user">
+                        <div class="user_img">
+                            <img :src="item.touxiang" alt="">
+                        </div>
+                        <div class="user_info">
+                            <p class="user_info_name">{{item.name}}</p>
+                            <p class="user_info_age">{{item.age}}岁</p>
+                        </div>
+                        <div class="user_button">
+                            <span>报名</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- </div> -->
+
+        <div class="about_add" @click='addAn'
+            v-bind:class="foundShow==true?'about_add_active':(active==1?'about_add_return':'about_add')">
+            <i class="iconfont icon-font-add "></i>
+        </div>
+        <div class="about_found" v-show='foundShow'>
+            <div class="about_found_bg" @click='addAn'>
+
+            </div>
+            <div class="about_found_content">
+                <div class="found_title border-bottom">
+                    发布邀约
+                </div>
+                <div class="found_items">
+                    <ul>
+                        <li @click='foundAbout(item.id, item.title)' v-for='item in found' :key='item.id'>
+                            <div>
+                                <img :src="item.thumbnail" alt="">
+                            </div>
+                            <p>{{item.content}}</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<!-- <script type="text/javascript" src="../script/swiper.min.js"></script> -->
+<script>
+    apiready = function()  {
+        let app, mySwiper, imageBrowser;
+        imageBrowser = api.require('imageBrowser');
+        app = new Vue({
+            el: '#app',
+            data: {
+                tabIndex: 0,
+                clientX: 0,
+                an: 0,
+                foundShow: false,
+                active: 0,
+                found: [],
+                ulShow:0,
+                getTitle: undefined,
+                listData: undefined
+            },
+            created() {
+                // api.setRefreshHeaderInfo({
+                //     bgColor: '#ccc',
+                //     textColor: '#fff',
+                //     textDown: '下拉刷新...',
+                //     textUp: '松开刷新...'
+                // }, function (ret, err) {
+
+                // });
+                // window.addEventListener('touchstart', function (e) {
+                //     this.clientX = event.touches[0].clientX;
+                // })
+                // window.addEventListener('touchmove', function (event) {
+                //     if (this.clientX - event.touches[0].clientX > 10) {
+                //         api.setFrameAttr({
+                //             name: api.frameName,
+                //             bounces: true
+                //         });
+                //     }
+                // })
+                // window.addEventListener('touchend', function (event) {
+                //     console.log(event.touches[0].clientX);
+                // })
+            },
+            mounted() {
+                let _this = this;
+                this.foundButton();
+                this.getList();
+                // mySwiper = new Swiper('.swiper-container', {
+                //     // scrollbar: {
+                //     //         el: '.swiper-scrollbar',
+                //     //         // dragSize: 10,
+                //     //     },
+                //     resistanceRatio: 0,
+                //     on: {
+                //         touchStart: function (swiper) {
+                //             api.setFrameAttr({
+                //                 name: api.frameName,
+                //                 bounces: false
+                //             })
+                //         },
+                //         touchEnd: function (swiper) {
+                //             api.setFrameAttr({
+                //                 name: api.frameName,
+                //                 bounces: true
+                //             });
+                //         },
+                //         transitionEnd: function (event) {
+                //             //你的事件
+                //             _this.tabIndex = this.activeIndex
+                //         },
+                //     },
+                // })
+                // mySwiper.scrollbar.$el.css('background','#fff');
+                // mySwiper.scrollbar.$el.css('height','3px');
+                // mySwiper.scrollbar.$el.css('width','100%');
+                // mySwiper.scrollbar.$el.css('position','absolute');
+                // mySwiper.scrollbar.$el.css('top','0');
+                // mySwiper.scrollbar.$dragEl.css('background','#e12e85');
+                // mySwiper.scrollbar.updateSize()
+            },
+            methods: {
+                slideTo(index, title){
+                    this.ulShow=index;
+                    this.tabIndex=index;
+                    this.getTitle = title;
+                    this.getList();
+                },
+                //返回上一页
+                goback() {
+                    api.closeWin();
+                },
+                //创建列表展开
+                addAn() {
+                    this.foundShow = !this.foundShow;
+                    this.active = 1;
+                },
+                imageBrowser() {
+                    imageBrowser.openImages({
+                        imageUrls: [
+                            'http://files.mmzhipin.com/FqHbzPTBeG7Y_7hIUcEKl49tboMe',
+                        ]
+                    });
+                },
+                //创建列表
+                foundButton() {
+                    axios('api/lm', 'get', '', '', (res, err) => {
+                        if (res) {
+                            let data = res.data;
+                            let url = 'http://xb.dianlewuxian.com/upload/';
+                            data.forEach(item => {
+                                item.thumbnail = url + item.thumbnail;
+                            })
+                            this.found = data;
+                            console.log(data)
+                        } else {
+                        }
+                    })
+                },
+                //创建约单
+                foundAbout(id, title) {
+                    api.openWin({
+                        name: 'publishing_service',
+                        url: 'publishing_service.html',
+                        pageParam:{
+                            item: id,
+                            title: title
+                        }
+                    })
+                    // let val={
+                    //     id:1,
+                    //     title:'电影',
+                    //     content:'电影',
+                    //     place:'郑州',
+                    //     time:'不限',
+                    //     cost:'AA',
+                    //     sex:0,
+                    //     instuctions:'11'
+
+                    // }
+                    // axios('api/lm','post','',val,(res, err) => {
+                    //     if(res){
+                    //         console.log(JSON.stringify(res))
+                    //     }else{
+                    //         alert(err)
+                    //     }
+                    // })
+                },
+                //约单详情
+                aboutDetail(item) {
+                    api.openWin({
+                        name: 'publishing_details',
+                        url: 'publishing_details.html',
+                        pageParam:{
+                            detail:item
+                        }
+                    })
+                },
+                getList() {
+                    let data = {
+                        pagenumber: 20,
+                        title: this.getTitle
+                    }
+                    axios('api/lmlb', 'post', '', data, res => {
+                        this.listData = res.data.data;
+                        // console.log(JSON.stringify(this.listData))
+                    })
+                }
+
+            }
+        })
+    }
+</script>

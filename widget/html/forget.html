@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>找回密码</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/register.css" />
+</head>
+
+<body>
+  <div id="app" v-claok>
+    <div class="wrap flex-wrap flex-vertical">
+      <header id="header" class="border-bottom">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-pre"></i>
+          </div>
+          <div class="header-title">找回密码</div>
+        </div>
+      </header>
+      <div id="main" class="flex-con">
+        <div class="form-wrap">
+          <div class="form-item flex-wrap">
+            <i class="iconfont icon-shouji"></i>
+            <input v-model="mobile" class="flex-con" type="tel" placeholder="请输入手机号码">
+          </div>
+          <div class="form-item flex-wrap">
+            <i class="iconfont icon-mima"></i>
+            <input v-model="password" class="flex-con" type="password" placeholder="请设置新的密码">
+          </div>
+          <div class="form-item flex-wrap">
+            <i class="iconfont icon-yanzhengma"></i>
+            <input v-model="code" class="flex-con" type="text" placeholder="请输入验证码">
+            <button :disabled="disabled" @click="sendSMS" :class="['sendMessage-btn', disabled ? 'disabled' : '']" type="button">{{verifyCodeBtnText}}</button>
+          </div>
+          <div class="btn-wrap">
+            <button @click="register" id="submit-btn" type="button">重置密码</button>
+          </div>
+        </div>
+        <div class="forget-wrap">
+          <a @click="goLogin" class="register-link" href="javascript:;">已有账号，去登录</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        mobile: '',
+        password: '',
+        code: '',
+        disabled: false,
+        verifyCodeBtnText: '获取验证码',
+      },
+      created: function () {},
+      mounted: function () {
+
+      },
+      methods: {
+        // 后退
+        goback: function () {
+          api.closeWin();
+        },
+
+        goLogin: function () {
+          api.openWin({
+            name: 'login',
+            url: 'login.html',
+            slidBackEnabled: false
+          });
+        },
+        ctimer: function (time) {
+          var t = time;
+          var that = this;
+          if (t > 0) {
+            that.disabled = true;
+            that.verifyCodeBtnText = t + '秒';
+            t--;
+            setTimeout(function () {
+              that.ctimer(t);
+            }, 1000);
+          } else {
+            that.disabled = false;
+            that.verifyCodeBtnText = '获取验证码';
+          }
+        },
+
+        sendSMS: function () {
+          if (this.mobile == '') {
+            api.toast({
+              msg: '手机号码不能为空',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'oauth/regsms',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                mobile: _this.mobile,
+              },
+            }
+          }, function (ret, err) {
+            _this.ctimer(60);
+            if (ret) {
+              api.toast({
+                msg: ret.message[0]
+              });
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        },
+
+        register: function () {
+          //console.error($api.getStorage('deviceToken'));
+          var _this = this;
+          if (_this.mobile == '') {
+            api.toast({
+              msg: '手机号码不能为空',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          if (_this.password == '') {
+            api.toast({
+              msg: '密码不能为空',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          if (_this.code == '') {
+            api.toast({
+              msg: '验证码不能为空',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          api.ajax({
+            url: baseUrl + 'oauth/find',
+            method: 'post',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                mobile: _this.mobile,
+                password: _this.password,
+                code: _this.code,
+              },
+            }
+          }, function (ret, err) {
+            console.log(JSON.stringify(ret))
+            console.log(JSON.stringify(err))
+            if (ret) {
+              if (ret.status == 200) {
+                api.toast({
+                  msg: '设置成功',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+                setTimeout(function () {
+                  api.openWin({
+                    name: 'login',
+                    url: 'login.html',
+                    slidBackEnabled: false
+                  });
+                }, 1000);
+              }else if(ret.status==400){
+                api.toast({
+                  msg: ret.message[0],
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            }
+            if (err) {
+              api.toast({
+                msg: '网络错误，请稍后再试'
+              });
+            }
+          });
+        },
+
+      },
+    })
+  }
+</script>

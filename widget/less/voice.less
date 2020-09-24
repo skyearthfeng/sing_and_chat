@@ -1,0 +1,70 @@
+// out: ../css/voice.css
+@import 'common';
+html,body{
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0)
+}
+.wrap {
+   
+    background-repeat: no-repeat;
+    background-size: cover;
+    align-items: center;
+    justify-content: center;
+  }
+  .random-avatar {
+    background-color: rgba(255, 255, 255, 0.6);
+    padding: 5px;
+    line-height: 0;
+    border-radius: 60px;
+    img {
+      width: 60px;
+      height: 60px;
+      border-radius: 60px;
+      &.animation {    
+        animation: fadeIn;/*动画名称*/  
+        animation-duration: 1.5s;/*动画持续时间*/  
+        -webkit-animation: fadeIn 1.5s;/*针对webkit内核*/  
+      }
+    }
+  }
+  .random-text {
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 200px;
+  }
+  .random-cancel {
+    width: 70px;
+    height: 70px;
+    
+    background-image: url(../image/guaduan.png);
+    background-size:100%; 
+    position: fixed;
+    top: 70%;
+    left: 10%;;
+   
+    
+  }
+  .random-answer{
+    width: 60px;
+    height: 60px;
+    background-color: green;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 30px;
+    line-height: 60px;
+    position: fixed;
+    top: 70%;
+    right: 10%;;
+    text-align: center;
+  }
+  @keyframes fadeIn {  
+    0% {opacity: 0;}/*初始状态 透明度为0*/  
+    40% {opacity: 0;}/*过渡状态 透明度为0*/  
+    100% {opacity: 1;}/*结束状态 透明度为1*/  
+  }
+  @-webkit-keyframes fadeIn {/*针对webkit内核*/  
+    0% {opacity: 0;}  
+    40% {opacity: 0;}  
+    100% {opacity: 1;}  
+  }

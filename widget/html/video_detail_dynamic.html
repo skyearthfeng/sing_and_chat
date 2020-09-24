@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>视频详情</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/video.css" />
+</head>
+
+<body>
+  <div id="app">
+    <div class="wrap flex-wrap flex-vertical">
+      <div class="videoControl-wrap">
+      </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    app = new Vue({
+      el: '#app',
+      data: {
+        dataInfo: {},
+      },
+      created: function () {},
+      mounted: function () {
+        var _this = this
+        // this.getVideoDetail();
+        // alert("123")
+        // alert(api.pageParam.file)
+        console.log(api.pageParam.file)
+        _this.initVideoPlayer(api.pageParam.file)
+        _this.videoControl()
+      },
+      methods: {
+        // id: api.pageParam.id
+
+
+        initVideoPlayer: function (path) {
+          var videoPlayer = api.require('videoPlayer');
+          var _this = this;
+          videoPlayer.open({
+            rect: {
+              x: 0,
+              y: 0,
+              w: ((api.winHeight / 18) * 10 + 5) < api.winWidth ? api.winWidth : ((api.winHeight / 18) * 10 +
+                5),
+              h: ((api.winHeight / 18) * 10 + 5) < api.winWidth ? api.winWidth * 18 / 10 : api.winHeight,
+            },
+            path: path,
+            scalingMode: 'scaleAspectFit'
+          }, function (ret, err) {
+            if (ret) {
+              // _this.isPlaying = true;
+              // api.alert({
+              //   title: 'videoPlayer',
+              //   msg: JSON.stringify(ret)
+              // });
+            }
+          });
+
+          videoPlayer.addEventListener({
+            name: 'play'
+          }, function (ret, err) {
+            if (ret && ret.eventType == 'complete') {
+              videoPlayer.start();
+            }
+          });
+
+          api.addEventListener({
+            name: 'videoPlay'
+          }, function (ret, err) {
+            videoPlayer.start();
+          })
+          api.addEventListener({
+            name: 'videoPause'
+          }, function (ret, err) {
+            videoPlayer.pause();
+          })
+
+
+
+        },
+
+        // 初始化video控制层
+        videoControl: function () {
+          // 打开video控制层
+          api.openFrame({
+            name: 'video_control_dynamic',
+            url: 'video_control_dynamic.html',
+            rect: {
+              x: 0,
+              y: 0,
+              w: api.winWidth,
+              h: api.winHeight
+            },
+            pageParam: this.dataInfo
+          });
+        },
+
+      }
+    })
+  }
+</script>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>排行榜</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/ranking_list.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="wrap flex-wrap flex-vertical">
+      <!-- <header id="header"> -->
+
+      <!-- <div class="header-left" tapmode onclick="api.closeWin();">
+            <i class="iconfont icon-pre"></i>
+          </div> -->
+      <!-- </header> -->
+      <div class="header-title border-bottom">
+        <span :class="['tabMenu', rankingType == 'm' ? 'active' : '']" v-on:click="rankingTypeSelect('m')">魅力榜</span>
+        <span :class="['tabMenu', rankingType == 'f' ? 'active' : '']" v-on:click="rankingTypeSelect('f')">财富榜</span>
+      </div>
+      <div class="flex-con">
+        <div class="rankingClass border-bottom">
+          <span :class="['tabMenu tabMenu1', rankingClass == 'day' ? 'active' : '']" v-on:click="rankingClassSelect('day')">日榜</span>
+          <span :class="['tabMenu tabMenu2', rankingClass == 'week' ? 'active' : '']" v-on:click="rankingClassSelect('week')">周榜</span>
+          <span :class="['tabMenu tabMenu3', rankingClass == '' ? 'active' : '']" v-on:click="rankingClassSelect('')">总榜</span>
+        </div>
+        <div class="list-wrap">
+          <div @click="openDetail(item.member_id)" v-for="(item, i) in list" class="list-item border-bottom">
+            <div class="eq">
+              <i v-if="i < 3" :class="['icon', 'icon-ranking' + i]"></i>
+              <span v-else class="eq-text">{{i+1}}</span>
+            </div>
+            <div class="avatar">
+              <img :src="item.member.avatar" alt="">
+            </div>
+            <div class="info-wrap">
+              <div class="name">{{item.member.name}}
+                <span :class="['age'+ item.member.sex]">
+                  <i :class="['icon-sex' + item.member.sex, 'iconfont']"></i>{{item.member.age}}</span>
+              </div>
+              <div class="info">{{item.member.city}}</div>
+            </div>
+            <span>{{item.gold | formatValue}}</span>
+            <i class="iconfont icon-next"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  var app;
+  apiready = function () {
+    // if (api.systemType == 'android') {
+    //   api.setScreenSecure({
+    //     secure: true
+    //   });
+    // }
+    api.setStatusBarStyle({
+      style: 'dark'
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        rankingType: 'm',
+        rankingClass: 'day',
+        list: [],
+        userInfo: {}
+      },
+      created: function () {
+
+      },
+      mounted: function () {
+        var _this = this;
+        _this.getChartsIndex(_this.rankingType, _this.rankingClass)
+        api.addEventListener({
+            name: 'navitembtn'
+        }, function (ret, err) {
+            if (ret.type == 'left') {
+                api.closeWin()
+            }
+            // alert('点击了'+ret.type+'按钮');
+        })
+      },
+      methods: {
+        openDetail: function (id) {
+          var _this = this;
+          // if (_this.userInfo.certification == '1') {
+            api.openWin({
+              name: 'user_home',
+              url: 'user_home.html',
+              slidBackEnabled: false,
+              pageParam: {
+                member_id: id
+              }
+            })
+          // } else {
+          //   api.toast({
+          //     msg: '你还未认证，不能查看主播信息'
+          //   })
+          // }
+        },
+        rankingTypeSelect: function (type) {
+          var _this = this;
+          _this.rankingType = type;
+          _this.getChartsIndex(type, _this.rankingClass);
+        },
+        rankingClassSelect: function (date) {
+          var _this = this;
+          _this.rankingClass = date;
+          _this.getChartsIndex(_this.rankingType, date);
+        },
+        getChartsIndex: function (type, date) {
+          var _this = this;
+          api.ajax({
+            url: baseUrl + 'charts/index',
+            method: 'get',
+            headers: {
+              token: $api.getStorage('deviceToken')
+            },
+            data: {
+              values: {
+                type: type,
+                date: date,
+                uid: $api.getStorage('uid')
+              },
+            }
+          }, function (ret, err) {
+            if (ret.status == 200) {
+              _this.list = ret.data;
+              _this.userInfo = ret.my;
+            }
+          })
+        }
+      },
+      filters: {
+        formatValue: function (value) {
+          if (app.rankingType == 'm') {
+            return value + '魅力值';
+          }
+          if (app.rankingType == 'f') {
+            return Math.abs(Number(value)) + '财富值';
+          }
+        }
+      }
+    })
+  }
+</script>

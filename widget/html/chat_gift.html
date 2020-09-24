@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>礼物</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/chat_gift.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.min.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak @click.stop="api.closeFrame()">
+        <div class="bg">
+
+        </div>
+        <div class="gift-top" @click.stop="">
+            <div class="top-left">
+                <span :class="giftIndex==0?'active':''" @click="giftIndex=0">
+                    礼物
+                </span>
+                <span :class="giftIndex==1?'active':''" @click="giftIndex=1">
+                    背包
+                </span>
+            </div>
+            <div class="top-right">
+                <span class="balance">
+                    <img src="../image/sign_in_icon_diamonds.png" alt="">
+                    <span>{{userInfo.info.gold}}</span>
+                    <i class="iconfont icon-next"></i>
+                </span>
+                <span class="recharge" @click.stop="openRecharge()">
+                    <span>
+                        充值
+                    </span>
+                    <i class="iconfont icon-next"></i>
+                </span>
+            </div>
+        </div>
+        <div class="swiper-container gift" class="swiper-wrap" v-if="giftIndex==0">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="slide in giftList">
+                    <div class="gift-wrap">
+                        <div class="gift-item" v-for="(item,i) in slide" :key="item.id"
+                            @click.stop="selectGift(i,item.id,item.file,item.name,item.show_url)"
+                            :class="item.id==gift_id?'active':''">
+                            <div class="img-wrap">
+                                <img :src="item.downImg" alt="" class="gift-img">
+                                <span class="effects" v-if="item.show_url">特</span>
+                            </div>
+                            <p class="name">{{item.name}}</p>
+                            <span class="bottom">
+                                <span>{{item.gold}}</span>
+                                <img src="../image/sign_in_icon_diamonds.png" alt="">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="swiper-container knapsack" class="swiper-wrap" v-if="giftIndex==1">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="slide in knapsackList" v-if="knapsackList.length>0">
+                    <div class="gift-wrap">
+                        <div class="gift-item" v-for="(item,i) in slide" :key="item.id"
+                            @click.stop="selectKnapsack(i,item.gift.id,item.gift.file,item.gift.name,item.gift.show_url)"
+                            :class="knapsackIndex==i?'active':''">
+                            <div class="img-wrap">
+                                <img :src="item.gift.file" alt="" class="gift-img">
+                                <span class="effects1">x{{item.nums}}</span>
+                            </div>
+                            <p class="name">{{item.gift.name}}</p>
+                            <span class="bottom">
+                                <span>{{item.gift.gold}}</span>
+                                <img src="../image/sign_in_icon_diamonds.png" alt="">
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- <div class="swiper-slide" v-if="knapsackList.length==0"> -->
+                    <div class="gift-wrap" v-if="knapsackList.length==0">
+                        背包暂无礼物快去抽奖吧!
+                    </div>
+                <!-- </div> -->
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+        <div class="gift-bottom" @click.stop="">
+            <div class="bottom-left">
+                <span @click.stop="userShow=!userShow" class="avatar-wrap">
+                    <img :src="objectAvatar" alt="" v-if="objectAvatar!=''" class="avatar">
+                    {{objectName}}
+                </span>
+                <i class="iconfont icon-next"></i>
+                <ul class="user-list" v-show="userShow">
+                    <li @click="selectAllUser">
+                        所有麦上用户
+                    </li>
+                    <li v-for="item in rewardDatas" v-if='item.nickname!="" & item.user_id != uid '
+                        @click="selectUser(item.user_id,item.nickname,item.avatar,item.mic)">
+                        <img :src="item.avatar" alt="">
+                        <span>{{item.nickname}}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bottom-right">
+                <div class="number-wrap">
+                    <input type="number" v-model="nums">
+                    <i class="iconfont icon-next"></i>
+                </div>
+                <div class="btn" @click="giftGive">
+                    赠送
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/swiper.min.js"></script>
+<script type="text/javascript">
+    let app, rong;
+    apiready = function () {
+        app = new Vue({
+            el: '#app',
+            data: {
+                nums: 1,
+                giftList: [],
+                rewardDatas: [],
+                activeIndex: 0,
+                knapsackIndex: -1,
+                type: api.pageParam.type,
+                userInfo: {
+                    info: {
+                        gold: 0
+                    }
+                },
+                giftImg: '',
+                giftName: '',
+                userShow: false,
+                gift_id: 0,
+                objectName: '所有麦上的用户',
+                objectAvatar: '',
+                donee_ids: '',
+                donee_mic: [],
+                imgList: [],
+                show_url: '', //特效图
+                giftIndex: 0,
+                knapsackList: [],
+                uid: $api.getStorage('uid')
+
+            },
+            created() {},
+            mounted() {
+                var _this = this
+                this.getGiftIndex()
+                this.getUserIndex()
+                this.getknapsack()
+                if (api.pageParam.single == 1) {
+                    this.objectName = api.pageParam.name
+                    this.objectAvatar = api.pageParam.avatar
+                    this.donee_ids = api.pageParam.to_uid
+                } else {
+                    var userId = '';
+                    for (var i = 0; i < api.pageParam.datas.length; i++) {
+                        if (api.pageParam.datas[i].user_id != 0 & api.pageParam.datas[i].user_id != $api
+                            .getStorage('uid')) {
+                            userId += api.pageParam.datas[i].user_id + ','
+                            this.donee_mic.push(api.pageParam.datas[i].mic)
+                        }
+                    }
+                    _this.donee_ids = userId
+                }
+                _this.rewardDatas = api.pageParam.datas
+                console.log(JSON.stringify(_this.donee_ids))
+
+            },
+            methods: {
+                // 获取账户信息
+                getUserIndex: function () {
+                    var _this = this;
+                    api.ajax({
+                        url: baseUrl + 'user/index',
+                        method: 'get',
+                        headers: {
+                            token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                            },
+                        }
+                    }, function (ret, err) {
+                        if (ret.status == 200) {
+                            _this.userInfo = ret.data
+                        }
+                    })
+                },
+
+                // 获取礼物列表
+                getGiftIndex: function () {
+                    var _this = this
+                    axios1('dlchat/api_gift/list', 'post', {
+                        token: $api.getStorage('deviceToken'),
+                        user_id: $api.getStorage('uid')
+                    }, function (res, err) {
+                        // console.log(JSON.stringify(res))
+                        if (res.code == 1) {
+                            var after = res.data
+                            for (var k = 0; k < after.length; k++) {
+                                api.imageCache({
+                                    url: after[k].file,
+                                    tag: k
+                                }, function (ret, err) {
+                                    var url = ret.url;
+                                    after[ret.tag].downImg = url
+                                    if (ret.tag == after.length - 1) {
+                                        _this.updateList(after)
+                                    }
+                                })
+                            }
+                        }
+                    })
+                },
+
+                updateList(after) {
+                    var _this = this
+                    var page = Math.ceil(after.length / 8)
+                    for (var i = 0; i < page; i++) {
+                        var tempArr = [];
+                        for (var j = 0; j < 8; j++) {
+                            if (!!after[(i * 8 + j)]) {
+                                tempArr.push(after[(i * 8 + j)])
+                            }
+                        }
+                        _this.giftList.push(tempArr)
+                    }
+                    console.log(JSON.stringify(_this.giftList))
+                    _this.gift_id = _this.giftList[0][0].id
+                    _this.giftImg = _this.giftList[0][0].file
+                    _this.giftName = _this.giftList[0][0].name
+                    setTimeout(
+                        function () {
+                            let mySwiper1 = new Swiper('.gift', {
+                                pagination: {
+                                    el: '.swiper-pagination',
+                                },
+                                loop: false, // 循环模式选项
+                            })
+                        }, 200)
+                },
+
+                //获取背包
+                getknapsack() {
+                    var _this = this;
+                    api.ajax({
+                        url: lotteryUrl + 'package',
+                        method: 'get',
+                        headers: {
+                            // token: $api.getStorage('deviceToken')
+                        },
+                        data: {
+                            values: {
+                                uid: $api.getStorage('uid'),
+                            },
+                        }
+                    }, function (ret, err) {
+                        console.log(JSON.stringify(ret))
+                        // console.log(JSON.stringify(err))
+                        if (ret.code == 200) {
+                            _this.knapsack = ret.data
+                            if (ret.data.length == 0) {
+                                _this.knapsack = ret.data
+                            } else {
+                                var page = Math.ceil(ret.data.length / 8)
+                                for (var i = 0; i < page; i++) {
+                                    var tempArr = [];
+                                    for (var j = 0; j < 8; j++) {
+                                        if (!!ret.data[(i * 8 + j)]) {
+                                            tempArr.push(ret.data[(i * 8 + j)])
+                                        }
+                                    }
+                                    _this.knapsackList.push(tempArr)
+                                    console.log(JSON.stringify(_this.knapsackList))
+                                }
+                            }
+                            setTimeout(
+                                function () {
+                                    let mySwiper = new Swiper('.knapsack', {
+                                        pagination: {
+                                            el: '.swiper-pagination',
+                                        },
+                                        loop: false, // 循环模式选项
+                                    })
+                                }, 300)
+                            // _this.userInfo = ret.data;
+                        }
+                    })
+                },
+
+                getGiftList() {
+                    axios('gift_index', '', (res) => {
+                        if (res.code == 200) {
+
+                        }
+                    })
+                },
+
+                selectGift(i, id, img, name, url) {
+                    this.activeIndex = i
+                    this.gift_id = id
+                    this.giftImg = img
+                    this.giftName = name
+                    this.show_url = url
+                },
+
+                selectKnapsack(i, id, img, name, url) {
+                    this.knapsackIndex = i
+                    this.gift_id = id
+                    this.giftImg = img
+                    this.giftName = name
+                    this.show_url = url
+                },
+
+                openRecharge: function () {
+                    api.openWin({
+                        name: 'recharge',
+                        url: 'recharge.html',
+                        slidBackEnabled: false
+                    })
+                },
+
+                // closeFrm() {
+                //     $event.closeFrame()
+                // },
+                //选择赠送的对象
+                selectUser(id, name, avatar, mic) {
+                    this.objectName = name
+                    this.objectAvatar = avatar
+                    this.donee_ids = id
+                    this.donee_mic = [mic]
+                    this.userShow = false
+                },
+                //选择所有
+                selectAllUser() {
+                    var userId = '';
+                    for (var i = 0; i < api.pageParam.datas.length; i++) {
+                        if (api.pageParam.datas[i].user_id != '') {
+                            userId += api.pageParam.datas[i].user_id + ','
+                            this.donee_mic.push(api.pageParam.datas[i].mic)
+                        }
+                    }
+                    this.donee_ids = userId
+                    this.objectAvatar = ''
+                    this.objectName = '所有麦上用户'
+                    this.userShow = false
+                },
+
+                //赠送礼物
+                giftGive() {
+                    var _this = this
+                    if (_this.donee_ids == '') {
+                        api.toast({
+                            msg: '暂时没有可送的人'
+                        })
+                        return
+                    }
+                    var str = _this.donee_ids + ''
+                    _this.donee_ids = (str.substring(str.length - 1) == ',') ? str.substring(0, str.length -
+                        1) : str
+                    if (_this.giftIndex == 1) {
+                        console.log(JSON.stringify({
+                            uid: $api.getStorage('uid'),
+                            to_uid: _this.donee_ids,
+                            nums: _this.nums,
+                            gift_id: _this.gift_id,
+                            roomid: api.pageParam.roomid
+                        }))
+                        api.ajax({
+                            url: lotteryUrl + 'send_gift',
+                            method: 'get',
+                            // headers: {
+                            //     token: $api.getStorage('deviceToken')
+                            // },
+                            data: {
+                                values: {
+                                    uid: $api.getStorage('uid'),
+                                    to_uid: _this.donee_ids,
+                                    nums: _this.nums,
+                                    gift_id: _this.gift_id,
+                                    roomid: api.pageParam.roomid
+                                },
+                            }
+                        }, function (ret, err) {
+                            console.log(JSON.stringify(ret))
+                            console.log(JSON.stringify(err))
+                            if (ret.code == 200) {
+                                api.toast({
+                                    msg: '赠送成功'
+                                })
+                                // if (ret.data.gold > 1000) {
+                                _this.giveEffect(ret.data[0])
+                                // }
+                            } else {
+                                api.toast({
+                                    msg: '赠送失败'
+                                })
+                            }
+                            api.closeFrame()
+                        })
+                    } else {
+                        var data = {
+                            token: $api.getStorage('deviceToken'),
+                            user_id: $api.getStorage('uid'),
+                            roomid: api.pageParam.roomid,
+                            gift_id: _this.gift_id,
+                            nums: _this.nums,
+                            donee_ids: _this.donee_ids + '',
+                        }
+                        axios1('dlchat/api_gift/reward', 'post', data,
+                            function (res, err) {
+                                console.log(JSON.stringify(res))
+                                console.log(JSON.stringify(err))
+                                api.toast({
+                                    msg: res.msg
+                                })
+                                if (res.code == 1) {
+                                    // if (res.data.gold > 1000) {
+                                    _this.giveEffect(res.data[0])
+                                    // }
+                                } else {
+                                    api.toast({
+                                        msg: '赠送失败'
+                                    })
+                                }
+                                api.hideProgress()
+                                api.closeFrame()
+                                // api.sendEvent({
+                                //     name: 'closeGif',
+                                // })
+                            }
+                        )
+                    }
+
+                },
+
+                giveEffect(gold) {
+                    var _this = this
+                    rong = api.require('rongCloud2')
+                    rong.sendRichContentMessage({
+                        conversationType: 'CHATROOM',
+                        targetId: api.pageParam.roomid,
+                        title: 'giveGift',
+                        description: _this.objectName,
+                        imageUrl: _this.giftImg,
+                        extra: {
+                            name: $api.getStorage('uname'),
+                            nums: _this.nums,
+                            giftName: _this.giftName,
+                            uid: $api.getStorage('uid'),
+                            toid: _this.donee_ids,
+                            uavatar: $api.getStorage('uavatar'),
+                            toavatar: _this.objectAvatar,
+                            show_url: _this.show_url,
+                            level: api.pageParam.level,
+                            donee_mic: _this.donee_mic,
+                            gold: gold
+                        }
+                    }, function (ret, err) {
+
+                    })
+                    api.sendEvent({
+                        name: 'giveGift',
+                        extra: {
+                            name: $api.getStorage('uname'),
+                            nums: _this.nums,
+                            giftName: _this.giftName,
+                            toname: _this.objectName,
+                            imageUrl: _this.giftImg,
+                            show_url: _this.show_url,
+                            donee_mic: _this.donee_mic,
+                            level: api.pageParam.level,
+                            gold: gold
+                        }
+                    })
+                },
+
+                judge(gift_id) {
+                    let _this = this
+                    if (api.pageParam.type == 'call') {
+                        var rong = api.require('rongCloud2');
+                        rong.getCallSession(function (ret) {
+                            let data = {
+                                time: ret.activeTime,
+                                gift_id: gift_id
+                            }
+                            axios('message_data', data, (res) => {
+                                if (res.code == 200) {
+                                    _this.giveGift(gift_id)
+                                } else if (res.code == 400) {
+                                    $event.openFrame('balance_not_frm')
+                                }
+                            }, 'post')
+                        })
+                    } else {
+                        _this.giveGift(gift_id)
+                    }
+                },
+
+                giveGift(gift_id) {
+                    let data = {
+                        member_id: api.pageParam.toId,
+                        gift_id: gift_id
+                    }
+                    axios('gift_send', data, (res) => {
+                        if (res.code == 200) {
+                            $event.toast('赠送成功')
+                            $event.execScript('video_call_control', '', 'app.getInfo()')
+                        } else if (res.code == 400) {
+                            $event.openFrame('balance_not_frm')
+                        }
+                        $event.closeFrame()
+                    }, 'post')
+                }
+            },
+        })
+    }
+</script>
